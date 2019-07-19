@@ -5,12 +5,12 @@ namespace Checkers
 {
 	namespace
 	{
-		Piece *SetupBoard(unsigned int size)
+		Board::Piece *SetupBoard(unsigned int size)
 		{
 			unsigned int dim = size * size;
-			Piece *ret = new Piece[dim];
+			Board::Piece *ret = new Board::Piece[dim];
 
-			std::memset(ret, Piece::EMPTY, sizeof(Piece) * dim);
+			std::memset(ret, Board::Piece::EMPTY, sizeof(Board::Piece) * dim);
 
 			unsigned int p1row = 0;
 			unsigned int p2row = size - 1;
@@ -23,12 +23,12 @@ namespace Checkers
 			{
 				for (unsigned int j = p1row_start_color; j < size; j += 2)
 				{
-					ret[i * size + j] = Piece::PLAYER1PAWN;
+					ret[i * size + j] = Board::Piece::PLAYER1PAWN;
 				}
 
 				for (unsigned int j = p2row_start_color; j < size; j += 2)
 				{
-					ret[(p2row - i) * size + j] = Piece::PLAYER2PAWN;
+					ret[(p2row - i) * size + j] = Board::Piece::PLAYER2PAWN;
 				}
 
 				p1row_start_color = 1 - p1row_start_color;
@@ -38,12 +38,12 @@ namespace Checkers
 			return ret;
 		}
 
-		Piece *DuplicateBoard(Piece const *src, unsigned int size)
+		Board::Piece *DuplicateBoard(Board::Piece const *src, unsigned int size)
 		{
 			unsigned int dim = size * size;
-			Piece * ret = new Piece[dim];
+			Board::Piece * ret = new Board::Piece[dim];
 			
-			std::memcpy(ret, src, sizeof(Piece) * dim);
+			std::memcpy(ret, src, sizeof(Board::Piece) * dim);
 
 			return ret;
 		}
@@ -87,12 +87,12 @@ namespace Checkers
 		return board_size;
 	}
 
-	Piece const &Board::operator()(int row, int col) const
+	Board::Piece const &Board::operator()(int row, int col) const
 	{
 		return board[row * board_size + col];
 	}
 
-	Piece &Board::operator()(int row, int col)
+	Board::Piece &Board::operator()(int row, int col)
 	{
 		return board[row * board_size + col];
 	}
@@ -103,18 +103,23 @@ namespace Checkers
 do \
 {\
 	unsigned int x = i, y = j;\
+	/*out of board*/\
 	if((r + y) < 0 || (r + y) >= board_size || (c + x) < 0 || (c + x) >= board_size)\
 		return false;\
 	unsigned int next = (r + y) * board_size + (c + x);\
 	switch(board[next])\
 	{\
+		/*check Next space*/\
 		case Piece::PLAYER1PAWN:\
+		/*Current piece and next cannot be the same*/\
 		if(curr & Piece::PLAYER1)\
 			return false;\
 		{\
+			/*check next next piece if is within board if not return*/\
 			if((r + y + y) < 0 || (r + y + y) >= board_size || (c + x + x) < 0 || (c + x + x) >= board_size)\
 				return false;\
 			unsigned int next_next = (r + y + y) * board_size + (c + x + x);\
+			/*if the next next space is empty, move over*/\
 			if(board[next_next] == Piece::EMPTY)\
 			{\
 				std::swap(board[curr], board[next_next]);\
@@ -222,14 +227,14 @@ do \
 			std::cout << "|";
 			for (unsigned int i = 0; i < board.board_size; ++i)
 			{
-				Piece piece = board(j, i);
-				if (piece & Piece::PLAYER1)
+				Board::Piece piece = board(j, i);
+				if (piece & Board::Piece::PLAYER1)
 				{
-					std::cout << (piece & Piece::KING ? "X" : " ") << "X|";
+					std::cout << (piece & Board::Piece::KING ? "X" : " ") << "X|";
 				}
-				else if (piece & Piece::PLAYER2)
+				else if (piece & Board::Piece::PLAYER2)
 				{
-					std::cout << (piece & Piece::KING ? "O" : " ") <<  "O|";
+					std::cout << (piece & Board::Piece::KING ? "O" : " ") <<  "O|";
 				}
 				else
 				{
