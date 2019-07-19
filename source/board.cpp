@@ -119,7 +119,7 @@ do \
 			{\
 				std::swap(board[curr], board[next_next]);\
 				board[next] = Piece::EMPTY;\
-				if((r + y + y) == 0)\
+				if((r + y + y) == (board_size - 1))\
 					board[next_next] = Piece::PLAYER1KING;\
 				return true;\
 			}\
@@ -151,7 +151,7 @@ do \
 			{\
 				std::swap(board[curr], board[next_next]);\
 				board[next] = Piece::EMPTY;\
-				if((r + y + y) == (board_size - 1))\
+				if((r + y + y) == 0)\
 					board[next_next] = Piece::PLAYER2KING;\
 				return true;\
 			}\
@@ -174,7 +174,7 @@ do \
 		return false;\
 		case Piece::EMPTY:\
 		std::swap(board[curr], board[next]);\
-		if(board[next] & Piece::PAWN && (((r + y) == 0) || ((r + y) == (board_size - 1))))\
+		if(board[next] & Piece::PAWN && (((board[next] & Piece::PLAYER2) && (r + y) == 0) || ((board[next] & Piece::PLAYER1) && (r + y) == (board_size - 1))))\
 			board[next] = (Piece)(board[next] << 1);\
 		return true;\
 		default:\
