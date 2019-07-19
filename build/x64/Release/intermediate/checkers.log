@@ -1,0 +1,10 @@
+﻿  board.cpp
+  main.cpp
+  minimax.cpp
+LINK : warning C4727: PCH named c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\main.obj and c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\board.obj.  Using first PCH.
+LINK : warning C4727: PCH named c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\minimax.obj and c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\board.obj.  Using first PCH.
+  Generating code
+  All 16 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  checkers.vcxproj -> C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe
+  checkers.vcxproj -> C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.pdb (Full PDB)

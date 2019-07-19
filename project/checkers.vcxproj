@@ -13,10 +13,12 @@
   <ItemGroup>
     <ClCompile Include="..\source\board.cpp" />
     <ClCompile Include="..\source\main.cpp" />
+    <ClCompile Include="..\source\minimax.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\macros.h" />
     <ClInclude Include="..\source\board.h" />
+    <ClInclude Include="..\source\minimax.h" />
     <ClInclude Include="..\source\precomp.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
