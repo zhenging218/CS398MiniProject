@@ -119,6 +119,8 @@ do \
 			{\
 				std::swap(board[curr], board[next_next]);\
 				board[next] = Piece::EMPTY;\
+				if((r + y + y) == 0)\
+					board[next_next] = Piece::PLAYER1KING;\
 				return true;\
 			}\
 		}\
@@ -149,6 +151,8 @@ do \
 			{\
 				std::swap(board[curr], board[next_next]);\
 				board[next] = Piece::EMPTY;\
+				if((r + y + y) == (board_size - 1))\
+					board[next_next] = Piece::PLAYER2KING;\
 				return true;\
 			}\
 		}\
@@ -170,6 +174,8 @@ do \
 		return false;\
 		case Piece::EMPTY:\
 		std::swap(board[curr], board[next]);\
+		if(board[next] & Piece::PAWN && (((r + y) == 0) || ((r + y) == (board_size - 1))))\
+			board[next] = (Piece)(board[next] << 1);\
 		return true;\
 		default:\
 		ASSERT(0, "Position on board at %d, %d has invalid value (%d)!", (int)r, (int)c, (int)board[next]);\
@@ -187,10 +193,10 @@ do \
 		switch (move)
 		{
 		case Movement::TOP_LEFT:
-			PROCESS_MOVE(row, col, 1, 1);
+			PROCESS_MOVE(row, col, -1, 1);
 			break;
 		case Movement::TOP_RIGHT:
-			PROCESS_MOVE(row, col, -1, 1);
+			PROCESS_MOVE(row, col, 1, 1);
 			break;
 		case Movement::BOTTOM_LEFT:
 			PROCESS_MOVE(row, col, -1, -1);
