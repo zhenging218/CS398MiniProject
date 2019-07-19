@@ -31,25 +31,24 @@ namespace Checkers
 			PLAYER2_PAWNMOVES = BOTTOM_LEFT | BOTTOM_RIGHT | Piece::PLAYER2,
 		};
 
-		Board(unsigned int size = 8);
+		Board(int size = 8);
 		Board(Board const &src);
 		Board(Board &&src);
 		Board &operator=(Board const &src);
 		Board &operator=(Board &&src);
 		~Board();
 
-		unsigned int size() const;
+		int size() const;
 
 		Piece const &operator()(int row, int col) const;
 		Piece &operator()(int row, int col);
 
 		bool Move(int row, int col, Movement const &move);
-		bool FirstMove(int row, int col, Movement const &move);
 
 		friend std::ostream &operator<<(std::ostream &os, Board const &board);
 		
 	private:
-		unsigned int board_size;
+		int board_size;
 		Piece *board;
 	};
 }

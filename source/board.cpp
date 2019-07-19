@@ -5,28 +5,28 @@ namespace Checkers
 {
 	namespace
 	{
-		Board::Piece *SetupBoard(unsigned int size)
+		Board::Piece *SetupBoard(int size)
 		{
-			unsigned int dim = size * size;
+			int dim = size * size;
 			Board::Piece *ret = new Board::Piece[dim];
 
 			std::memset(ret, Board::Piece::EMPTY, sizeof(Board::Piece) * dim);
 
-			unsigned int p1row = 0;
-			unsigned int p2row = size - 1;
-			unsigned int num_rows = (size - 2) / 2;
+			int p1row = 0;
+			int p2row = size - 1;
+			int num_rows = (size - 2) / 2;
 
-			unsigned int p1row_start_color = 0;
-			unsigned int p2row_start_color = 1;
+			int p1row_start_color = 0;
+			int p2row_start_color = 1;
 
-			for (unsigned int i = 0; i < num_rows; ++i)
+			for (int i = 0; i < num_rows; ++i)
 			{
-				for (unsigned int j = p1row_start_color; j < size; j += 2)
+				for (int j = p1row_start_color; j < size; j += 2)
 				{
 					ret[i * size + j] = Board::Piece::PLAYER1PAWN;
 				}
 
-				for (unsigned int j = p2row_start_color; j < size; j += 2)
+				for (int j = p2row_start_color; j < size; j += 2)
 				{
 					ret[(p2row - i) * size + j] = Board::Piece::PLAYER2PAWN;
 				}
@@ -38,9 +38,9 @@ namespace Checkers
 			return ret;
 		}
 
-		Board::Piece *DuplicateBoard(Board::Piece const *src, unsigned int size)
+		Board::Piece *DuplicateBoard(Board::Piece const *src, int size)
 		{
-			unsigned int dim = size * size;
+			int dim = size * size;
 			Board::Piece * ret = new Board::Piece[dim];
 			
 			std::memcpy(ret, src, sizeof(Board::Piece) * dim);
@@ -49,7 +49,7 @@ namespace Checkers
 		}
 	}
 
-	Board::Board(unsigned int size) : board_size(size), board(SetupBoard(size))
+	Board::Board(int size) : board_size(size), board(SetupBoard(size))
 	{
 		ASSERT((size & 1) == 0, "Checkers Board Size must be a multiple of 2!");
 	}
@@ -82,7 +82,7 @@ namespace Checkers
 		delete board;
 	}
 
-	unsigned int Board::size() const
+	int Board::size() const
 	{
 		return board_size;
 	}
@@ -102,11 +102,11 @@ namespace Checkers
 #define PROCESS_MOVE(r, c, i, j)\
 do \
 {\
-	unsigned int x = i, y = j;\
+	int x = i, y = j;\
 	/*out of board*/\
 	if((r + y) < 0 || (r + y) >= board_size || (c + x) < 0 || (c + x) >= board_size)\
 		return false;\
-	unsigned int next = (r + y) * board_size + (c + x);\
+	int next = (r + y) * board_size + (c + x);\
 	switch(board[next])\
 	{\
 		/*check Next space*/\
@@ -118,7 +118,7 @@ do \
 			/*check next next piece if is within board if not return*/\
 			if((r + y + y) < 0 || (r + y + y) >= board_size || (c + x + x) < 0 || (c + x + x) >= board_size)\
 				return false;\
-			unsigned int next_next = (r + y + y) * board_size + (c + x + x);\
+			int next_next = (r + y + y) * board_size + (c + x + x);\
 			/*if the next next space is empty, move over*/\
 			if(board[next_next] == Piece::EMPTY)\
 			{\
@@ -136,7 +136,7 @@ do \
 		{\
 			if((r + y + y) < 0 || (r + y + y) >= board_size || (c + x + x) < 0 || (c + x + x) >= board_size)\
 				return false;\
-			unsigned int next_next = (r + y + y) * board_size + (c + x + x);\
+			int next_next = (r + y + y) * board_size + (c + x + x);\
 			if(board[next_next] == Piece::EMPTY)\
 			{\
 				std::swap(board[curr], board[next_next]);\
@@ -151,7 +151,7 @@ do \
 		{\
 			if((r + y + y) < 0 || (r + y + y) >= board_size || (c + x + x) < 0 || (c + x + x) >= board_size)\
 				return false;\
-			unsigned int next_next = (r + y + y) * board_size + (c + x + x);\
+			int next_next = (r + y + y) * board_size + (c + x + x);\
 			if(board[next_next] == Piece::EMPTY)\
 			{\
 				std::swap(board[curr], board[next_next]);\
@@ -168,7 +168,7 @@ do \
 		{\
 			if((r + y + y) < 0 || (r + y + y) >= board_size || (c + x + x) < 0 || (c + x + x) >= board_size)\
 				return false;\
-			unsigned int next_next = (r + y + y) * board_size + (c + x + x);\
+			int next_next = (r + y + y) * board_size + (c + x + x);\
 			if(board[next_next] == Piece::EMPTY)\
 			{\
 				std::swap(board[curr], board[next_next]);\
@@ -210,7 +210,7 @@ do \
 			PROCESS_MOVE(row, col, 1, -1);
 			break;
 		default:
-			ASSERT(0, "Checkers Move processing got a non-valid move (%d)!", (unsigned int)move);
+			ASSERT(0, "Checkers Move processing got a non-valid move (%d)!", (int)move);
 			break;
 		}
 
@@ -222,10 +222,10 @@ do \
 	std::ostream &operator<<(std::ostream &os, Board const &board)
 	{
 		
-		for (unsigned int j = 0; j < board.board_size; ++j)
+		for (int j = 0; j < board.board_size; ++j)
 		{
 			std::cout << "|";
-			for (unsigned int i = 0; i < board.board_size; ++i)
+			for (int i = 0; i < board.board_size; ++i)
 			{
 				Board::Piece piece = board(j, i);
 				if (piece & Board::Piece::PLAYER1)
