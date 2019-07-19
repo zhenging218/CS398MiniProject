@@ -47,22 +47,147 @@ namespace Checkers
 
 			return ret;
 		}
+
+		int *DuplicatePositions(int const *src, int size)
+		{
+			int *ret = new int[size];
+			std::memcpy(ret, src, sizeof(int) * size);
+			return ret;
+		}
+
+		bool ProcessMove(int r, int c, int x, int y, Board::Piece *board, int *player1Pieces, int *player2Pieces, int size)
+		{
+			int currIndex = r * size + c;
+			Board::Piece curr = board[currIndex];
+
+			
+		/*out of board*/
+		if ((r + y) < 0 || (r + y) >= size || (c + x) < 0 || (c + x) >= size)
+			return false; 
+			int next = (r + y) * size + (c + x);
+			switch (board[next])
+			{
+				/*check Next space*/
+			case Board::Piece::PLAYER1PAWN:
+			/*Current piece and next cannot be the same*/
+			if (curr & Board::Piece::PLAYER1)
+				return false; 
+			{
+				/*check next next piece if is within board if not return*/
+				if ((r + y + y) < 0 || (r + y + y) >= size || (c + x + x) < 0 || (c + x + x) >= size)
+					return false; 
+					int next_next = (r + y + y) * size + (c + x + x); 
+					/*if the next next space is empty, move over*/
+					if (board[next_next] == Board::Piece::EMPTY)
+					{
+						std::swap(board[currIndex], board[next_next]);
+						board[next] = Board::Piece::EMPTY; 
+						if ((r + y + y) == (size - 1))
+							board[next_next] = Board::Piece::PLAYER1KING; 
+							return true; 
+					}
+			}
+				return false; 
+			case Board::Piece::PLAYER1KING:
+			if (curr & Board::Piece::PLAYER1)
+				return false; 
+			{
+				if ((r + y + y) < 0 || (r + y + y) >= size || (c + x + x) < 0 || (c + x + x) >= size)
+					return false; 
+					int next_next = (r + y + y) * size + (c + x + x); 
+					if (board[next_next] == Board::Piece::EMPTY)
+					{
+						std::swap(board[currIndex], board[next_next]);
+						board[next] = Board::Piece::EMPTY;
+						return true; 
+					}
+			}
+				return false; 
+			case Board::Piece::PLAYER2PAWN:
+			if (curr & Board::Piece::PLAYER2)
+				return false; 
+			{
+				if ((r + y + y) < 0 || (r + y + y) >= size || (c + x + x) < 0 || (c + x + x) >= size)
+					return false; 
+					int next_next = (r + y + y) * size + (c + x + x); 
+					if (board[next_next] == Board::Piece::EMPTY)
+					{
+						std::swap(board[currIndex], board[next_next]);
+						board[next] = Board::Piece::EMPTY;
+						if ((r + y + y) == 0)
+							board[next_next] = Board::Piece::PLAYER2KING;
+							return true; 
+					}
+			}
+				return false; 
+			case Board::Piece::PLAYER2KING:
+			if (curr & Board::Piece::PLAYER2)
+				return false; 
+			{
+				if ((r + y + y) < 0 || (r + y + y) >= size || (c + x + x) < 0 || (c + x + x) >= size)
+					return false; 
+					int next_next = (r + y + y) * size + (c + x + x); 
+					if (board[next_next] == Board::Piece::EMPTY)
+					{
+						std::swap(board[currIndex], board[next_next]);
+						board[next] = Board::Piece::EMPTY;
+						return true; 
+					}
+			}
+				return false; 
+			case Board::Piece::EMPTY:
+			std::swap(board[currIndex], board[next]);
+			if (board[next] & Board::Piece::PAWN && (((board[next] & Board::Piece::PLAYER2) && (r + y) == 0) || ((board[next] & Board::Piece::PLAYER1) && (r + y) == (size - 1))))
+				board[next] = (Board::Piece)(board[next] << 1);
+				return true; 
+			default:
+			ASSERT(0, "Position on board at %d, %d has invalid value (%d)!", (int)r, (int)c, (int)board[next]); 
+			break; 
+			}
+
+		}
+
+		int *InitPiecePositionArray(Board::Piece const &src, int numPieces, Board::Piece const *board, int size)
+		{
+			int *ret = new int[numPieces];
+			std::memset(ret, 0, sizeof(int) * sizeof(numPieces));
+			int curr = 0;
+			for (int j = 0; j < size && curr < numPieces; ++j)
+			{
+				for (int i = 0; i < size && curr < numPieces; ++i)
+				{
+					int position = j * size + i;
+					if (board[position] == src)
+					{
+						ret[curr++] = position;
+					}
+				}
+			}
+			return ret;
+		}
 	}
 
-	Board::Board(int size) : board_size(size), board(SetupBoard(size))
+	Board::Board(int numPieces, int size) : board_size(size), num_pieces(numPieces), board(SetupBoard(size)), player1Pieces(InitPiecePositionArray(Piece::PLAYER1PAWN, numPieces, board, size)), player2Pieces(InitPiecePositionArray(Piece::PLAYER2PAWN, numPieces, board, size))
 	{
 		ASSERT((size & 1) == 0, "Checkers Board Size must be a multiple of 2!");
 	}
 
-	Board::Board(Board const &src) : board_size(src.board_size), board(DuplicateBoard(src.board, src.board_size))
+	Board::Board(int size) : Board((size * size - 2 * size) / 4, size)
+	{
+		
+	}
+
+	Board::Board(Board const &src) : board_size(src.board_size), num_pieces(src.num_pieces), board(DuplicateBoard(src.board, src.board_size)), player1Pieces(DuplicatePositions(src.player1Pieces, src.num_pieces)), player2Pieces(DuplicatePositions(src.player2Pieces, src.num_pieces))
 	{
 
 	}
 
-	Board::Board(Board &&src) : board_size(src.board_size), board(src.board)
+	Board::Board(Board &&src) : board_size(src.board_size), num_pieces(src.num_pieces), board(src.board), player1Pieces(src.player1Pieces), player2Pieces(src.player2Pieces)
 	{
 		src.board_size = 0;
+		src.num_pieces = 0;
 		src.board = nullptr;
+		src.player1Pieces = src.player2Pieces = nullptr;
 	}
 
 	Board &Board::operator=(Board const &src)
@@ -74,12 +199,17 @@ namespace Checkers
 	{
 		std::swap(board, src.board);
 		std::swap(board_size, src.board_size);
+		std::swap(num_pieces, src.num_pieces);
+		std::swap(player1Pieces, src.player1Pieces);
+		std::swap(player2Pieces, src.player2Pieces);
 		return *this;
 	}
 
 	Board::~Board()
 	{
 		delete board;
+		delete player1Pieces;
+		delete player2Pieces;
 	}
 
 	int Board::size() const
@@ -99,129 +229,48 @@ namespace Checkers
 
 	bool Board::Move(int row, int col, Movement const &move)
 	{
-#define PROCESS_MOVE(r, c, i, j)\
-do \
-{\
-	int x = i, y = j;\
-	/*out of board*/\
-	if((r + y) < 0 || (r + y) >= board_size || (c + x) < 0 || (c + x) >= board_size)\
-		return false;\
-	int next = (r + y) * board_size + (c + x);\
-	switch(board[next])\
-	{\
-		/*check Next space*/\
-		case Piece::PLAYER1PAWN:\
-		/*Current piece and next cannot be the same*/\
-		if(curr & Piece::PLAYER1)\
-			return false;\
-		{\
-			/*check next next piece if is within board if not return*/\
-			if((r + y + y) < 0 || (r + y + y) >= board_size || (c + x + x) < 0 || (c + x + x) >= board_size)\
-				return false;\
-			int next_next = (r + y + y) * board_size + (c + x + x);\
-			/*if the next next space is empty, move over*/\
-			if(board[next_next] == Piece::EMPTY)\
-			{\
-				std::swap(board[curr], board[next_next]);\
-				board[next] = Piece::EMPTY;\
-				if((r + y + y) == (board_size - 1))\
-					board[next_next] = Piece::PLAYER1KING;\
-				return true;\
-			}\
-		}\
-		return false;\
-		case Piece::PLAYER1KING:\
-		if(curr & Piece::PLAYER1)\
-			return false;\
-		{\
-			if((r + y + y) < 0 || (r + y + y) >= board_size || (c + x + x) < 0 || (c + x + x) >= board_size)\
-				return false;\
-			int next_next = (r + y + y) * board_size + (c + x + x);\
-			if(board[next_next] == Piece::EMPTY)\
-			{\
-				std::swap(board[curr], board[next_next]);\
-				board[next] = Piece::EMPTY;\
-				return true;\
-			}\
-		}\
-		return false;\
-		case Piece::PLAYER2PAWN:\
-		if(curr & Piece::PLAYER2)\
-			return false;\
-		{\
-			if((r + y + y) < 0 || (r + y + y) >= board_size || (c + x + x) < 0 || (c + x + x) >= board_size)\
-				return false;\
-			int next_next = (r + y + y) * board_size + (c + x + x);\
-			if(board[next_next] == Piece::EMPTY)\
-			{\
-				std::swap(board[curr], board[next_next]);\
-				board[next] = Piece::EMPTY;\
-				if((r + y + y) == 0)\
-					board[next_next] = Piece::PLAYER2KING;\
-				return true;\
-			}\
-		}\
-		return false;\
-		case Piece::PLAYER2KING:\
-		if(curr & Piece::PLAYER2)\
-			return false;\
-		{\
-			if((r + y + y) < 0 || (r + y + y) >= board_size || (c + x + x) < 0 || (c + x + x) >= board_size)\
-				return false;\
-			int next_next = (r + y + y) * board_size + (c + x + x);\
-			if(board[next_next] == Piece::EMPTY)\
-			{\
-				std::swap(board[curr], board[next_next]);\
-				board[next] = Piece::EMPTY;\
-				return true;\
-			}\
-		}\
-		return false;\
-		case Piece::EMPTY:\
-		std::swap(board[curr], board[next]);\
-		if(board[next] & Piece::PAWN && (((board[next] & Piece::PLAYER2) && (r + y) == 0) || ((board[next] & Piece::PLAYER1) && (r + y) == (board_size - 1))))\
-			board[next] = (Piece)(board[next] << 1);\
-		return true;\
-		default:\
-		ASSERT(0, "Position on board at %d, %d has invalid value (%d)!", (int)r, (int)c, (int)board[next]);\
-		break;\
-	}\
-} while(0)
-
 		Piece curr = board[row * board_size + col];
-
 		if (!(curr & Piece::KING) && !(((curr | move) & Movement::PLAYER1_PAWNMOVES) || ((curr | move) & Movement::PLAYER2_PAWNMOVES)))
 		{
 			return false;
 		}
 
+		bool result = false;
+
 		switch (move)
 		{
 		case Movement::TOP_LEFT:
-			PROCESS_MOVE(row, col, -1, 1);
+			result = ProcessMove(row, col, -1, -1, board, board_size);
 			break;
 		case Movement::TOP_RIGHT:
-			PROCESS_MOVE(row, col, 1, 1);
+			result = ProcessMove(row, col, 1, -1, board, board_size);
 			break;
 		case Movement::BOTTOM_LEFT:
-			PROCESS_MOVE(row, col, -1, -1);
+			result = ProcessMove(row, col, -1, 1, board, board_size);
 			break;
 		case Movement::BOTTOM_RIGHT:
-			PROCESS_MOVE(row, col, 1, -1);
+			result = ProcessMove(row, col, 1, 1, board, board_size);
 			break;
 		default:
 			ASSERT(0, "Checkers Move processing got a non-valid move (%d)!", (int)move);
 			break;
 		}
-
-#undef PROCESS_MOVE
-
-		return false;
+		return result;
 	}
 
 	std::ostream &operator<<(std::ostream &os, Board const &board)
 	{
 		
+		for (int i = 0; i < board.num_pieces; ++i)
+		{
+			std::cout << board.player1Pieces[i] << (i + 1 < board.num_pieces ? ", " : "\n");
+		}
+
+		for (int i = 0; i < board.num_pieces; ++i)
+		{
+			std::cout << board.player2Pieces[i] << (i + 1 < board.num_pieces ? ", " : "\n");
+		}
+
 		for (int j = 0; j < board.board_size; ++j)
 		{
 			std::cout << "|";

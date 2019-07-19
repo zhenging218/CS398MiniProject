@@ -3,7 +3,6 @@
 
 namespace Checkers
 {
-
 	class Board
 	{
 	public:
@@ -48,7 +47,12 @@ namespace Checkers
 		friend std::ostream &operator<<(std::ostream &os, Board const &board);
 		
 	private:
+		Board(int numPieces, int size);
+
 		int board_size;
+		int num_pieces;
 		Piece *board;
+		int *player1Pieces;
+		int *player2Pieces;
 	};
 }
