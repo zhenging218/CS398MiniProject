@@ -55,7 +55,7 @@ namespace Checkers
 			return ret;
 		}
 
-		bool ProcessMove(int r, int c, int x, int y, Board::Piece *board, int *player1Pieces, int *player2Pieces, int size)
+		bool ProcessMove(int r, int c, int x, int y, Board::Piece *board, int size)
 		{
 			int currIndex = r * size + c;
 			Board::Piece curr = board[currIndex];
