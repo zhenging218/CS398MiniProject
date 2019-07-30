@@ -1,6 +1,6 @@
 #include "precomp.h"
 #include <vector>
-
+#include <algorithm>
 namespace Checkers
 {
 	namespace
@@ -37,7 +37,7 @@ namespace Checkers
 
 	void Minimax::SetMaxTurns(int t)
 	{
-		max_turns();
+		max_turns() = t;
 	}
 
 	int Minimax::GetMaxTurns()
@@ -119,22 +119,74 @@ namespace Checkers
 
 	bool Minimax::TerminalTest(int &terminal_value, int depth) const
 	{
-		return false;
+		if (WinTest())
+			terminal_value = MAX_VALUE;
+		else if (LoseTest())
+			terminal_value = MIN_VALUE;
+		else if (DrawTest())
+			terminal_value = 0;
+		else if (depth == 0)
+			terminal_value = EvaluationTest();
+		else
+			return false;
+		return true;
 	}
 
 	int Minimax::EvaluationTest() const
 	{
-		return 0;
+		int winning_moves = 0;
+		int left_diagonal_validity = 0;
+		int right_diagonal_validity = 0;
 	}
 
 	int Minimax::Player1Move(int depth, int alpha, int beta) const
 	{
-		return 0;
+		int v = -INFINITE;
+		int terminalValue = 0;
+		// check if need to stop the search
+		if (TerminalTest(terminalValue, depth))
+			return terminalValue;
+
+		auto moves = GetMoves(board);
+		for (auto const &move : moves)
+		{
+			//Place(move.row, move.col, BoardType::Cross);
+			v = std::max(Player2Move(depth - 1, alpha, beta), v);
+			//UnPlace(move.row, move.col);
+			if (v > beta)
+			{
+				// prune
+				break;
+			}
+			alpha = std::max(alpha, v);
+		}
+
+		return v;
 	}
 
 	int Minimax::Player2Move(int depth, int alpha, int beta) const
 	{
-		return 0;
+		int v = INFINITE;
+		int terminalValue = 0;
+		// check if need to stop the search
+		if (TerminalTest(terminalValue, depth))
+			return terminalValue;
+
+		auto moves = GetMoves(board);
+		for (auto const &move : moves)
+		{
+			//Place(move.row, move.col, BoardType::Cross);
+			v = std::min(Player1Move(depth - 1, alpha, beta), v);
+			//UnPlace(move.row, move.col);
+			if (v > alpha)
+			{
+				// prune
+				break;
+			}
+			beta = std::min(beta, v);
+		}
+
+		return v;
 	}
 
 	bool Minimax::ProcessMove()
