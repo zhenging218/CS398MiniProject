@@ -16,12 +16,12 @@ namespace Checkers
 
 		board_type GetLLNonJumpWhiteMoves() const;
 		board_type GetLRNonJumpWhiteMoves() const;
-		board_type GetURNonJumpWhiteMmoves() const;
+		board_type GetURNonJumpWhiteMoves() const;
 		board_type GetULNonJumpWhiteMoves() const;
 
 		board_type GetLLJumpWhiteMoves() const;
 		board_type GetLRJumpWhiteMoves() const;
-		board_type GetURJumpWhiteMmoves() const;
+		board_type GetURJumpWhiteMoves() const;
 		board_type GetULJumpWhiteMoves() const;
 
 
@@ -38,11 +38,8 @@ namespace Checkers
 
 		BitBoard();
 
-		board_type GetWhiteMoves() const;
-		board_type GetBlackMoves() const;
-
-		board_type GetWhiteJumps() const;
-		board_type GetBlackJumps() const;
+		board_type GetBlackPieces() const;
+		board_type GetWhitePieces() const;
 
 		board_type GetWhiteKings() const;
 		board_type GetBlackKings() const;
@@ -50,4 +47,7 @@ namespace Checkers
 		static std::vector<BitBoard> GetPossibleWhiteMoves(BitBoard const &src);
 		static std::vector<BitBoard> GetPossibleBlackMoves(BitBoard const &src);
 	};
+
+	std::ostream &operator<<(std::ostream &os, BitBoard const &src);
+
 }
