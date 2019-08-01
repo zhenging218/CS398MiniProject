@@ -10,6 +10,7 @@ namespace Checkers
 
 	public:
 		using board_type = std::uint32_t;
+		using utility_type = std::int32_t;
 
 	private:
 
@@ -32,6 +33,9 @@ namespace Checkers
 
 		void GetPossibleWhiteMoves(Move *dst) const;
 		void GetPossibleBlackMoves(Move *dst) const;
+
+		utility_type GetBlackUtility() const;
+		utility_type GetWhiteUtility() const;
 	};
 
 

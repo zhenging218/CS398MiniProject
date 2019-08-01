@@ -3,6 +3,7 @@
 #include <array>
 
 // logic referenced from http://www.3dkingdoms.com/checkers/bitboards.htm
+// minimax referenced from https://github.com/billjeffries/jsCheckersAI
 
 namespace Checkers
 {
@@ -15,8 +16,23 @@ namespace Checkers
 
 		constexpr BitBoard::board_type OddRows = 0xF0F0F0F0u;
 
-		constexpr BitBoard::board_type BlackKingMask = 0xF000000;
-		constexpr BitBoard::board_type WhiteKingMask = 0x000000F;
+		constexpr BitBoard::board_type BlackKingMask = 0xF000000u;
+		constexpr BitBoard::board_type WhiteKingMask = 0x000000Fu;
+
+		constexpr BitBoard::board_type EvaluationMask = 0x81188118u;
+
+		constexpr BitBoard::utility_type MaxUtility = 10000;
+		constexpr BitBoard::utility_type MinUtility = -10000;
+
+		std::uint32_t SWAR(BitBoard::board_type i)
+		{
+			// SWAR algorithm: count bits
+			// https://stackoverflow.com/questions/22081738/how-does-this-algorithm-to-count-the-number-of-set-bits-in-a-32-bit-integer-work
+
+			i = i - ((i >> 1) & 0x55555555);
+			i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+			return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+		}
 
 		BitBoard::board_type InitializeWhitePieces()
 		{
@@ -27,6 +43,73 @@ namespace Checkers
 		{
 			return 0x00000FFF;
 		}
+
+		BitBoard::utility_type EvaluatePosition(BitBoard::board_type board)
+		{
+			BitBoard::board_type corners = board & EvaluationMask;
+			// BitBoard::board_type others = ~corners;
+			// return SWAR(corners) * 2 + SWAR(others);
+			return SWAR(corners);
+		}
+	}
+
+	Move::Move(BitBoard const &bb, bool j) : board(bb), jump(j)
+	{
+
+	}
+
+	BitBoard::utility_type BitBoard::GetBlackUtility() const
+	{
+		std::uint32_t white_pieces = SWAR(white);
+		std::uint32_t black_pieces = SWAR(black);
+		std::uint32_t white_kings = SWAR(white & kings);
+		std::uint32_t black_kings = SWAR(black & kings);
+		std::uint32_t black_eval = EvaluatePosition(black);
+		std::uint32_t white_eval = EvaluatePosition(white);
+
+		std::uint32_t piece_diff = black_pieces - white_pieces;
+		std::uint32_t king_diff = black_kings - white_kings;
+		std::uint32_t eval_diff = black_eval - white_eval;
+
+		if (!white_pieces)
+		{
+			// black won
+			return MaxUtility;
+		}
+
+		if (!black_pieces)
+		{
+			return MinUtility;
+		}
+
+		return piece_diff * 100 + king_diff * 10 + eval_diff;
+	}
+
+	BitBoard::utility_type BitBoard::GetWhiteUtility() const
+	{
+		std::uint32_t white_pieces = SWAR(white);
+		std::uint32_t black_pieces = SWAR(black);
+		std::uint32_t white_kings = SWAR(white & kings);
+		std::uint32_t black_kings = SWAR(black & kings);
+		std::uint32_t black_eval = EvaluatePosition(black);
+		std::uint32_t white_eval = EvaluatePosition(white);
+
+		std::uint32_t piece_diff = white_pieces - black_pieces;
+		std::uint32_t king_diff = white_kings - black_kings;
+		std::uint32_t eval_diff = white_eval - black_eval;
+
+		if (!white_pieces)
+		{
+			// black won
+			return MinUtility;
+		}
+
+		if (!black_pieces)
+		{
+			return MaxUtility;
+		}
+
+		return piece_diff * 100 + king_diff * 10 + eval_diff;
 	}
 
 	BitBoard::BitBoard() : white(InitializeWhitePieces()), black(InitializeBlackPieces()), kings(0)
@@ -209,13 +292,13 @@ namespace Checkers
 					// odd rows
 					if (((i & kings) << 4) & empty) // UL
 					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 4), (kings & ~i) | (((kings & i) << 4)|((i << 4) & BlackKingMask))) , false);
+						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 4), (kings & ~i) | (i << 4)) , false);
 						++k;
 					}
 
 					if (((i & kings) << 3) & empty && k < 48) // UR
 					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 3), (kings & ~i) | (((kings & i) << 3) | ((i << 3) & BlackKingMask))), false);
+						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 3), (kings & ~i) | (i << 3)), false);
 						++k;
 					}
 
@@ -237,13 +320,13 @@ namespace Checkers
 					// even rows
 					if (((i & kings) << 5) & empty) // UL
 					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 5), (kings & ~i) | (((kings & i) << 5) | ((i << 5) & BlackKingMask))), false);
+						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 5), (kings & ~i) | (i << 5)), false);
 						++k;
 					}
 
 					if (((i & kings) << 4) & empty && k < 48) // UR
 					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 4), (kings & ~i) | (((kings & i) << 4) | ((i << 4) & BlackKingMask))), false);
+						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 4), (kings & ~i) | (i << 4)), false);
 						++k;
 					}
 
@@ -279,7 +362,7 @@ namespace Checkers
 						board_type j = i << 4;
 						if ((j << 5) & empty) // UL from even
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 5), (kings & ~i) | ((((kings & i) << 4) << 5) | ((j << 5) & BlackKingMask))), true);
+							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 5), (kings & ~i) | (j << 5)), true);
 			
 							++k;
 						}
@@ -290,7 +373,7 @@ namespace Checkers
 						board_type j = i << 3;
 						if ((j << 4) & empty) // UR from even
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 4), (kings & ~i) | ((((kings & i) << 3) << 4) | ((j << 4) & BlackKingMask))), true);
+							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 4), (kings & ~i) | (j << 4)), true);
 							++k;
 						}
 					}
@@ -324,7 +407,7 @@ namespace Checkers
 						board_type j = i << 4;
 						if ((j << 4) & empty) // UL from odd
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 4), (kings & ~i) | ((((kings & i) << 5) << 4) | ((j << 4) & BlackKingMask))), true);
+							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 4), (kings & ~i) | (j << 4)), true);
 							++k;
 						}
 					}
@@ -334,7 +417,7 @@ namespace Checkers
 						board_type j = i << 3;
 						if ((j << 3) & empty) // UR from odd
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 4), (kings & ~i) | ((((kings & i) << 3) << 4) | ((j << 4) & BlackKingMask))), true);
+							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 4), (kings & ~i) | (j << 4)), true);
 							++k;
 						}
 					}
