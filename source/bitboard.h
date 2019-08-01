@@ -6,48 +6,40 @@ namespace Checkers
 {
 	class BitBoard
 	{
+		friend struct Move;
+
 	public:
 		using board_type = std::uint32_t;
 
 	private:
+
 		board_type white, black, kings;
 
 		BitBoard(board_type w, board_type b, board_type k);
 
-		board_type GetLLNonJumpWhiteMoves() const;
-		board_type GetLRNonJumpWhiteMoves() const;
-		board_type GetURNonJumpWhiteMoves() const;
-		board_type GetULNonJumpWhiteMoves() const;
+		board_type GetBlackMoves() const;
+		board_type GetWhiteMoves() const;
 
-		board_type GetLLJumpWhiteMoves() const;
-		board_type GetLRJumpWhiteMoves() const;
-		board_type GetURJumpWhiteMoves() const;
-		board_type GetULJumpWhiteMoves() const;
+		board_type GetBlackJumps() const;
+		board_type GetWhiteJumps() const;
 
-
-		board_type GetLLNonJumpBlackMoves() const;
-		board_type GetLRNonJumpBlackMoves() const;
-		board_type GetURNonJumpBlackMoves() const;
-		board_type GetULNonJumpBlackMoves() const;
-
-		board_type GetLLJumpBlackMoves() const;
-		board_type GetLRJumpBlackMoves() const;
-		board_type GetURJumpBlackMoves() const;
-		board_type GetULJumpBlackMoves() const;
+		BitBoard(board_type w, board_type b, board_type k);
 	public:
 
 		BitBoard();
 
-		board_type GetBlackPieces() const;
-		board_type GetWhitePieces() const;
+		friend std::ostream &operator<<(std::ostream &os, BitBoard const &src);
 
-		board_type GetWhiteKings() const;
-		board_type GetBlackKings() const;
-
-		static std::vector<BitBoard> GetPossibleWhiteMoves(BitBoard const &src);
-		static std::vector<BitBoard> GetPossibleBlackMoves(BitBoard const &src);
+		void GetPossibleWhiteMoves(Move *dst) const;
+		void GetPossibleBlackMoves(Move *dst) const;
 	};
 
-	std::ostream &operator<<(std::ostream &os, BitBoard const &src);
 
+	struct Move
+	{
+		BitBoard board;
+		bool jump;
+
+		Move(BitBoard const &bb, bool j);
+	};
 }

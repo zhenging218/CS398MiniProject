@@ -111,7 +111,6 @@ int main()
 	Checkers::BitBoard bboard;
 	std::cout << bboard << std::endl;
 
-	system("cls");
 	for (int x = 0; x < 20; ++x)
 	{
 		if (x % 2)
@@ -132,7 +131,7 @@ int main()
 			std::cout << "new board is:\n";
 			std::cout << bboard << std::endl;
 			system("pause");
-			system("cls");
+			//system("cls");
 		}
 		else
 		{
@@ -152,7 +151,7 @@ int main()
 			std::cout << "new board is:\n";
 			std::cout << bboard << std::endl;
 			system("pause");
-			system("cls");
+			//system("cls");
 		}
 	}
 

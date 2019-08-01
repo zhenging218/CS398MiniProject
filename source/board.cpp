@@ -23,12 +23,12 @@ namespace Checkers
 			{
 				for (int j = p1row_start_color; j < size; j += 2)
 				{
-					ret[i * size + j] = Board::Piece::PLAYER1PAWN;
+					ret[i * size + j] = Board::Piece::WHITEPAWN;
 				}
 
 				for (int j = p2row_start_color; j < size; j += 2)
 				{
-					ret[(p2row - i) * size + j] = Board::Piece::PLAYER2PAWN;
+					ret[(p2row - i) * size + j] = Board::Piece::BLACKPAWN;
 				}
 
 				p1row_start_color = 1 - p1row_start_color;
@@ -68,9 +68,9 @@ namespace Checkers
 			switch (board[next])
 			{
 				/*check Next space*/
-			case Board::Piece::PLAYER1PAWN:
+			case Board::Piece::WHITEPAWN:
 			/*Current piece and next cannot be the same*/
-			if (curr & Board::Piece::PLAYER1)
+			if (curr & Board::Piece::WHITE)
 				return false; 
 			{
 				/*check next next piece if is within board if not return*/
@@ -83,13 +83,13 @@ namespace Checkers
 						std::swap(board[currIndex], board[next_next]);
 						board[next] = Board::Piece::EMPTY; 
 						if ((r + y + y) == (size - 1))
-							board[next_next] = Board::Piece::PLAYER1KING; 
+							board[next_next] = Board::Piece::WHITEKING; 
 							return true; 
 					}
 			}
 				return false; 
-			case Board::Piece::PLAYER1KING:
-			if (curr & Board::Piece::PLAYER1)
+			case Board::Piece::WHITEKING:
+			if (curr & Board::Piece::WHITE)
 				return false; 
 			{
 				if ((r + y + y) < 0 || (r + y + y) >= size || (c + x + x) < 0 || (c + x + x) >= size)
@@ -103,8 +103,8 @@ namespace Checkers
 					}
 			}
 				return false; 
-			case Board::Piece::PLAYER2PAWN:
-			if (curr & Board::Piece::PLAYER2)
+			case Board::Piece::BLACKPAWN:
+			if (curr & Board::Piece::BLACK)
 				return false; 
 			{
 				if ((r + y + y) < 0 || (r + y + y) >= size || (c + x + x) < 0 || (c + x + x) >= size)
@@ -115,13 +115,13 @@ namespace Checkers
 						std::swap(board[currIndex], board[next_next]);
 						board[next] = Board::Piece::EMPTY;
 						if ((r + y + y) == 0)
-							board[next_next] = Board::Piece::PLAYER2KING;
+							board[next_next] = Board::Piece::BLACKKING;
 							return true; 
 					}
 			}
 				return false; 
-			case Board::Piece::PLAYER2KING:
-			if (curr & Board::Piece::PLAYER2)
+			case Board::Piece::BLACKKING:
+			if (curr & Board::Piece::BLACK)
 				return false; 
 			{
 				if ((r + y + y) < 0 || (r + y + y) >= size || (c + x + x) < 0 || (c + x + x) >= size)
@@ -137,7 +137,7 @@ namespace Checkers
 				return false; 
 			case Board::Piece::EMPTY:
 			std::swap(board[currIndex], board[next]);
-			if (board[next] & Board::Piece::PAWN && (((board[next] & Board::Piece::PLAYER2) && (r + y) == 0) || ((board[next] & Board::Piece::PLAYER1) && (r + y) == (size - 1))))
+			if (board[next] & Board::Piece::PAWN && (((board[next] & Board::Piece::BLACK) && (r + y) == 0) || ((board[next] & Board::Piece::WHITE) && (r + y) == (size - 1))))
 				board[next] = (Board::Piece)(board[next] << 1);
 				return true; 
 			default:
@@ -167,7 +167,7 @@ namespace Checkers
 		}
 	}
 
-	Board::Board(int numPieces, int size) : board_size(size), num_pieces(numPieces), board(SetupBoard(size)), player1Pieces(InitPiecePositionArray(Piece::PLAYER1PAWN, numPieces, board, size)), player2Pieces(InitPiecePositionArray(Piece::PLAYER2PAWN, numPieces, board, size))
+	Board::Board(int numPieces, int size) : board_size(size), num_pieces(numPieces), board(SetupBoard(size)), player1Pieces(InitPiecePositionArray(Piece::WHITEPAWN, numPieces, board, size)), player2Pieces(InitPiecePositionArray(Piece::BLACKPAWN, numPieces, board, size))
 	{
 		ASSERT((size & 1) == 0, "Checkers Board Size must be a multiple of 2!");
 	}
@@ -230,7 +230,7 @@ namespace Checkers
 	bool Board::Move(int row, int col, Movement const &move)
 	{
 		Piece curr = board[row * board_size + col];
-		if (!(curr & Piece::KING) && !(((curr | move) & Movement::PLAYER1_PAWNMOVES) || ((curr | move) & Movement::PLAYER2_PAWNMOVES)))
+		if (!(curr & Piece::KING) && !(((curr | move) & Movement::WHITE_PAWNMOVES) || ((curr | move) & Movement::BLACK_PAWNMOVES)))
 		{
 			return false;
 		}
@@ -277,11 +277,11 @@ namespace Checkers
 			for (int i = 0; i < board.board_size; ++i)
 			{
 				Board::Piece piece = board(j, i);
-				if (piece & Board::Piece::PLAYER1)
+				if (piece & Board::Piece::WHITE)
 				{
 					std::cout << (piece & Board::Piece::KING ? "X" : " ") << "X|";
 				}
-				else if (piece & Board::Piece::PLAYER2)
+				else if (piece & Board::Piece::BLACK)
 				{
 					std::cout << (piece & Board::Piece::KING ? "O" : " ") <<  "O|";
 				}
