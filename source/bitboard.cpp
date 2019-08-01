@@ -2,12 +2,10 @@
 #include <utility>
 #include <array>
 
-#define UPPER_RIGHT(x) (((x) << 3) & (~InvalidURMove))
-#define LOWER_RIGHT(x) (((x) >> 4) & (~InvalidLRMove))
-#define UPPER_LEFT(x)  (((x) << 4) & (~InvalidULMove))
-#define LOWER_LEFT(x)  (((x) >> 3) & (~InvalidLLMove))
-
-#define NEXT_MOVE(x) (x >> 1)
+#define UPPER_RIGHT(x) (((x) & (~InvalidURMove)) << 3)
+#define LOWER_RIGHT(x) (((x) & (~InvalidLRMove)) >> 4)
+#define UPPER_LEFT(x)  (((x) & (~InvalidULMove)) << 4)
+#define LOWER_LEFT(x)  (((x) & (~InvalidLLMove)) >> 3)
 
 namespace Checkers
 {
@@ -172,7 +170,7 @@ namespace Checkers
 		board_type LLJumpMoves = src.GetLLJumpBlackMoves();
 		board_type LRJumpMoves = src.GetLRJumpBlackMoves();
 
-		for (board_type i = 1; ULNonJumpMoves && URNonJumpMoves && LLNonJumpMoves && LRNonJumpMoves; i <<= 1)
+		for (board_type i = 1; i && (ULNonJumpMoves || URNonJumpMoves || LLNonJumpMoves || LRNonJumpMoves); i <<= 1)
 		{
 			if (i & ULNonJumpMoves)
 			{
@@ -211,13 +209,13 @@ namespace Checkers
 			}
 
 			// update the moves
-			ULNonJumpMoves ^= i;
-			URNonJumpMoves ^= i;
-			LLNonJumpMoves ^= i;
-			LRNonJumpMoves ^= i;
+			ULNonJumpMoves &= ~i;
+			URNonJumpMoves &= ~i;
+			LLNonJumpMoves &= ~i;
+			LRNonJumpMoves &= ~i;
 		}
 
-		for (board_type i = 1; ULJumpMoves && URJumpMoves && LLJumpMoves && LRJumpMoves; i <<= 1)
+		for (board_type i = 1; i && (ULJumpMoves || URJumpMoves || LLJumpMoves || LRJumpMoves); i <<= 1)
 		{
 			if (i & ULJumpMoves)
 			{
@@ -256,10 +254,10 @@ namespace Checkers
 			}
 
 			// update the moves
-			ULJumpMoves ^= i;
-			URJumpMoves ^= i;
-			LLJumpMoves ^= i;
-			LRJumpMoves ^= i;
+			ULJumpMoves &= ~i;
+			URJumpMoves &= ~i;
+			LLJumpMoves &= ~i;
+			LRJumpMoves &= ~i;
 		}
 
 		return ret;
@@ -279,7 +277,7 @@ namespace Checkers
 		board_type LLJumpMoves = src.GetLLJumpWhiteMoves();
 		board_type LRJumpMoves = src.GetLRJumpWhiteMoves();
 
-		for (board_type i = 1; ULNonJumpMoves && URNonJumpMoves && LLNonJumpMoves && LRNonJumpMoves; i <<= 1)
+		for (board_type i = 1; i && (ULNonJumpMoves || URNonJumpMoves || LLNonJumpMoves || LRNonJumpMoves); i <<= 1)
 		{
 			if (i & ULNonJumpMoves)
 			{
@@ -318,13 +316,13 @@ namespace Checkers
 			}
 
 			// update the moves
-			ULNonJumpMoves ^= i;
-			URNonJumpMoves ^= i;
-			LLNonJumpMoves ^= i;
-			LRNonJumpMoves ^= i;
+			ULNonJumpMoves &= ~i;
+			URNonJumpMoves &= ~i;
+			LLNonJumpMoves &= ~i;
+			LRNonJumpMoves &= ~i;
 		}
 
-		for (board_type i = 1; ULJumpMoves && URJumpMoves && LLJumpMoves && LRJumpMoves; i <<= 1)
+		for (board_type i = 1; i && (ULJumpMoves || URJumpMoves || LLJumpMoves || LRJumpMoves); i <<= 1)
 		{
 			if (i & ULJumpMoves)
 			{
@@ -363,10 +361,10 @@ namespace Checkers
 			}
 
 			// update the moves
-			ULJumpMoves ^= i;
-			URJumpMoves ^= i;
-			LLJumpMoves ^= i;
-			LRJumpMoves ^= i;
+			ULJumpMoves &= ~i;
+			URJumpMoves &= ~i;
+			LLJumpMoves &= ~i;
+			LRJumpMoves &= ~i;
 		}
 
 		return ret;
@@ -386,9 +384,9 @@ namespace Checkers
 
 		for(int j = 0; j < 8; ++j)
 		{
+			os << "|";
 			for (int i = 0; i < 8; ++i)
-			{
-				os << "|";
+			{	
 				// check if index is even or odd
 				if (start)
 				{
