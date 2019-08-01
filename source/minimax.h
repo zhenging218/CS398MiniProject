@@ -14,8 +14,8 @@ namespace Checkers
 
 		enum Turn : unsigned char
 		{
-			PLAYER1 = Board::Piece::PLAYER1,
-			PLAYER2 = Board::Piece::PLAYER2
+			PLAYER1 = Board::Piece::WHITE,
+			PLAYER2 = Board::Piece::BLACK
 		};
 
 		enum Result : char

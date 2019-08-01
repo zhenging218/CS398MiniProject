@@ -111,20 +111,22 @@ int main()
 	Checkers::BitBoard bboard;
 	std::cout << bboard << std::endl;
 
+	Checkers::Move moves[32 * 4];
+
 	for (int x = 0; x < 20; ++x)
 	{
 		if (x % 2)
 		{
 			std::cout << "black move:\n";
 			Checkers::BitBoard newboard;
-			auto moves = Checkers::BitBoard::GetPossibleBlackMoves(bboard);
-			std::cout << moves.size() << " kinds of moves available\n";
-			for (auto i : moves)
+			auto size = bboard.GetPossibleBlackMoves(moves);
+			std::cout << size << " kinds of moves available\n";
+			for (decltype(size) i = 0; i < size; ++i)
 			{
 				int test = unif(rng);
 				if (test)
 				{
-					newboard = i;
+					newboard = moves[i].board;
 				}
 			}
 			bboard = newboard;
@@ -137,14 +139,14 @@ int main()
 		{
 			std::cout << "white move:\n";
 			Checkers::BitBoard newboard;
-			auto moves = Checkers::BitBoard::GetPossibleWhiteMoves(bboard);
-			std::cout << moves.size() << " kinds of moves available\n";
-			for (auto i : moves)
+			auto size = bboard.GetPossibleWhiteMoves(moves);
+			std::cout << size << " kinds of moves available\n";
+			for (decltype(size) i = 0; i < size; ++i)
 			{
 				int test = unif(rng);
 				if (test)
 				{
-					newboard = i;
+					newboard = moves[i].board;
 				}
 			}
 			bboard = newboard;
