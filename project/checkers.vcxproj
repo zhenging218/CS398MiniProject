@@ -11,11 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\bitboard.cpp" />
     <ClCompile Include="..\source\board.cpp" />
     <ClCompile Include="..\source\main.cpp" />
     <ClCompile Include="..\source\minimax.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\source\bitboard.h" />
     <ClInclude Include="..\source\macros.h" />
     <ClInclude Include="..\source\board.h" />
     <ClInclude Include="..\source\minimax.h" />

@@ -61,6 +61,7 @@ int main()
 	//		break;*/
 	//}
 	
+	/*
 	StopWatchInterface *hTimer = NULL;
 	float dAvgSecs;
 	for (int i = 0; i < 5; ++i)
@@ -92,6 +93,20 @@ int main()
 		Sleep(5000);
 		system("cls");
 	}
+	*/
 	
+	std::cout << "testing bitboard init" << std::endl;
+	Checkers::BitBoard bboard;
+	std::cout << bboard << std::endl;
+
+	auto moves = Checkers::BitBoard::GetPossibleBlackMoves(bboard);
+	std::cout << "testing possible black moves" << std::endl;
+	for (auto i : moves)
+	{
+		std::cout << i << std::endl;
+		system("pause");
+		system("cls");
+	}
+
 	system("PAUSE");
 }
