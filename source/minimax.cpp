@@ -120,9 +120,9 @@ namespace Checkers
 	bool Minimax::TerminalTest(int &terminal_value, int depth) const
 	{
 		if (WinTest())
-			terminal_value = MAX_VALUE;
+			terminal_value = 1;
 		else if (LoseTest())
-			terminal_value = MIN_VALUE;
+			terminal_value = 0;
 		else if (DrawTest())
 			terminal_value = 0;
 		else if (depth == 0)
@@ -137,11 +137,12 @@ namespace Checkers
 		int winning_moves = 0;
 		int left_diagonal_validity = 0;
 		int right_diagonal_validity = 0;
+		return 0;
 	}
 
 	int Minimax::Player1Move(int depth, int alpha, int beta) const
 	{
-		int v = -INFINITE;
+		int v = -2;
 		int terminalValue = 0;
 		// check if need to stop the search
 		if (TerminalTest(terminalValue, depth))
@@ -166,7 +167,7 @@ namespace Checkers
 
 	int Minimax::Player2Move(int depth, int alpha, int beta) const
 	{
-		int v = INFINITE;
+		int v = 2;
 		int terminalValue = 0;
 		// check if need to stop the search
 		if (TerminalTest(terminalValue, depth))

@@ -5,6 +5,10 @@
 #include <helper_functions.h>
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+
+#include <random>
+#include <chrono>
+
 #define BLOCK_SIZE 32
 int RandomStart()
 {
@@ -95,17 +99,61 @@ int main()
 	}
 	*/
 	
+	std::mt19937_64 rng;
+	// initialize the random number generator with time-dependent seed
+	uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+	std::seed_seq ss{ uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed >> 32) };
+	rng.seed(ss);
+	// initialize a uniform distribution between 0 and 1
+	std::uniform_int_distribution<int> unif(0, 1);
+
 	std::cout << "testing bitboard init" << std::endl;
 	Checkers::BitBoard bboard;
 	std::cout << bboard << std::endl;
 
-	auto moves = Checkers::BitBoard::GetPossibleBlackMoves(bboard);
-	std::cout << "testing possible black moves" << std::endl;
-	for (auto i : moves)
+	system("cls");
+	for (int x = 0; x < 20; ++x)
 	{
-		std::cout << i << std::endl;
-		system("pause");
-		system("cls");
+		if (x % 2)
+		{
+			std::cout << "black move:\n";
+			Checkers::BitBoard newboard;
+			auto moves = Checkers::BitBoard::GetPossibleBlackMoves(bboard);
+			std::cout << moves.size() << " kinds of moves available\n";
+			for (auto i : moves)
+			{
+				int test = unif(rng);
+				if (test)
+				{
+					newboard = i;
+				}
+			}
+			bboard = newboard;
+			std::cout << "new board is:\n";
+			std::cout << bboard << std::endl;
+			system("pause");
+			system("cls");
+		}
+		else
+		{
+			std::cout << "white move:\n";
+			Checkers::BitBoard newboard;
+			auto moves = Checkers::BitBoard::GetPossibleWhiteMoves(bboard);
+			std::cout << moves.size() << " kinds of moves available\n";
+			for (auto i : moves)
+			{
+				int test = unif(rng);
+				if (test)
+				{
+					newboard = i;
+				}
+			}
+			bboard = newboard;
+			std::cout << "new board is:\n";
+			std::cout << bboard << std::endl;
+			system("pause");
+			system("cls");
+		}
 	}
 
 	system("PAUSE");
