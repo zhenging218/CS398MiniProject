@@ -16,8 +16,6 @@ namespace Checkers
 
 		board_type white, black, kings;
 
-		BitBoard(board_type w, board_type b, board_type k);
-
 		board_type GetBlackMoves() const;
 		board_type GetWhiteMoves() const;
 
@@ -27,6 +25,7 @@ namespace Checkers
 	public:
 
 		BitBoard();
+		BitBoard(board_type w, board_type b, board_type k);
 
 		friend std::ostream &operator<<(std::ostream &os, BitBoard const &src);
 
@@ -35,6 +34,10 @@ namespace Checkers
 
 		utility_type GetBlackUtility() const;
 		utility_type GetWhiteUtility() const;
+
+		utility_type GetBlackPieceCount() const;
+		utility_type GetWhitePieceCount() const;
+
 	};
 
 

@@ -105,55 +105,50 @@ int main()
 	std::seed_seq ss{ uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed >> 32) };
 	rng.seed(ss);
 	// initialize a uniform distribution between 0 and 1
-	std::uniform_int_distribution<int> unif(0, 1);
+	std::uniform_int_distribution<int> unif(0, 48);
 
 	std::cout << "testing bitboard init" << std::endl;
+	// Checkers::BitBoard bboard(0x00040000u, 0x00002000u, 0x00002000u);
 	Checkers::BitBoard bboard;
 	std::cout << bboard << std::endl;
 
 	Checkers::Move moves[32 * 4];
 
-	for (int x = 0; x < 20; ++x)
+	for (int x = 0; bboard.GetBlackPieceCount() && bboard.GetWhitePieceCount(); ++x)
 	{
 		if (x % 2)
 		{
-			std::cout << "black move:\n";
-			Checkers::BitBoard newboard;
-			auto size = bboard.GetPossibleBlackMoves(moves);
+			std::cout << "white move:\n";
+			auto size = bboard.GetPossibleWhiteMoves(moves);
 			std::cout << size << " kinds of moves available\n";
-			for (decltype(size) i = 0; i < size; ++i)
+			std::uint32_t test = unif(rng);
+			while (test >= size)
 			{
-				int test = unif(rng);
-				if (test)
-				{
-					newboard = moves[i].board;
-				}
+				test = unif(rng);
 			}
-			bboard = newboard;
+			bboard = moves[test].board;
 			std::cout << "new board is:\n";
 			std::cout << bboard << std::endl;
 			system("pause");
 			//system("cls");
+			
 		}
 		else
 		{
-			std::cout << "white move:\n";
-			Checkers::BitBoard newboard;
-			auto size = bboard.GetPossibleWhiteMoves(moves);
+			std::cout << "black move:\n";
+			auto size = bboard.GetPossibleBlackMoves(moves);
 			std::cout << size << " kinds of moves available\n";
-			for (decltype(size) i = 0; i < size; ++i)
+			std::uint32_t test = unif(rng);
+			while (test >= size)
 			{
-				int test = unif(rng);
-				if (test)
-				{
-					newboard = moves[i].board;
-				}
+				test = unif(rng);
 			}
-			bboard = newboard;
+			bboard = moves[test].board;
 			std::cout << "new board is:\n";
 			std::cout << bboard << std::endl;
 			system("pause");
 			//system("cls");
+			
 		}
 	}
 

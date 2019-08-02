@@ -9,10 +9,10 @@ namespace Checkers
 {
 	namespace
 	{
-		constexpr BitBoard::board_type L3Mask = 0xF0707070u;
-		constexpr BitBoard::board_type L5Mask = 0x0D0D0D00u;
-		constexpr BitBoard::board_type R3Mask = 0x0D0D0D0Du;
-		constexpr BitBoard::board_type R5Mask = 0x00707070u;
+		constexpr BitBoard::board_type L3Mask = 0x0E0E0E0Eu;
+		constexpr BitBoard::board_type L5Mask = 0x00707070u;
+		constexpr BitBoard::board_type R3Mask = 0x70707070u;
+		constexpr BitBoard::board_type R5Mask = 0x0E0E0E00u;
 
 		constexpr BitBoard::board_type OddRows = 0xF0F0F0F0u;
 
@@ -23,6 +23,8 @@ namespace Checkers
 
 		constexpr BitBoard::utility_type MaxUtility = 10000;
 		constexpr BitBoard::utility_type MinUtility = -10000;
+
+		constexpr BitBoard::board_type Row0 = 0x10000000u;
 
 		std::uint32_t SWAR(BitBoard::board_type i)
 		{
@@ -61,6 +63,16 @@ namespace Checkers
 	Move::Move(BitBoard const &bb, bool j) : board(bb), jump(j)
 	{
 
+	}
+
+	BitBoard::utility_type BitBoard::GetBlackPieceCount() const
+	{
+		return SWAR(black);
+	}
+
+	BitBoard::utility_type BitBoard::GetWhitePieceCount() const
+	{
+		return SWAR(white);
 	}
 
 	BitBoard::utility_type BitBoard::GetBlackUtility() const
@@ -131,14 +143,12 @@ namespace Checkers
 	BitBoard::board_type BitBoard::GetWhiteMoves() const
 	{
 		const board_type not_occupied = ~(black | white);
-
-		board_type moves = not_occupied << 4;
-		moves |= ((not_occupied & L3Mask) << 3);
-		moves |= ((not_occupied & L5Mask) << 5);
-		moves &= white;
-
 		const board_type white_kings = white & kings;
 
+		board_type moves = (not_occupied << 4) & white;
+
+		moves |= ((not_occupied & L3Mask) << 3) & white;
+		moves |= ((not_occupied & L5Mask) << 5) & white;
 		if (white_kings)
 		{
 			moves |= ((not_occupied >> 4) & white_kings);
@@ -153,18 +163,17 @@ namespace Checkers
 	{
 		const board_type not_occupied = ~(black | white);
 
-		board_type moves = not_occupied << 4;
-		moves |= ((not_occupied & L3Mask) << 3);
-		moves |= ((not_occupied & L5Mask) << 5);
-		moves &= black;
+		board_type moves = ((not_occupied >> 4) & black);
+		moves |= (((not_occupied & R3Mask) >> 3) & black);
+		moves |= (((not_occupied & R5Mask) >> 5) & black);
 
 		const board_type black_kings = black & kings;
 
 		if (black_kings)
 		{
-			moves |= ((not_occupied >> 4) & black_kings);
-			moves |= (((not_occupied & R3Mask) >> 3) & black_kings);
-			moves |= (((not_occupied & R5Mask) >> 5) & black_kings);
+			moves |= (not_occupied << 4) & black_kings;
+			moves |= ((not_occupied & L3Mask) << 3) & black_kings;
+			moves |= ((not_occupied & L5Mask) << 5) & black_kings;
 		}
 
 		return moves;
@@ -235,44 +244,62 @@ namespace Checkers
 		board_type white_kings = src.white & src.kings;
 		board_type black_kings = src.black & src.kings;
 
-		int start = 0;
-		int x = 1;
-
-		for (int j = 0; j < 8; ++j)
+		for (BitBoard::board_type i = Row0; i != 0; i = i >> 4)
 		{
-			os << "|";
-			for (int i = 0; i < 8; ++i)
+			BitBoard::board_type j = i;
+			if (i & OddRows)
 			{
-				// check if index is even or odd
-				if (start)
+				for (int k = 0; k < 8; ++k)
 				{
-					// odd
-					if (i % 2)
+					if (k % 2) // odd
 					{
-						os << ((x & white) ? (x & (white_kings) ? "WW" : " W") : ((x & black) ? (x & black_kings) ? "BB" : " B" : "  ")) << "|";
-						x <<= 1;
+						if (j & white)
+						{
+							os << (j & white_kings ? "WW|" : " W|");
+						}
+						else if (j & black)
+						{
+							os << (j & black_kings ? "BB|" : " B|");
+						}
+						else
+						{
+							os << "  |";
+						}
+						j = j << 1;
 					}
-					else
-					{
-						os << "  |";
-					}
-				}
-				else
-				{
-					// even
-					if (!(i % 2))
-					{
-						os << ((x & white) ? (x & (white_kings) ? "WW" : " W") : ((x & black) ? (x & black_kings) ? "BB" : " B" : "  ")) << "|";
-						x <<= 1;
-					}
-					else
+					else // even
 					{
 						os << "  |";
 					}
 				}
 			}
-			os << "\n";
-			start = 1 - start;
+			else
+			{
+				for (int k = 0; k < 8; ++k)
+				{
+					if (!(k % 2)) // even
+					{
+						if (j & white)
+						{
+							os << (j & white_kings ? "WW|" : " W|");
+						}
+						else if (j & black)
+						{
+							os << (j & black_kings ? "BB|" : " B|");
+						}
+						else
+						{
+							os << "  |";
+						}
+						j = j << 1;
+					}
+					else // odd
+					{
+						os << "  |";
+					}
+				}
+			}
+			os << ((i >> 4) ? "\n" : "");
 		}
 
 		return os;
@@ -282,175 +309,163 @@ namespace Checkers
 	{
 		board_type moves = GetBlackMoves();
 		board_type jumps = GetBlackJumps();
-		board_type empty = ~(white | black);
+		board_type empty = ~(black | white);
 
 		int k = 0;
 		board_type i = 1;
 
-		while (moves && i && k < 48)
+		if (!jumps)
 		{
-
-			if (moves & i)
+			while (moves && i && k < 48)
 			{
-				if (OddRows & i)
+
+				if (moves & i)
 				{
-					// odd rows
-					if (((i & kings) << 4) & empty) // UL
+					if (OddRows & i) // odd rows
 					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 4), (kings & ~i) | (i << 4)) , false);
-						++k;
-					}
+						if ((i << 4) & empty)//UL
+						{
+							dst[k++] = Move(BitBoard(white, (black & ~i) | (i << 4), (((kings & i) << 4) | ((i << 4) & BlackKingMask))), false);
 
-					if (((i & kings) << 3) & empty && k < 48) // UR
-					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 3), (kings & ~i) | (i << 3)), false);
-						++k;
-					}
+						}
+						if (((i & L5Mask) << 5) & empty)//UR
+						{
+							dst[k++] = Move(BitBoard(white, (black & ~i) | (i << 5), (((kings & i) << 5) | ((i << 5) & BlackKingMask))), false);
 
-					if ((i >> 3) & empty && k < 48) // LR
-					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i >> 3), (kings & ~i) | (((kings & i) >> 3) | ((i >> 3) & BlackKingMask))), false);
-						++k;
-					}
+						}
 
-					if ((i >> 4) & empty && k < 48) // LL
-					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i >> 4), (kings & ~i) | (((kings & i) >> 4) | ((i >> 4) & BlackKingMask))), false);
-						++k;
-					}
+						if (((i & kings) >> 4) & empty)//LL
+						{
+							dst[k++] = Move(BitBoard(white, (black & ~i) | (i >> 4), (kings & ~i) | (i >> 4)), false);
 
-				}
-				else
-				{
-					// even rows
-					if (((i & kings) << 5) & empty) // UL
-					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 5), (kings & ~i) | (i << 5)), false);
-						++k;
-					}
+						}
+						if (((i & kings) >> 3) & empty)//LR
+						{
+							dst[k++] = Move(BitBoard(white, (black & ~i) | (i >> 3), (kings & ~i) | (i >> 3)), false);
 
-					if (((i & kings) << 4) & empty && k < 48) // UR
-					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i << 4), (kings & ~i) | (i << 4)), false);
-						++k;
+						}
 					}
-
-					if ((i >> 4) & empty && empty < 48) // LR
+					else // even rows
 					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i >> 4), (kings & ~i) | (((kings & i) >> 4) | ((i >> 4) & BlackKingMask))), false);
-						++k;
-					}
+						if (((i & L3Mask) << 3) & empty)//UL
+						{
+							dst[k++] = Move(BitBoard(white, (black & ~i) | (i << 3), (kings & ~i) | (((kings & i) << 3) | ((i << 3) & WhiteKingMask))), false);
 
-					if ((i >> 5) & empty && empty < 48) // LL
-					{
-						dst[k] = Move(BitBoard(white, (black & ~i) | (i >> 5), (kings & ~i) | (((kings & i) >> 5) | ((i >> 5) & BlackKingMask))), false);
-						++k;
+						}
+						if ((i << 4) & empty)//UR
+						{
+							dst[k++] = Move(BitBoard(white, (black & ~i) | (i << 4), (kings & ~i) | (((kings & i) << 4) | ((i << 4) & WhiteKingMask))), false);
+						}
+
+						if ((((i  & kings)& R5Mask) >> 5) & empty)//LL
+						{
+							dst[k++] = Move(BitBoard(white, (black & ~i) | (i >> 5), (kings & ~i) | (i >> 5)), false);
+
+						}
+						if (((i  & kings) >> 4) & empty)//LR
+						{
+							dst[k++] = Move(BitBoard(white, (black & ~i) | (i >> 4), (kings & ~i) | (i >> 4)), false);
+
+						}
+
 					}
 				}
+
+				moves &= ~i;
+				i = i << 1;
 			}
-
-			moves &= ~i;
-			i = i << 1;
 		}
-
-		i = 1;
-
-		while (jumps && i && k < 48)
+		else
 		{
-			if (jumps & i)
+
+			while (jumps && i && k < 48)
 			{
-				if (OddRows & i)
+				if (jumps & i)
 				{
-					// odd rows, jump lands in odd row (enemy piece in even row)
-					if (((i & kings) << 4) & white) // UL from odd
+					if (OddRows & i)
 					{
-						board_type j = i << 4;
-						if ((j << 5) & empty) // UL from even
+						// odd rows, jump lands in odd row (enemy piece in even row)
+						if ((i << 4) & white) // UL from odd
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 5), (kings & ~i) | (j << 5)), true);
-			
-							++k;
+							board_type j = i << 4;
+							if (((j & L3Mask) << 3) & empty) // UL from even
+							{
+								dst[k++] = Move(BitBoard((white & ~j), (black & ~i) | (j << 3), (kings & ~i) | ((((kings & i) << 4) << 3) | ((j << 3) & BlackKingMask))), true);
+							}
 						}
-					}
 
-					if (((i & kings) << 3) & white && k < 48) // UR
-					{
-						board_type j = i << 3;
-						if ((j << 4) & empty) // UR from even
+						if (((i & L5Mask) << 5) & white && k < 48) // UR from odd
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 4), (kings & ~i) | (j << 4)), true);
-							++k;
+							board_type j = i << 5;
+							if ((j << 4) & empty) // UR from even
+							{
+								dst[k++] = Move(BitBoard((white & ~j), (black & ~i) | (j << 4), (kings & ~i) | ((((kings & i) << 5) << 4) | ((j << 4) & BlackKingMask))), true);
+							}
 						}
-					}
 
-					if ((i >> 3) & white && k < 48) // LR
-					{
-						board_type j = i >> 3;
-						if ((j >> 4) & empty)// LR from even
+						if ((((i & R3Mask) & kings) >> 3) & white && k < 48) // LR from odd
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j >> 4), (kings & ~i) | ((((kings & i) >> 3)>>4) | ((j >> 4) & BlackKingMask))), true);
-							++k;
+							board_type j = i >> 4;
+							if (((j & kings) >> 4) & empty)// LR from even
+							{
+								dst[k++] = Move(BitBoard((white & ~j), (black & ~i) | (j >> 4), (kings & ~i) | (j >> 4)), true);
+							}
 						}
-					}
 
-					if ((i >> 4) & white && k < 48) // LL
-					{
-						board_type j = i >> 4;
-						if ((j >> 5) & empty) // LL from even
+						if (((i & kings) >> 4) & white && k < 48) // LL from odd
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j >> 5), (kings & ~i) | ((((kings & i) >> 4) >> 5) | ((j >> 5) & BlackKingMask))), true);
-							++k;
+							board_type j = i >> 4;
+							if ((((j & kings)& R5Mask) >> 5) & empty) // LL from even
+							{
+								dst[k++] = Move(BitBoard((white & ~j), (black & ~i) | (j >> 5), (kings & ~i) | (j >> 5)), true);
+							}
 						}
-					}
 
-				}
-				else
-				{
-					// even rows
-					if (((i & kings) << 5) & white) // UL from even
+					}
+					else
 					{
-						board_type j = i << 4;
-						if ((j << 4) & empty) // UL from odd
+						// even rows
+						if ((((i & L3Mask)) << 3) & white) // UL from even
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 4), (kings & ~i) | (j << 4)), true);
-							++k;
+							board_type j = i << 3;
+							if ((j << 4) & empty) // UL from odd
+							{
+								dst[k++] = Move(BitBoard((white & ~j), (black & ~i) | (j << 4), (kings & ~i) | ((((kings & i) << 3) << 4) | ((j << 4) & BlackKingMask))), true);
+							}
 						}
-					}
 
-					if (((i & kings) << 4) & white && k < 48) // UR from even
-					{
-						board_type j = i << 3;
-						if ((j << 3) & empty) // UR from odd
+						if ((i << 4) & white && k < 48) // UR from even
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j << 4), (kings & ~i) | (j << 4)), true);
-							++k;
+							board_type j = i << 4;
+							if (((j & L5Mask) << 5) & empty) // UR from odd
+							{
+								dst[k++] = Move(BitBoard((white & ~j), (black & ~i) | (j << 5), (kings & ~i) | ((((kings & i) << 4) << 5) | ((j << 5) & BlackKingMask))), true);
+							}
 						}
-					}
 
-					if ((i >> 3) & white && k < 48) // LR
-					{
-						board_type j = i >> 3;
-						if ((j >> 4) & empty)// LR from even
+						if (((i & kings) >> 4) & white && k < 48) // LR from even
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j >> 4), (kings & ~i) | ((((kings & i) >> 3) >> 4) | ((j >> 4) & BlackKingMask))), true);
-							++k;
+							board_type j = i >> 4;
+							if (((j & R3Mask) >> 3) & empty)// LR from odd
+							{
+								dst[k++] = Move(BitBoard((white & ~j), (black & ~i) | (j >> 3), (kings & ~i) | (j >> 3)), true);
+							}
 						}
-					}
 
-					if ((i >> 4) & white && k < 48) // LL
-					{
-						board_type j = i >> 4;
-						if ((j >> 5) & empty) // LL from even
+						if ((((i & kings) & L5Mask) >> 5) & white && k < 48) // LL from even
 						{
-							dst[k] = Move(BitBoard((white & ~j), (black & ~i) | (j >> 5), (kings & ~i) | ((((kings & i) >> 4) >> 5) | ((j >> 5) & BlackKingMask))), true);
-							++k;
+							board_type j = i >> 5;
+							if ((j >> 4) & empty) // LL from odd
+							{
+								dst[k++] = Move(BitBoard((white & ~j), (black & ~i) | (j >> 4), (kings & ~i) | (j >> 4)), true);
+							}
 						}
 					}
 				}
+
+				jumps &= ~i;
+				i = i << 1;
 			}
-
-			jumps &= ~i;
-			i = i << 1;
 		}
 		return k;
 	}
@@ -464,170 +479,157 @@ namespace Checkers
 		int k = 0;
 		board_type i = 1;
 
-		while (moves && i && k < 48)
+		if (!jumps)
 		{
-
-			if (moves & i)
+			while (moves && i && k < 48)
 			{
-				if (OddRows & i)
+
+				if (moves & i)
 				{
-					// odd rows
-					if (((i & kings) << 4) & empty) // UL
+					if (OddRows & i) // odd rows
 					{
-						dst[k] = Move(BitBoard((white & ~i) | (i << 4), black, (kings & ~i) | (i << 4)), false);
-						++k;
-					}
+						if (((i & kings) << 4) & empty)//UL
+						{
+							dst[k++] = Move(BitBoard((white & ~i) | (i << 4), black, (kings & ~i) | (i << 4)), false);
 
-					if (((i & kings) << 3) & empty && k < 48) // UR
-					{
-						dst[k] = Move(BitBoard((white& ~i) | (i << 3), black , (kings & ~i) | (i << 3)), false);
-						++k;
-					}
+						}
+						if (((((i & kings))& L5Mask) << 5) & empty)//UR
+						{
+							dst[k++] = Move(BitBoard((white & ~i) | (i << 5), black, (kings & ~i) | (i << 5)), false);
 
-					if ((i >> 3) & empty && k < 48) // LR
-					{
-						dst[k] = Move(BitBoard((white& ~i) | (i >> 3), black , (kings & ~i) | (((kings & i) >> 3) | ((i >> 3) & BlackKingMask))), false);
-						++k;
-					}
+						}
 
-					if ((i >> 4) & empty && k < 48) // LL
-					{
-						dst[k] = Move(BitBoard((white& ~i) | (i >> 4), black , (kings & ~i) | (((kings & i) >> 4) | ((i >> 4) & BlackKingMask))), false);
-						++k;
-					}
+						if ((i >> 4) & empty)//LL
+						{
+							dst[k++] = Move(BitBoard((white & ~i) | (i >> 4), black, (kings & ~i) | (((kings & i) >> 4) | ((i >> 4) & WhiteKingMask))), false);
 
-				}
-				else
-				{
-					// even rows
-					if (((i & kings) << 5) & empty) // UL
-					{
-						dst[k] = Move(BitBoard((white& ~i) | (i << 5), black , (kings & ~i) | (i << 5)), false);
-						++k;
-					}
+						}
+						if (((i & R3Mask) >> 3) & empty)//LR
+						{
+							dst[k++] = Move(BitBoard((white & ~i) | (i >> 3), black, (kings & ~i) | (((kings & i) >> 3) | ((i >> 3) & WhiteKingMask))), false);
 
-					if (((i & kings) << 4) & empty && k < 48) // UR
-					{
-						dst[k] = Move(BitBoard((white& ~i) | (i << 4), black , (kings & ~i) | (i << 4)), false);
-						++k;
+						}
 					}
-
-					if ((i >> 4) & empty && empty < 48) // LR
+					else // even rows
 					{
-						dst[k] = Move(BitBoard((white& ~i) | (i >> 4), black , (kings & ~i) | (((kings & i) >> 4) | ((i >> 4) & BlackKingMask))), false);
-						++k;
-					}
+						if ((((i & L3Mask) & kings) << 3) & empty) //UL
+						{
+							dst[k++] = Move(BitBoard((white & ~i) | (i << 3), black, (kings & ~i) | (i << 3)), false);
 
-					if ((i >> 5) & empty && empty < 48) // LL
-					{
-						dst[k] = Move(BitBoard((white & ~i) | (i >> 5), black, (kings & ~i) | (((kings & i) >> 5) | ((i >> 5) & BlackKingMask))), false);
-						++k;
+						}
+						if (((i & kings) << 4) & empty) //UR
+						{
+							dst[k++] = Move(BitBoard((white & ~i) | (i << 4), black, (kings & ~i) | (i << 4)), false);
+
+						}
+
+						if (((i & R5Mask) >> 5) & empty) //LL
+						{
+							dst[k++] = Move(BitBoard((white & ~i) | (i >> 5), black, (kings & ~i) | (((kings & i) >> 5) | ((i >> 5) & WhiteKingMask))), false);
+
+						}
+						if ((i >> 4) & empty)//LR
+						{
+							dst[k++] = Move(BitBoard((white & ~i) | (i >> 4), black, (kings & ~i) | (((kings & i) >> 4) | ((i >> 4) & WhiteKingMask))), false);
+
+						}
 					}
 				}
+
+				moves &= ~i;
+				i = i << 1;
 			}
-
-			moves &= ~i;
-			i = i << 1;
 		}
-
-		i = 1;
-
-		while (jumps && i && k < 48)
+		else
 		{
-			if (jumps & i)
+			while (jumps && i && k < 48)
 			{
-				if (OddRows & i)
+
+				if (jumps & i)
 				{
-					// odd rows, jump lands in odd row (enemy piece in even row)
-					if (((i & kings) << 4) & white) // UL from odd
+					if (OddRows & i) // odd rows
 					{
-						board_type j = i << 4;
-						if ((j << 5) & empty) // UL from even
+						if (((i & kings) << 4) & black) //UL from odd
 						{
-							dst[k] = Move(BitBoard((white & ~i) | (j << 5), (black & ~j) , (kings & ~i) | (j << 5)), true);
+							board_type j = i << 4;
+							if (((j & L3Mask) << 3) & empty) // UL from even
+							{
+								dst[k++] = Move(BitBoard((white & ~i) | (j << 3), (black & ~j), (kings & ~i) | (j << 3)), true);
+							}
+						}
 
-							++k;
+						if ((((i & L5Mask)& kings) << 5) & black) //UR from odd
+						{
+							board_type j = i << 5;
+							if ((j << 4) & empty) // UR from even
+							{
+								dst[k++] = Move(BitBoard((white & ~i) | (j << 4), (black & ~j), (kings & ~i) | (j << 4)), true);
+							}
+						}
+
+						if ((i >> 4) & black) //LL from odd
+						{
+							board_type j = i >> 4;
+							if (((j & R5Mask) >> 5) & empty) // LL from even
+							{
+								dst[k++] = Move(BitBoard((white & ~i) | (j >> 5), (black & ~j), (kings & ~i) | ((((kings & i) >> 4) >>5) | ((j >>5) & WhiteKingMask))), true);
+							}
+						}
+
+						if (((i & R3Mask) >> 3) & black)//LR
+						{
+							board_type j = i >> 3;
+							if ((j >> 4) & empty)
+							{
+								dst[k++] = Move(BitBoard((white & ~i) | (j >> 4), (black & ~j), (kings & ~i) | ((((kings & i) >> 3) >> 4) | ((j >> 4) & WhiteKingMask))), true);
+							}
 						}
 					}
-
-					if (((i & kings) << 3) & white && k < 48) // UR
+					else // even rows
 					{
-						board_type j = i << 3;
-						if ((j << 4) & empty) // UR from even
+						if ((((i & L3Mask) & kings) << 3) & black) //UL
 						{
-							dst[k] = Move(BitBoard((white & ~i) | (j << 4), (black & ~j) , (kings & ~i) | (j << 4)), true);
-							++k;
+							board_type j = i << 3;
+							if ((j << 4) & empty)
+							{
+								dst[k++] = Move(BitBoard((white & ~i) | (j << 4), (black & ~j), (kings & ~i) | (j << 4)), true);
+							}
+
+
 						}
-					}
-
-					if ((i >> 3) & white && k < 48) // LR
-					{
-						board_type j = i >> 3;
-						if ((j >> 4) & empty)// LR from even
+						if (((i & kings) << 4) & black) //UR
 						{
-							dst[k] = Move(BitBoard((white & ~i) | (j >> 4), (black & ~j) , (kings & ~i) | ((((kings & i) >> 3) >> 4) | ((j >> 4) & BlackKingMask))), true);
-							++k;
+							board_type j = i << 4;
+							if (((j & L5Mask) << 5) & empty)
+							{
+								dst[k++] = Move(BitBoard((white & ~i) | (j << 5), (black & ~j), (kings & ~i) | (j << 3)), true);
+							}
+
 						}
-					}
 
-					if ((i >> 4) & white && k < 48) // LL
-					{
-						board_type j = i >> 4;
-						if ((j >> 5) & empty) // LL from even
+						if (((i & R5Mask) >> 5) & black) //LL
 						{
-							dst[k] = Move(BitBoard((white & ~i) | (j >> 5), (black & ~j) , (kings & ~i) | ((((kings & i) >> 4) >> 5) | ((j >> 5) & BlackKingMask))), true);
-							++k;
+							board_type j = i >> 5;
+							if ((j >> 4) & empty)
+							{
+								dst[k++] = Move(BitBoard((white & ~i) | (j >> 4), (black & ~j) , (kings & ~i) | ((((kings & i) >> 5) >> 4) | ((j >> 4) & WhiteKingMask))), true);
+							}
 						}
-					}
-
-				}
-				else
-				{
-					// even rows
-					if (((i & kings) << 5) & white) // UL from even
-					{
-						board_type j = i << 4;
-						if ((j << 4) & empty) // UL from odd
+						if ((i >> 4) & black)//LR
 						{
-							dst[k] = Move(BitBoard((white & ~i) | (j << 4), (black & ~j) , (kings & ~i) | (j << 4)), true);
-							++k;
-						}
-					}
+							board_type j = i >> 4;
+							if (((j & R3Mask) >> 3) & empty)
+							{
+								dst[k++] = Move(BitBoard((white & ~i) | (j >> 3), (black & ~j), (kings & ~i) | ((((kings & i) >> 4) >> 3) | ((j >> 3) & WhiteKingMask))), true);
+							}
 
-					if (((i & kings) << 4) & white && k < 48) // UR from even
-					{
-						board_type j = i << 3;
-						if ((j << 3) & empty) // UR from odd
-						{
-							dst[k] = Move(BitBoard((white & ~i) | (j << 4), (black & ~j) , (kings & ~i) | (j << 4)), true);
-							++k;
-						}
-					}
-
-					if ((i >> 3) & white && k < 48) // LR
-					{
-						board_type j = i >> 3;
-						if ((j >> 4) & empty)// LR from even
-						{
-							dst[k] = Move(BitBoard((white & ~i) | (j >> 4), (black & ~j) , (kings & ~i) | ((((kings & i) >> 3) >> 4) | ((j >> 4) & BlackKingMask))), true);
-							++k;
-						}
-					}
-
-					if ((i >> 4) & white && k < 48) // LL
-					{
-						board_type j = i >> 4;
-						if ((j >> 5) & empty) // LL from even
-						{
-							dst[k] = Move(BitBoard((white & ~i) | (j >> 5), (black & ~j) , (kings & ~i) | ((((kings & i) >> 4) >> 5) | ((j >> 5) & BlackKingMask))), true);
-							++k;
 						}
 					}
 				}
+
+				jumps &= ~i;
+				i = i << 1;
 			}
-
-			jumps &= ~i;
-			i = i << 1;
 		}
 		return k;
 	}
