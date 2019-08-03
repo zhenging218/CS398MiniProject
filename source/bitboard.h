@@ -9,7 +9,7 @@ namespace Checkers
 
 	public:
 		using board_type = std::uint32_t;
-		using utility_type = std::int32_t;
+		using count_type = std::int32_t;
 
 	private:
 		static constexpr board_type L3Mask = 0x0E0E0E0Eu;
@@ -43,17 +43,16 @@ namespace Checkers
 #endif
 
 		template <typename OutIt>
-		OutIt GetPossibleWhiteMoves(OutIt dst) const;
+		std::pair<OutIt, bool> GetPossibleWhiteMoves(OutIt dst) const;
 
 		template <typename OutIt>
-		OutIt GetPossibleBlackMoves(OutIt dst) const;
+		std::pair<OutIt, bool> GetPossibleBlackMoves(OutIt dst) const;
 
-		utility_type GetBlackUtility() const;
-		utility_type GetWhiteUtility() const;
+		count_type GetBlackPieceCount() const;
+		count_type GetWhitePieceCount() const;
 
-		utility_type GetBlackPieceCount() const;
-		utility_type GetWhitePieceCount() const;
-
+		count_type GetBlackKingsCount() const;
+		count_type GetWhiteKingsCount() const;
 	};
 
 
@@ -69,13 +68,14 @@ namespace Checkers
 #pragma region GetPossibleMoves
 
 	template <typename OutIt>
-	OutIt BitBoard::GetPossibleWhiteMoves(OutIt dst) const
+	std::pair<OutIt, bool> BitBoard::GetPossibleWhiteMoves(OutIt dst) const
 	{
 		board_type moves = GetWhiteMoves();
 		board_type jumps = GetWhiteJumps();
 		board_type empty = ~(white | black);
 
 		board_type i = 1;
+		bool jumped = false;
 
 		if (!jumps)
 		{
@@ -140,6 +140,7 @@ namespace Checkers
 		}
 		else
 		{
+			jumped = true;
 			while (jumps && i)
 			{
 
@@ -229,17 +230,18 @@ namespace Checkers
 				i = i << 1;
 			}
 		}
-		return dst;
+		return std::make_pair(dst, jumped);
 	}
 
 	template <typename OutIt>
-	OutIt BitBoard::GetPossibleBlackMoves(OutIt dst) const
+	std::pair<OutIt, bool> BitBoard::GetPossibleBlackMoves(OutIt dst) const
 	{
 		board_type moves = GetBlackMoves();
 		board_type jumps = GetBlackJumps();
 		board_type empty = ~(black | white);
 
 		board_type i = 1;
+		bool jumped = false;
 
 		if (!jumps)
 		{
@@ -312,7 +314,7 @@ namespace Checkers
 		}
 		else
 		{
-
+			jumped = true;
 			while (jumps && i)
 			{
 				if (jumps & i)
@@ -401,7 +403,7 @@ namespace Checkers
 				i = i << 1;
 			}
 		}
-		return dst;
+		return std::make_pair(dst, jumped);
 	}
 
 #pragma endregion

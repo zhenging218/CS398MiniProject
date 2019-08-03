@@ -1,6 +1,5 @@
 #include "precomp.h"
 #include <utility>
-#include <array>
 #include <iostream>
 
 // logic referenced from http://www.3dkingdoms.com/checkers/bitboards.htm
@@ -11,20 +10,10 @@ namespace Checkers
 	namespace
 	{
 		constexpr BitBoard::board_type EvaluationMask = 0x81188118u;
-		constexpr BitBoard::utility_type MaxUtility = 10000;
-		constexpr BitBoard::utility_type MinUtility = -10000;
+		constexpr BitBoard::count_type MaxUtility = 10000;
+		constexpr BitBoard::count_type MinUtility = -10000;
 
 		constexpr BitBoard::board_type Row0 = 0x10000000u;
-
-		std::uint32_t SWAR(BitBoard::board_type i)
-		{
-			// SWAR algorithm: count bits
-			// https://stackoverflow.com/questions/22081738/how-does-this-algorithm-to-count-the-number-of-set-bits-in-a-32-bit-integer-work
-
-			i = i - ((i >> 1) & 0x55555555);
-			i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
-			return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
-		}
 
 		BitBoard::board_type InitializeWhitePieces()
 		{
@@ -34,14 +23,6 @@ namespace Checkers
 		BitBoard::board_type InitializeBlackPieces()
 		{
 			return 0x00000FFF;
-		}
-
-		BitBoard::utility_type EvaluatePosition(BitBoard::board_type board)
-		{
-			BitBoard::board_type corners = board & EvaluationMask;
-			// BitBoard::board_type others = ~corners;
-			// return SWAR(corners) * 2 + SWAR(others);
-			return SWAR(corners);
 		}
 	}
 
@@ -55,68 +36,24 @@ namespace Checkers
 
 	}
 
-	BitBoard::utility_type BitBoard::GetBlackPieceCount() const
+	BitBoard::count_type BitBoard::GetBlackPieceCount() const
 	{
 		return SWAR(black);
 	}
 
-	BitBoard::utility_type BitBoard::GetWhitePieceCount() const
+	BitBoard::count_type BitBoard::GetWhitePieceCount() const
 	{
 		return SWAR(white);
 	}
 
-	BitBoard::utility_type BitBoard::GetBlackUtility() const
+	BitBoard::count_type BitBoard::GetBlackKingsCount() const
 	{
-		std::uint32_t white_pieces = SWAR(white);
-		std::uint32_t black_pieces = SWAR(black);
-		std::uint32_t white_kings = SWAR(white & kings);
-		std::uint32_t black_kings = SWAR(black & kings);
-		std::uint32_t black_eval = EvaluatePosition(black);
-		std::uint32_t white_eval = EvaluatePosition(white);
-
-		std::uint32_t piece_diff = black_pieces - white_pieces;
-		std::uint32_t king_diff = black_kings - white_kings;
-		std::uint32_t eval_diff = black_eval - white_eval;
-
-		if (!white_pieces)
-		{
-			// black won
-			return MaxUtility;
-		}
-
-		if (!black_pieces)
-		{
-			return MinUtility;
-		}
-
-		return piece_diff * 100 + king_diff * 10 + eval_diff;
+		return SWAR(black & kings);
 	}
 
-	BitBoard::utility_type BitBoard::GetWhiteUtility() const
+	BitBoard::count_type BitBoard::GetWhiteKingsCount() const
 	{
-		std::uint32_t white_pieces = SWAR(white);
-		std::uint32_t black_pieces = SWAR(black);
-		std::uint32_t white_kings = SWAR(white & kings);
-		std::uint32_t black_kings = SWAR(black & kings);
-		std::uint32_t black_eval = EvaluatePosition(black);
-		std::uint32_t white_eval = EvaluatePosition(white);
-
-		std::uint32_t piece_diff = white_pieces - black_pieces;
-		std::uint32_t king_diff = white_kings - black_kings;
-		std::uint32_t eval_diff = white_eval - black_eval;
-
-		if (!white_pieces)
-		{
-			// black won
-			return MinUtility;
-		}
-
-		if (!black_pieces)
-		{
-			return MaxUtility;
-		}
-
-		return piece_diff * 100 + king_diff * 10 + eval_diff;
+		return SWAR(white & kings);
 	}
 
 	BitBoard::BitBoard() : white(InitializeWhitePieces()), black(InitializeBlackPieces()), kings(0)
@@ -170,7 +107,6 @@ namespace Checkers
 
 		board_type move = (LL_even_to_odd | LR_even_to_odd | UL_even_to_odd | UR_even_to_odd |
 			LL_odd_to_even | LR_odd_to_even | UL_odd_to_even | UR_odd_to_even);
-		printf("white jumps: %08x\n", move);
 		return move;
 	}
 

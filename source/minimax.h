@@ -12,6 +12,8 @@ namespace Checkers
 
 	public:
 
+		using utility_type = std::uint32_t;
+
 		enum Turn : unsigned char
 		{
 			PLAYER1 = Board::Piece::WHITE,
@@ -27,8 +29,7 @@ namespace Checkers
 			LOSE
 		};
 
-		friend Minimax CreateMinimaxBoard(Board const &src, Turn turn);
-		friend Minimax CreateMinimaxBoard(Board &&src, Turn turn);
+		friend Minimax CreateMinimaxBoard(BitBoard const &src, Turn turn);
 
 		static void SetSearchDepth(int d);
 		static int GetSearchDepth();
@@ -46,10 +47,13 @@ namespace Checkers
 			return default_max_turns;
 		}
 
-		Board const &GetBoard() const;
+		BitBoard const &GetBoard() const;
 
 		Result Next();
 		Result Next(int row, int col, Board::Movement const &move);
+
+		static utility_type GetBlackUtility(BitBoard const &b);
+		static utility_type GetWhiteUtility(BitBoard const &b);
 
 	private:
 		static inline int &depth()
@@ -64,11 +68,10 @@ namespace Checkers
 			return t;
 		}
 
-		Board board;
+		BitBoard board;
 		Turn turn;
 
-		Minimax(Board const &src, Turn t);
-		Minimax(Board &&src, Turn t);
+		Minimax(BitBoard const &src, Turn t);
 
 		bool WinTest() const;
 		bool LoseTest() const;

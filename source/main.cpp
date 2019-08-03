@@ -11,6 +11,33 @@
 #include <iterator>
 
 #define BLOCK_SIZE 32
+
+namespace
+{
+	std::pair<std::vector<Checkers::Move>, bool> TestGetMoves(Checkers::BitBoard const &board, Checkers::Minimax::Turn turn)
+	{
+		std::vector<Checkers::Move> ret;
+		bool jumped = false;
+		switch (turn)
+		{
+		case Checkers::Minimax::Turn::PLAYER1:
+		{
+			auto result = board.GetPossibleWhiteMoves(std::back_insert_iterator<decltype(ret)>(ret));
+			jumped = result.second;
+		} break;
+		case Checkers::Minimax::Turn::PLAYER2:
+		{
+			auto result = board.GetPossibleBlackMoves(std::back_insert_iterator<decltype(ret)>(ret));
+			jumped = result.second;
+		} break;
+		default:
+			ASSERT(0, "GetMoves(%u) has wrong turn value!", turn);
+			break;
+		}
+		return std::make_pair(ret, jumped);
+	}
+}
+
 int RandomStart()
 {
 	/*
@@ -111,7 +138,7 @@ int main()
 	std::cout << "testing bitboard init" << std::endl;
 	// Checkers::BitBoard bboard(0x00040000u, 0x00002000u, 0x00002000u);
 	Checkers::BitBoard bboard;
-	std::cout << bboard << std::endl;
+	std::cout << board << std::endl;
 
 	Checkers::Move moves[48];
 
@@ -119,41 +146,46 @@ int main()
 
 	for (int x = 0; bboard.GetBlackPieceCount() && bboard.GetWhitePieceCount();)
 	{
-		if (x % 2)
+		if (!(x % 2))
 		{
-			std::vector<Checkers::Move> moves;
-			auto start = bboard.GetPossibleWhiteMoves(std::back_insert_iterator<decltype(moves)>(moves));
-			auto size = moves.size();
-			if (size > 0)
+			std::cout << "White Turn (PLAYER 1):\n";
+			auto moves = TestGetMoves(bboard, Checkers::Minimax::Turn::PLAYER1);
+			std::vector<Checkers::Move> frontier;
+
+			if (moves.second)
 			{
-				if (jumped && !moves[0].jump)
+				while (!moves.first.empty())
 				{
-					jumped = false;
-					std::cout << "new board is:\n";
-					std::cout << bboard << std::endl;
-					system("pause");
-					++x;
-					continue;
-				}
+					std::vector<Checkers::Move> moves2;
+					for (auto i = moves.first.begin(); i != moves.first.end(); ++i)
+					{
 
-				if (!jumped)
-				{
-					std::cout << "white move:\n";
-					std::cout << size << " kinds of " << (moves[0].jump ? "jumps" : "moves") << " available\n";
+						auto j = TestGetMoves(i->board, Checkers::Minimax::Turn::PLAYER1);
+						if (j.second)
+						{
+							moves2.insert(moves2.end(), j.first.begin(), j.first.end());
+						}
+						else
+						{
+							frontier.push_back(*i);
+						}
+					}
+					moves.first = std::move(moves2);
 				}
+			}
+			else
+			{
+				frontier = std::move(moves.first);
+			}
 
+			if (!frontier.empty())
+			{
 				std::uint32_t test = unif(rng);
-				while (test >= size)
+				while (test >= frontier.size())
 				{
 					test = unif(rng);
 				}
-				bboard = moves[test].board;
-				jumped = moves[test].jump;
-				if (!jumped)
-				{
-					++x;
-				}
-				std::cout << "new board is:\n";
+				bboard = frontier[test].board;
 				std::cout << bboard << std::endl;
 				system("pause");
 			}
@@ -163,47 +195,47 @@ int main()
 				std::cout << "no more moves\n";
 				break;
 			}
-
-			
-			//system("cls");
-			
 		}
 		else
 		{
-			
-			std::vector<Checkers::Move> moves;
-			auto start = bboard.GetPossibleBlackMoves(std::back_insert_iterator<decltype(moves)>(moves));
-			auto size = moves.size();
-			if (size > 0)
-			{
-				if (jumped && !moves[0].jump)
-				{
-					jumped = false;
-					std::cout << "new board is:\n";
-					std::cout << bboard << std::endl;
-					system("pause");
-					++x;
-					continue;
-				}
-				if (!jumped)
-				{
-					std::cout << "black move:\n";
-					std::cout << size << " kinds of " << (moves[0].jump ? "jumps" : "moves") << " available\n";
-				}
-				
+			std::cout << "Black Turn (PLAYER 2):\n";
+			auto moves = TestGetMoves(bboard, Checkers::Minimax::Turn::PLAYER2);
+			std::vector<Checkers::Move> frontier;
 
+			if (moves.second)
+			{
+				while (!moves.first.empty())
+				{
+					std::vector<Checkers::Move> moves2;
+					for (auto i = moves.first.begin(); i != moves.first.end(); ++i)
+					{
+
+						auto j = TestGetMoves(i->board, Checkers::Minimax::Turn::PLAYER2);
+						if (j.second)
+						{
+							moves2.insert(moves2.end(), j.first.begin(), j.first.end());
+						}
+						else
+						{
+							frontier.push_back(*i);
+						}
+					}
+					moves.first = std::move(moves2);
+				}
+			}
+			else
+			{
+				frontier = std::move(moves.first);
+			}
+
+			if (!frontier.empty())
+			{
 				std::uint32_t test = unif(rng);
-				while (test >= size)
+				while (test >= frontier.size())
 				{
 					test = unif(rng);
 				}
-				bboard = moves[test].board;
-				jumped = moves[test].jump;
-				if (!jumped)
-				{
-					++x;
-				}
-				std::cout << "new board is:\n";
+				bboard = frontier[test].board;
 				std::cout << bboard << std::endl;
 				system("pause");
 			}
@@ -213,12 +245,21 @@ int main()
 				std::cout << "no more moves\n";
 				break;
 			}
-
-			
-			//system("cls");
-			//system("cls");
-			
 		}
+		++x;
+	}
+
+	if (bboard.GetBlackPieceCount() == 0)
+	{
+		std::cout << "White (PLAYER 1) Wins!\n";
+	}
+	else if (bboard.GetWhitePieceCount() == 0)
+	{
+		std::cout << "Black (PLAYER 2) Wins!\n";
+	}
+	else
+	{
+		std::cout << "Draw!\n" << std::endl;
 	}
 
 	system("PAUSE");

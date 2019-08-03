@@ -1,28 +1,120 @@
 #include "precomp.h"
 #include <vector>
 #include <algorithm>
+#include <iterator>
+
 namespace Checkers
 {
 	namespace
 	{
-
-		struct Move
+		/*
+		
+		BitBoard::count_type EvaluatePosition(BitBoard::board_type board)
 		{
-			int x, y;
-			Board::Movement move;
+			BitBoard::board_type corners = board & EvaluationMask;
+			// BitBoard::board_type others = ~corners;
+			// return SWAR(corners) * 2 + SWAR(others);
+			return SWAR(corners);
+		}
 
-			Move(int x_, int y_, Board::Movement const &m) : x(x_), y(y_), move(m)
-			{
+		BitBoard::count_type BitBoard::GetBlackUtility() const
+		{
+		std::uint32_t white_pieces = SWAR(white);
+		std::uint32_t black_pieces = SWAR(black);
+		std::uint32_t white_kings = SWAR(white & kings);
+		std::uint32_t black_kings = SWAR(black & kings);
+		std::uint32_t black_eval = EvaluatePosition(black);
+		std::uint32_t white_eval = EvaluatePosition(white);
 
-			}	
-		};
+		std::uint32_t piece_diff = black_pieces - white_pieces;
+		std::uint32_t king_diff = black_kings - white_kings;
+		std::uint32_t eval_diff = black_eval - white_eval;
 
-		std::vector<Move> GetMoves(Board const &board)
+		if (!white_pieces)
+		{
+		// black won
+		return MaxUtility;
+		}
+
+		if (!black_pieces)
+		{
+		return MinUtility;
+		}
+
+		return piece_diff * 100 + king_diff * 10 + eval_diff;
+		}
+
+		BitBoard::count_type BitBoard::GetWhiteUtility() const
+		{
+		std::uint32_t white_pieces = SWAR(white);
+		std::uint32_t black_pieces = SWAR(black);
+		std::uint32_t white_kings = SWAR(white & kings);
+		std::uint32_t black_kings = SWAR(black & kings);
+		std::uint32_t black_eval = EvaluatePosition(black);
+		std::uint32_t white_eval = EvaluatePosition(white);
+
+		std::uint32_t piece_diff = white_pieces - black_pieces;
+		std::uint32_t king_diff = white_kings - black_kings;
+		std::uint32_t eval_diff = white_eval - black_eval;
+
+		if (!white_pieces)
+		{
+		// black won
+		return MinUtility;
+		}
+
+		if (!black_pieces)
+		{
+		return MaxUtility;
+		}
+
+		return piece_diff * 100 + king_diff * 10 + eval_diff;
+		}
+
+		*/
+
+		constexpr BitBoard::board_type EvaluationMask = 0x81188118u;
+
+		std::pair<std::vector<Move>, bool> GetMoves(BitBoard const &board, Minimax::Turn turn)
 		{
 			std::vector<Move> ret;
-
-			return ret;
+			bool jumped = false;
+			switch (turn)
+			{
+			case Minimax::Turn::PLAYER1:
+			{
+				auto result = board.GetPossibleWhiteMoves(std::back_insert_iterator<decltype(ret)>(ret));
+				jumped = result.second;
+			} break;
+			case Minimax::Turn::PLAYER2:
+			{
+				auto result = board.GetPossibleBlackMoves(std::back_insert_iterator<decltype(ret)>(ret));
+				jumped = result.second;
+			} break;
+			default:
+				ASSERT(0, "GetMoves(%u) has wrong turn value!", turn);
+				break;
+			}
+			return std::make_pair(ret, jumped);
 		}
+	}
+
+	Minimax::utility_type Minimax::GetBlackUtility(BitBoard const &b)
+	{
+		utility_type black_pieces = b.GetBlackPieceCount();
+		utility_type white_pieces = b.GetWhitePieceCount();
+		utility_type black_kings = b.GetBlackKingsCount();
+		utility_type white_kings = b.GetWhiteKingsCount();
+
+
+
+		return 0;
+	}
+
+	Minimax::utility_type Minimax::GetWhiteUtility(BitBoard const &b)
+	{
+
+		return 0;
 	}
 
 	void Minimax::SetSearchDepth(int d)
@@ -45,19 +137,14 @@ namespace Checkers
 		return max_turns();
 	}
 
-	Board const &Minimax::GetBoard() const
+	BitBoard const &Minimax::GetBoard() const
 	{
 		return board;
 	}
 
-	Minimax CreateMinimaxBoard(Board const &src, Minimax::Turn turn)
+	Minimax CreateMinimaxBoard(BitBoard const &src, Minimax::Turn turn)
 	{
 		return Minimax(src, turn);
-	}
-
-	Minimax CreateMinimaxBoard(Board &&src, Minimax::Turn turn)
-	{
-		return Minimax(std::move(src), turn);
 	}
 
 	Minimax::Result Minimax::Next()
@@ -90,12 +177,7 @@ namespace Checkers
 		return Result::DRAW;
 	}
 
-	Minimax::Minimax(Board const &src, Turn t) : board(src), turn(t)
-	{
-
-	}
-
-	Minimax::Minimax(Board &&src, Turn t) : board(std::move(src)), turn(t)
+	Minimax::Minimax(BitBoard const &src, Turn t) : board(src), turn(t)
 	{
 
 	}
@@ -148,8 +230,36 @@ namespace Checkers
 		if (TerminalTest(terminalValue, depth))
 			return terminalValue;
 
-		auto moves = GetMoves(board);
-		for (auto const &move : moves)
+		auto moves = GetMoves(board, Turn::PLAYER1);
+		std::vector<Move> frontier;
+		
+		if (moves.second)
+		{
+			while (!moves.first.empty())
+			{
+				std::vector<Move> moves2;
+				for (auto i = moves.first.begin(); i != moves.first.end(); ++i)
+				{
+					
+					auto j = GetMoves(i->board, Turn::PLAYER1);
+					if (j.second)
+					{
+						moves2.insert(moves2.end(), j.first.begin(), j.first.end());
+					}
+					else
+					{
+						frontier.push_back(*i);
+					}
+				}
+				moves.first = std::move(moves2);
+			}
+		}
+		else
+		{
+			frontier = std::move(moves.first);
+		}
+
+		for (auto const &move : frontier)
 		{
 			//Place(move.row, move.col, BoardType::Cross);
 			v = std::max(Player2Move(depth - 1, alpha, beta), v);
@@ -173,8 +283,36 @@ namespace Checkers
 		if (TerminalTest(terminalValue, depth))
 			return terminalValue;
 
-		auto moves = GetMoves(board);
-		for (auto const &move : moves)
+		auto moves = GetMoves(board, Turn::PLAYER2);
+		std::vector<Move> frontier;
+
+		if (moves.second)
+		{
+			while (!moves.first.empty())
+			{
+				std::vector<Move> moves2;
+				for (auto i = moves.first.begin(); i != moves.first.end(); ++i)
+				{
+
+					auto j = GetMoves(i->board, Turn::PLAYER2);
+					if (j.second)
+					{
+						moves2.insert(moves2.end(), j.first.begin(), j.first.end());
+					}
+					else
+					{
+						frontier.push_back(*i);
+					}
+				}
+				moves.first = std::move(moves2);
+			}
+		}
+		else
+		{
+			frontier = std::move(moves.first);
+		}
+
+		for (auto const &move : frontier)
 		{
 			//Place(move.row, move.col, BoardType::Cross);
 			v = std::min(Player1Move(depth - 1, alpha, beta), v);
