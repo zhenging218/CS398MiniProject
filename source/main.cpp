@@ -8,6 +8,7 @@
 
 #include <random>
 #include <chrono>
+#include <iterator>
 
 #define BLOCK_SIZE 32
 int RandomStart()
@@ -112,7 +113,7 @@ int main()
 	Checkers::BitBoard bboard;
 	std::cout << bboard << std::endl;
 
-	Checkers::Move moves[32 * 4];
+	Checkers::Move moves[48];
 
 	bool jumped = false;
 
@@ -120,8 +121,9 @@ int main()
 	{
 		if (x % 2)
 		{
-			
-			auto size = bboard.GetPossibleWhiteMoves(moves);
+			std::vector<Checkers::Move> moves;
+			auto start = bboard.GetPossibleWhiteMoves(std::back_insert_iterator<decltype(moves)>(moves));
+			auto size = moves.size();
 			if (size > 0)
 			{
 				if (jumped && !moves[0].jump)
@@ -169,7 +171,9 @@ int main()
 		else
 		{
 			
-			auto size = bboard.GetPossibleBlackMoves(moves);
+			std::vector<Checkers::Move> moves;
+			auto start = bboard.GetPossibleBlackMoves(std::back_insert_iterator<decltype(moves)>(moves));
+			auto size = moves.size();
 			if (size > 0)
 			{
 				if (jumped && !moves[0].jump)

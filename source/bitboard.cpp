@@ -10,18 +10,7 @@ namespace Checkers
 {
 	namespace
 	{
-		constexpr BitBoard::board_type L3Mask = 0x0E0E0E0Eu;
-		constexpr BitBoard::board_type L5Mask = 0x00707070u;
-		constexpr BitBoard::board_type R3Mask = 0x70707070u;
-		constexpr BitBoard::board_type R5Mask = 0x0E0E0E00u;
-
-		constexpr BitBoard::board_type OddRows = 0xF0F0F0F0u;
-
-		constexpr BitBoard::board_type BlackKingMask = 0xF0000000u;
-		constexpr BitBoard::board_type WhiteKingMask = 0x0000000Fu;
-
 		constexpr BitBoard::board_type EvaluationMask = 0x81188118u;
-
 		constexpr BitBoard::utility_type MaxUtility = 10000;
 		constexpr BitBoard::utility_type MinUtility = -10000;
 
@@ -223,7 +212,7 @@ namespace Checkers
 		{
 			os << "|";
 			BitBoard::board_type j = i;
-			if (i & OddRows)
+			if (i & BitBoard::OddRows)
 			{
 				for (int k = 0; k < 8; ++k)
 				{
@@ -281,6 +270,7 @@ namespace Checkers
 		return os;
 	}
 
+#if 0
 	std::uint32_t BitBoard::GetPossibleBlackMoves(Move *dst) const
 	{
 		board_type moves = GetBlackMoves();
@@ -616,4 +606,5 @@ namespace Checkers
 		}
 		return k;
 	}
+#endif
 }
