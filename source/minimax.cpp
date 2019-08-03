@@ -7,6 +7,11 @@ namespace Checkers
 {
 	namespace
 	{
+		constexpr Minimax::utility_type MaxUtility = 10000;
+		constexpr Minimax::utility_type MinUtility = -MaxUtility;
+		constexpr Minimax::utility_type PieceUtility = 1;
+		constexpr Minimax::utility_type KingsUtility = 3;
+
 		/*
 		
 		BitBoard::count_type EvaluatePosition(BitBoard::board_type board)
@@ -101,20 +106,42 @@ namespace Checkers
 
 	Minimax::utility_type Minimax::GetBlackUtility(BitBoard const &b)
 	{
-		utility_type black_pieces = b.GetBlackPieceCount();
-		utility_type white_pieces = b.GetWhitePieceCount();
-		utility_type black_kings = b.GetBlackKingsCount();
-		utility_type white_kings = b.GetWhiteKingsCount();
+		utility_type black_pieces = b.GetBlackPieceCount() * PieceUtility;
+		utility_type white_pieces = b.GetWhitePieceCount() * PieceUtility;
 
+		if (!black_pieces || (!b.GetBlackMoves() && !b.GetBlackJumps()))
+		{
+			return MinUtility;
+		}
+		else if(!white_pieces || (!b.GetWhiteMoves() && !b.GetWhiteJumps()))
+		{
+			return MaxUtility;
+		}
 
+		utility_type black_kings = b.GetBlackKingsCount() * KingsUtility;
+		utility_type white_kings = b.GetWhiteKingsCount() * KingsUtility;
 
-		return 0;
+		return (black_pieces - white_pieces) + (black_kings - white_kings);
 	}
 
 	Minimax::utility_type Minimax::GetWhiteUtility(BitBoard const &b)
 	{
+		utility_type black_pieces = b.GetBlackPieceCount() * PieceUtility;
+		utility_type white_pieces = b.GetWhitePieceCount() * PieceUtility;
 
-		return 0;
+		if (!black_pieces || (!b.GetBlackMoves() && !b.GetBlackJumps()))
+		{
+			return MaxUtility;
+		}
+		else if (!white_pieces || (!b.GetWhiteMoves() && !b.GetWhiteJumps()))
+		{
+			return MinUtility;
+		}
+
+		utility_type black_kings = b.GetBlackKingsCount() * KingsUtility;
+		utility_type white_kings = b.GetWhiteKingsCount() * KingsUtility;
+
+		return (white_pieces - black_pieces) + (white_kings - black_kings);
 	}
 
 	void Minimax::SetSearchDepth(int d)

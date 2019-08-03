@@ -24,12 +24,6 @@ namespace Checkers
 
 		board_type white, black, kings;
 
-		board_type GetBlackMoves() const;
-		board_type GetWhiteMoves() const;
-
-		board_type GetBlackJumps() const;
-		board_type GetWhiteJumps() const;
-
 	public:
 
 		BitBoard();
@@ -41,6 +35,11 @@ namespace Checkers
 		std::uint32_t GetPossibleWhiteMoves(Move *dst) const;
 		std::uint32_t GetPossibleBlackMoves(Move *dst) const;
 #endif
+		board_type GetBlackMoves() const;
+		board_type GetWhiteMoves() const;
+
+		board_type GetBlackJumps() const;
+		board_type GetWhiteJumps() const;
 
 		template <typename OutIt>
 		std::pair<OutIt, bool> GetPossibleWhiteMoves(OutIt dst) const;

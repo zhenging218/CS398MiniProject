@@ -149,6 +149,7 @@ int main()
 		if (!(x % 2))
 		{
 			std::cout << "White Turn (PLAYER 1):\n";
+			std::cout << "White has " << bboard.GetWhitePieceCount() << " pieces (" << bboard.GetWhiteKingsCount() << " kings)\n";
 			auto moves = TestGetMoves(bboard, Checkers::Minimax::Turn::PLAYER1);
 			std::vector<Checkers::Move> frontier;
 
@@ -199,6 +200,7 @@ int main()
 		else
 		{
 			std::cout << "Black Turn (PLAYER 2):\n";
+			std::cout << "Black has " << bboard.GetBlackPieceCount() << " pieces (" << bboard.GetBlackKingsCount() << " kings)\n";
 			auto moves = TestGetMoves(bboard, Checkers::Minimax::Turn::PLAYER2);
 			std::vector<Checkers::Move> frontier;
 

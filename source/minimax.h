@@ -12,7 +12,7 @@ namespace Checkers
 
 	public:
 
-		using utility_type = std::uint32_t;
+		using utility_type = std::int32_t;
 
 		enum Turn : unsigned char
 		{
@@ -52,6 +52,7 @@ namespace Checkers
 		Result Next();
 		Result Next(int row, int col, Board::Movement const &move);
 
+		// utility functions should be called by terminal test (i.e. before frontier generation).
 		static utility_type GetBlackUtility(BitBoard const &b);
 		static utility_type GetWhiteUtility(BitBoard const &b);
 
