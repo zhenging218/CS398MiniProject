@@ -114,39 +114,104 @@ int main()
 
 	Checkers::Move moves[32 * 4];
 
-	for (int x = 0; bboard.GetBlackPieceCount() && bboard.GetWhitePieceCount(); ++x)
+	bool jumped = false;
+
+	for (int x = 0; bboard.GetBlackPieceCount() && bboard.GetWhitePieceCount();)
 	{
 		if (x % 2)
 		{
-			std::cout << "white move:\n";
+			
 			auto size = bboard.GetPossibleWhiteMoves(moves);
-			std::cout << size << " kinds of moves available\n";
-			std::uint32_t test = unif(rng);
-			while (test >= size)
+			if (size > 0)
 			{
-				test = unif(rng);
+				if (jumped && !moves[0].jump)
+				{
+					jumped = false;
+					std::cout << "new board is:\n";
+					std::cout << bboard << std::endl;
+					system("pause");
+					++x;
+					continue;
+				}
+
+				if (!jumped)
+				{
+					std::cout << "white move:\n";
+					std::cout << size << " kinds of " << (moves[0].jump ? "jumps" : "moves") << " available\n";
+				}
+
+				std::uint32_t test = unif(rng);
+				while (test >= size)
+				{
+					test = unif(rng);
+				}
+				bboard = moves[test].board;
+				jumped = moves[test].jump;
+				if (!jumped)
+				{
+					++x;
+				}
+				std::cout << "new board is:\n";
+				std::cout << bboard << std::endl;
+				system("pause");
 			}
-			bboard = moves[test].board;
-			std::cout << "new board is:\n";
-			std::cout << bboard << std::endl;
-			system("pause");
+			else
+			{
+				std::cout << "white move:\n";
+				std::cout << "no more moves\n";
+				break;
+			}
+
+			
 			//system("cls");
 			
 		}
 		else
 		{
-			std::cout << "black move:\n";
+			
 			auto size = bboard.GetPossibleBlackMoves(moves);
-			std::cout << size << " kinds of moves available\n";
-			std::uint32_t test = unif(rng);
-			while (test >= size)
+			if (size > 0)
 			{
-				test = unif(rng);
+				if (jumped && !moves[0].jump)
+				{
+					jumped = false;
+					std::cout << "new board is:\n";
+					std::cout << bboard << std::endl;
+					system("pause");
+					++x;
+					continue;
+				}
+				if (!jumped)
+				{
+					std::cout << "black move:\n";
+					std::cout << size << " kinds of " << (moves[0].jump ? "jumps" : "moves") << " available\n";
+				}
+				
+
+				std::uint32_t test = unif(rng);
+				while (test >= size)
+				{
+					test = unif(rng);
+				}
+				bboard = moves[test].board;
+				jumped = moves[test].jump;
+				if (!jumped)
+				{
+					++x;
+				}
+				std::cout << "new board is:\n";
+				std::cout << bboard << std::endl;
+				system("pause");
 			}
-			bboard = moves[test].board;
-			std::cout << "new board is:\n";
-			std::cout << bboard << std::endl;
-			system("pause");
+			else
+			{
+				std::cout << "black move:\n";
+				std::cout << "no more moves\n";
+				break;
+			}
+
+			
+			//system("cls");
 			//system("cls");
 			
 		}
