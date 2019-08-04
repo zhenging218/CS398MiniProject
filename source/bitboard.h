@@ -3,15 +3,14 @@
 
 namespace Checkers
 {
-	class BitBoard
+	struct BitBoard
 	{
-		friend struct Move;
-
-	public:
 		using board_type = std::uint32_t;
 		using count_type = std::int32_t;
 
 	private:
+		friend struct Move;
+
 		static constexpr board_type L3Mask = 0x0E0E0E0Eu;
 		static constexpr board_type L5Mask = 0x00707070u;
 		static constexpr board_type R3Mask = 0x70707070u;
@@ -22,9 +21,8 @@ namespace Checkers
 		static constexpr board_type BlackKingMask = 0xF0000000u;
 		static constexpr board_type WhiteKingMask = 0x0000000Fu;
 
-		board_type white, black, kings;
-
 	public:
+		board_type white, black, kings;
 
 		BitBoard();
 		BitBoard(board_type w, board_type b, board_type k);

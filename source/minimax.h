@@ -16,20 +16,17 @@ namespace Checkers
 
 		enum Turn : unsigned char
 		{
-			PLAYER1 = Board::Piece::WHITE,
-			PLAYER2 = Board::Piece::BLACK
+			WHITE = Board::Piece::WHITE,
+			BLACK = Board::Piece::BLACK
 		};
 
 		enum Result : char
 		{
-			INVALID_MOVE = -2,
 			INPROGRESS = -1,
-			DRAW = 0,
-			WIN,
 			LOSE
 		};
 
-		friend Minimax CreateMinimaxBoard(BitBoard const &src, Turn turn);
+		friend Minimax CreateMinimaxBoard(BitBoard const &src, Turn turn = Turn::WHITE);
 
 		static void SetSearchDepth(int d);
 		static int GetSearchDepth();
@@ -50,11 +47,11 @@ namespace Checkers
 		BitBoard const &GetBoard() const;
 
 		Result Next();
-		Result Next(int row, int col, Board::Movement const &move);
+		Turn GetTurn() const;
 
 		// utility functions should be called by terminal test (i.e. before frontier generation).
-		static utility_type GetBlackUtility(BitBoard const &b);
-		static utility_type GetWhiteUtility(BitBoard const &b);
+		static bool GetBlackUtility(BitBoard const &b, utility_type &utility, int depth);
+		static bool GetWhiteUtility(BitBoard const &b, utility_type &utility, int depth);
 
 	private:
 		static inline int &depth()
@@ -74,18 +71,20 @@ namespace Checkers
 
 		Minimax(BitBoard const &src, Turn t);
 
-		bool WinTest() const;
-		bool LoseTest() const;
-		bool DrawTest() const;
-		bool TerminalTest(int &terminal_value, int depth) const;
-		int EvaluationTest() const;
+		static bool WhiteWinTest(BitBoard const &b);
+		static bool WhiteLoseTest(BitBoard const &b);
+		static bool BlackWinTest(BitBoard const &b);
+		static bool BlackLoseTest(BitBoard const &b);
 
-		int Player1Move(int depth, int alpha, int beta) const;
-		int Player2Move(int depth, int alpha, int beta) const;
-
-		// minimax entry point
-		bool ProcessMove();
+		static utility_type WhiteMoveMax(BitBoard const &b, int depth, utility_type alpha, utility_type beta);
+		static utility_type WhiteMoveMin(BitBoard const &b, int depth, utility_type alpha, utility_type beta);
+		static utility_type BlackMoveMax(BitBoard const &b, int depth, utility_type alpha, utility_type beta);
+		static utility_type BlackMoveMin(BitBoard const &b, int depth, utility_type alpha, utility_type beta);
 	};
 
-	
+	Minimax::Turn operator++(Minimax::Turn &turn);
+	Minimax::Turn operator++(Minimax::Turn &turn, int);
+
+	Minimax::Turn operator--(Minimax::Turn &turn) = delete;
+	Minimax::Turn operator--(Minimax::Turn &turn, int) = delete;
 }
