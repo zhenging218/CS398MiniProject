@@ -137,6 +137,8 @@ namespace Checkers
 		utility_type black_pieces = b.GetBlackPieceCount() * PieceUtility;
 		utility_type white_pieces = b.GetWhitePieceCount() * PieceUtility;
 
+		utility_type black_kings = b.GetBlackKingsCount() * KingsUtility;
+		utility_type white_kings = b.GetWhiteKingsCount() * KingsUtility;
 		
 		if(BlackWinTest(b))
 		{
@@ -148,13 +150,21 @@ namespace Checkers
 		}
 		else if (turns_left == 0)
 		{
-			utility = 0;
+			if (black_pieces < white_pieces)
+			{
+				return MinUtility;
+			}
+			else if (white_pieces < black_pieces)
+			{
+				return MaxUtility;
+			}
+			else
+			{
+				utility = 0;
+			}
 		}
 		else if (depth == 0)
 		{
-			utility_type black_kings = b.GetBlackKingsCount() * KingsUtility;
-			utility_type white_kings = b.GetWhiteKingsCount() * KingsUtility;
-
 			utility = (black_pieces - white_pieces) + (black_kings - white_kings);
 		}
 		else
@@ -180,6 +190,9 @@ namespace Checkers
 		utility_type black_pieces = b.GetBlackPieceCount() * PieceUtility;
 		utility_type white_pieces = b.GetWhitePieceCount() * PieceUtility;
 
+		utility_type black_kings = b.GetBlackKingsCount() * KingsUtility;
+		utility_type white_kings = b.GetWhiteKingsCount() * KingsUtility;
+
 		if (WhiteWinTest(b))
 		{
 			utility = MaxUtility;
@@ -190,12 +203,21 @@ namespace Checkers
 		}
 		else if (turns_left == 0)
 		{
-			utility = 0;
+			if (black_pieces < white_pieces)
+			{
+				return MaxUtility;
+			}
+			else if (white_pieces < black_pieces)
+			{
+				return MinUtility;
+			}
+			else
+			{
+				utility = 0;
+			}
 		}
 		else if(depth == 0)
 		{
-			utility_type black_kings = b.GetBlackKingsCount() * KingsUtility;
-			utility_type white_kings = b.GetWhiteKingsCount() * KingsUtility;
 			utility = (white_pieces - black_pieces) + (white_kings - black_kings);
 		}
 		else
@@ -230,9 +252,9 @@ namespace Checkers
 		return board;
 	}
 
-	Minimax CreateMinimaxBoard(BitBoard const &src, Minimax::Turn turn, int count)
+	Minimax CreateMinimaxBoard(BitBoard const &src, Minimax::Turn turn)
 	{
-		return Minimax(src, turn, count);
+		return Minimax(src, turn);
 	}
 
 	Minimax::Result Minimax::Next()
@@ -305,7 +327,7 @@ namespace Checkers
 		return Result::INPROGRESS;
 	}
 
-	Minimax::Minimax(BitBoard const &src, Turn t, int count) : board(src), turn(t), turn_count(count)
+	Minimax::Minimax(BitBoard const &src, Turn t) : board(src), turn(t), turn_count(max_turns())
 	{
 
 	}

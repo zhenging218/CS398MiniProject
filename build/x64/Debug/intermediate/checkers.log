@@ -1,8 +1,3 @@
-﻿  minimax.cpp
-  main.cpp
-  board.cpp
-c:\users\zijian.ng\desktop\cs398miniproject-master\cs398miniproject\source\board.cpp(1): fatal error C1041: cannot open program database 'C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\vc140.pdb'; if multiple CL.EXE write to the same .PDB file, please use /FS
-  bitwise_helpers.cpp
-c1xx : fatal error C1083: Cannot open compiler intermediate file: 'C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\checkers.pch': Permission denied
-  bitboard.cpp
-c1xx : fatal error C1083: Cannot open compiler intermediate file: 'C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\checkers.pch': Permission denied
+﻿  main.cpp
+  checkers.vcxproj -> C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\checkers.exe
+  checkers.vcxproj -> C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\checkers.pdb (Full PDB)
