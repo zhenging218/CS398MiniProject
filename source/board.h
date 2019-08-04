@@ -3,9 +3,8 @@
 
 namespace Checkers
 {
-	class Board
+	namespace Board
 	{
-	public:
 		enum Piece : unsigned char
 		{
 			EMPTY = 0,
@@ -29,30 +28,5 @@ namespace Checkers
 			WHITE_PAWNMOVES = TOP_LEFT | TOP_RIGHT | Piece::WHITE,
 			BLACK_PAWNMOVES = BOTTOM_LEFT | BOTTOM_RIGHT | Piece::BLACK,
 		};
-
-		Board(int size = 8);
-		Board(Board const &src);
-		Board(Board &&src);
-		Board &operator=(Board const &src);
-		Board &operator=(Board &&src);
-		~Board();
-
-		int size() const;
-
-		Piece const &operator()(int row, int col) const;
-		Piece &operator()(int row, int col);
-
-		bool Move(int row, int col, Movement const &move);
-
-		friend std::ostream &operator<<(std::ostream &os, Board const &board);
-		
-	private:
-		Board(int numPieces, int size);
-
-		int board_size;
-		int num_pieces;
-		Piece *board;
-		int *player1Pieces;
-		int *player2Pieces;
-	};
+	}
 }
