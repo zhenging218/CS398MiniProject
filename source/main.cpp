@@ -54,6 +54,7 @@ namespace
 		{
 			del = 4;
 		}
+		std::cout << "pos is " << pos << " and del is " << del << ", original is " << (pos - del) << std::endl;
 		return Checkers::BitBoard((0xFFF00000u & ~((1u << pos) << del)) | (1u << pos), 0x00000FFFu, 0u);
 	}
 }
