@@ -12,6 +12,8 @@
 
 #define BLOCK_SIZE 32
 
+#define RUN_RNG_CHECKERS 0
+
 namespace
 {
 	std::pair<std::vector<Checkers::Move>, bool> TestGetMoves(Checkers::BitBoard const &board, Checkers::Minimax::Turn turn)
@@ -20,12 +22,12 @@ namespace
 		bool jumped = false;
 		switch (turn)
 		{
-		case Checkers::Minimax::Turn::PLAYER1:
+		case Checkers::Minimax::Turn::WHITE:
 		{
 			auto result = board.GetPossibleWhiteMoves(std::back_insert_iterator<decltype(ret)>(ret));
 			jumped = result.second;
 		} break;
-		case Checkers::Minimax::Turn::PLAYER2:
+		case Checkers::Minimax::Turn::BLACK:
 		{
 			auto result = board.GetPossibleBlackMoves(std::back_insert_iterator<decltype(ret)>(ret));
 			jumped = result.second;
@@ -35,6 +37,25 @@ namespace
 			break;
 		}
 		return std::make_pair(ret, jumped);
+	}
+
+	Checkers::BitBoard CreateRandomWhiteBitBoard()
+	{
+		std::mt19937_64 rng;
+		// initialize the random number generator with time-dependent seed
+		uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+		std::seed_seq ss{ uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed >> 32) };
+		rng.seed(ss);
+		std::uniform_int_distribution<int> unif(16, 19);
+		std::uniform_int_distribution<int> unif2(3, 4);
+		int pos = unif(rng);
+		int del = unif2(rng);
+		if (pos == 16)
+		{
+			del = 4;
+		}
+		std::cout << "pos is " << pos << " and del is " << del << ", original is " << (pos - del) << std::endl;
+		return Checkers::BitBoard((0xFFF00000u & ~((1u << pos) << del)) | (1u << pos), 0x00000FFFu, 0u);
 	}
 }
 
@@ -127,6 +148,7 @@ int main()
 	}
 	*/
 	
+#if RUN_RNG_CHECKERS
 	std::mt19937_64 rng;
 	// initialize the random number generator with time-dependent seed
 	uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -150,7 +172,7 @@ int main()
 		{
 			std::cout << "White Turn (PLAYER 1):\n";
 			std::cout << "White has " << bboard.GetWhitePieceCount() << " pieces (" << bboard.GetWhiteKingsCount() << " kings)\n";
-			auto moves = TestGetMoves(bboard, Checkers::Minimax::Turn::PLAYER1);
+			auto moves = TestGetMoves(bboard, Checkers::Minimax::Turn::WHITE);
 			std::vector<Checkers::Move> frontier;
 
 			if (moves.second)
@@ -161,7 +183,7 @@ int main()
 					for (auto i = moves.first.begin(); i != moves.first.end(); ++i)
 					{
 
-						auto j = TestGetMoves(i->board, Checkers::Minimax::Turn::PLAYER1);
+						auto j = TestGetMoves(i->board, Checkers::Minimax::Turn::WHITE);
 						if (j.second)
 						{
 							moves2.insert(moves2.end(), j.first.begin(), j.first.end());
@@ -201,7 +223,7 @@ int main()
 		{
 			std::cout << "Black Turn (PLAYER 2):\n";
 			std::cout << "Black has " << bboard.GetBlackPieceCount() << " pieces (" << bboard.GetBlackKingsCount() << " kings)\n";
-			auto moves = TestGetMoves(bboard, Checkers::Minimax::Turn::PLAYER2);
+			auto moves = TestGetMoves(bboard, Checkers::Minimax::Turn::BLACK);
 			std::vector<Checkers::Move> frontier;
 
 			if (moves.second)
@@ -212,7 +234,7 @@ int main()
 					for (auto i = moves.first.begin(); i != moves.first.end(); ++i)
 					{
 
-						auto j = TestGetMoves(i->board, Checkers::Minimax::Turn::PLAYER2);
+						auto j = TestGetMoves(i->board, Checkers::Minimax::Turn::BLACK);
 						if (j.second)
 						{
 							moves2.insert(moves2.end(), j.first.begin(), j.first.end());
@@ -263,6 +285,26 @@ int main()
 	{
 		std::cout << "Draw!\n" << std::endl;
 	}
+#else
+
+system("cls");
+	auto minimax = Checkers::CreateMinimaxBoard(CreateRandomWhiteBitBoard());
+	Checkers::Minimax::Result result = Checkers::Minimax::INPROGRESS;
+	while (result == Checkers::Minimax::INPROGRESS)
+	{
+		Checkers::Minimax::Turn turn = minimax.GetTurn();
+		result = minimax.Next();
+		std::cout << (turn == Checkers::Minimax::WHITE ? "White" : "Black") << ":\n";
+		if (result == Checkers::Minimax::LOSE)
+		{
+			std::cout << (turn == Checkers::Minimax::WHITE ? "White" : "Black") << " lost!\n";
+		}
+		else
+		{
+			std::cout << minimax.GetBoard() << std::endl;
+		}
+	}
+#endif
 
 	system("PAUSE");
 }
