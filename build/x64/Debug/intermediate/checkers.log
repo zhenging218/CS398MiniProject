@@ -1,7 +1,3 @@
-﻿  minimax.cpp
-  main.cpp
-  board.cpp
-  bitwise_helpers.cpp
-  bitboard.cpp
+﻿  main.cpp
   checkers.vcxproj -> C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Debug\checkers.exe
   checkers.vcxproj -> C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Debug\checkers.pdb (Full PDB)
