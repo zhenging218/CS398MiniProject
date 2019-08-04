@@ -132,7 +132,7 @@ namespace Checkers
 		return !b.GetWhitePieceCount() || (!b.GetWhiteMoves() && !b.GetWhiteJumps());
 	}
 
-	bool Minimax::GetBlackUtility(BitBoard const &b, utility_type &utility, int depth, int turns)
+	bool Minimax::GetBlackUtility(BitBoard const &b, utility_type &utility, int depth, int turns_left)
 	{
 		utility_type black_pieces = b.GetBlackPieceCount() * PieceUtility;
 		utility_type white_pieces = b.GetWhitePieceCount() * PieceUtility;
@@ -146,7 +146,7 @@ namespace Checkers
 		{
 			utility = MinUtility;
 		}
-		else if (turns == 0)
+		else if (turns_left == 0)
 		{
 			utility = 0;
 		}
@@ -175,7 +175,7 @@ namespace Checkers
 		return !b.GetWhitePieceCount() || (!b.GetWhiteMoves() && !b.GetWhiteJumps());
 	}
 
-	bool Minimax::GetWhiteUtility(BitBoard const &b, utility_type &utility, int depth, int turns)
+	bool Minimax::GetWhiteUtility(BitBoard const &b, utility_type &utility, int depth, int turns_left)
 	{
 		utility_type black_pieces = b.GetBlackPieceCount() * PieceUtility;
 		utility_type white_pieces = b.GetWhitePieceCount() * PieceUtility;
@@ -188,7 +188,7 @@ namespace Checkers
 		{
 			utility = MinUtility;
 		}
-		else if (turns == 0)
+		else if (turns_left == 0)
 		{
 			utility = 0;
 		}
@@ -230,13 +230,18 @@ namespace Checkers
 		return board;
 	}
 
-	Minimax CreateMinimaxBoard(BitBoard const &src, Minimax::Turn turn)
+	Minimax CreateMinimaxBoard(BitBoard const &src, Minimax::Turn turn, int count)
 	{
-		return Minimax(src, turn);
+		return Minimax(src, turn, count);
 	}
 
 	Minimax::Result Minimax::Next()
 	{
+		if (turn_count == 0)
+		{
+			return Result::DRAW;
+		}
+
 		if (turn == Turn::WHITE)
 		{
 			auto frontier = GenerateWhiteFrontier(board);
@@ -251,7 +256,7 @@ namespace Checkers
 
 			for (int i = 0; i < size; ++i)
 			{
-				utility_type v = WhiteMoveMin(frontier[i].board, GetSearchDepth(), GetMaxTurns(), -Infinity, Infinity);
+				utility_type v = WhiteMoveMin(frontier[i].board, GetSearchDepth(), turn_count, -Infinity, Infinity);
 				if (X < v)
 				{
 					X = v;
@@ -278,7 +283,7 @@ namespace Checkers
 
 			for (int i = 0; i < size; ++i)
 			{
-				utility_type v = BlackMoveMin(frontier[i].board, GetSearchDepth(), GetMaxTurns(), -Infinity, Infinity);
+				utility_type v = BlackMoveMin(frontier[i].board, GetSearchDepth(), turn_count, -Infinity, Infinity);
 				if (X < v)
 				{
 					X = v;
@@ -293,10 +298,14 @@ namespace Checkers
 		}
 
 		++turn;
+		if (turn_count)
+		{
+			--turn_count;
+		}
 		return Result::INPROGRESS;
 	}
 
-	Minimax::Minimax(BitBoard const &src, Turn t) : board(src), turn(t)
+	Minimax::Minimax(BitBoard const &src, Turn t, int count) : board(src), turn(t), turn_count(count)
 	{
 
 	}
@@ -373,14 +382,13 @@ namespace Checkers
 		return v;
 	}
 																								  
-	Minimax::utility_type Minimax::BlackMoveMin(BitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta) 
+	Minimax::utility_type Minimax::BlackMoveMin(BitBoard const &b, int depth,int turns_left, utility_type alpha, utility_type beta) 
 	{
 		utility_type v = Infinity;
 		utility_type terminal_value = 0;
 		// check if need to stop the search
 		if (GetBlackUtility(b, terminal_value, depth, turns_left))
 			return terminal_value;
-
 		auto frontier = GenerateWhiteFrontier(b);
 
 		for (auto const &move : frontier)

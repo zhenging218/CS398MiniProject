@@ -10,6 +10,18 @@ namespace Checkers
 		static constexpr int default_search_depth = 8;
 		static constexpr int default_max_turns = 50;
 
+		static inline int &depth()
+		{
+			static int d = default_search_depth;
+			return d;
+		}
+
+		static inline int &max_turns()
+		{
+			static int t = default_max_turns;
+			return t;
+		}
+
 	public:
 
 		using utility_type = std::int32_t;
@@ -23,10 +35,11 @@ namespace Checkers
 		enum Result : char
 		{
 			INPROGRESS = -1,
-			LOSE
+			LOSE,
+			DRAW
 		};
 
-		friend Minimax CreateMinimaxBoard(BitBoard const &src, Turn turn = Turn::WHITE);
+		friend Minimax CreateMinimaxBoard(BitBoard const &src, Turn turn = Turn::WHITE, int count = max_turns());
 
 		static void SetSearchDepth(int d);
 		static int GetSearchDepth();
@@ -50,26 +63,16 @@ namespace Checkers
 		Turn GetTurn() const;
 
 		// utility functions should be called by terminal test (i.e. before frontier generation).
-		static bool GetBlackUtility(BitBoard const &b, utility_type &utility, int depth, int turns);
-		static bool GetWhiteUtility(BitBoard const &b, utility_type &utility, int depth, int turns);
+		static bool GetBlackUtility(BitBoard const &b, utility_type &utility, int depth, int turns_left);
+		static bool GetWhiteUtility(BitBoard const &b, utility_type &utility, int depth, int turns_left);
 
 	private:
-		static inline int &depth()
-		{
-			static int d = default_search_depth;
-			return d;
-		}
-
-		static inline int &max_turns()
-		{
-			static int t = default_max_turns;
-			return t;
-		}
 
 		BitBoard board;
 		Turn turn;
+		int turn_count;
 
-		Minimax(BitBoard const &src, Turn t);
+		Minimax(BitBoard const &src, Turn t, int count);
 
 		static bool WhiteWinTest(BitBoard const &b);
 		static bool WhiteLoseTest(BitBoard const &b);
