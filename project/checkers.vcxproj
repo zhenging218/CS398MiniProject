@@ -22,15 +22,19 @@
     <ClInclude Include="..\source\bitwise_helpers.h" />
     <ClInclude Include="..\source\gpubitboard.cuh" />
     <ClInclude Include="..\source\gpubitwise_helpers.cuh" />
+    <ClInclude Include="..\source\gpuinterface.h" />
+    <ClInclude Include="..\source\gpuminimax.cuh" />
     <ClInclude Include="..\source\macros.h" />
     <ClInclude Include="..\source\board.h" />
     <ClInclude Include="..\source\minimax.h" />
+    <ClInclude Include="..\source\precomp.cuh" />
     <ClInclude Include="..\source\precomp.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\source\gpubitwise_helpers.cu" />
     <CudaCompile Include="..\source\gpubitboard.cu" />
-    <CudaCompile Include="..\source\gpubitboard_genfrontier.cu" />
+    <CudaCompile Include="..\source\gpuinterface.cu" />
+    <CudaCompile Include="..\source\gpuminimax.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C144999E-B9AD-4C28-B718-541D736F1BDD}</ProjectGuid>

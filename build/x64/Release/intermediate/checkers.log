@@ -6,15 +6,72 @@
   C:\Users\zhenging.yiu\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpubitboard_genfrontier.cu.obj "C:\Users\zhenging.yiu\Desktop\CS398MiniProject\source\gpubitboard_genfrontier.cu" 
   gpubitboard.cu
   gpubitboard_genfrontier.cu
+  bitboard.cpp
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C3646: '__device__': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C2059: syntax error: '('
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C3646: '__device__': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C2059: syntax error: '('
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C3646: '__device__': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C2143: syntax error: missing ';' before '&'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(20): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(20): error C2059: syntax error: '('
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(20): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C2143: syntax error: missing ';' before '&'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(23): error C2143: syntax error: missing ';' before 'user-defined conversion'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(23): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  bitboard_templates.cpp
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C3646: '__device__': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C2059: syntax error: '('
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C3646: '__device__': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C2059: syntax error: '('
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C3646: '__device__': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C2143: syntax error: missing ';' before '&'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(20): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(20): error C2059: syntax error: '('
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(20): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C2143: syntax error: missing ';' before '&'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(23): error C2143: syntax error: missing ';' before 'user-defined conversion'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(23): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
   main.cpp
-LINK : warning C4727: PCH named c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitboard_templates.obj and c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitboard.obj.  Using first PCH.
-LINK : warning C4727: PCH named c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitwise_helpers.obj and c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitboard.obj.  Using first PCH.
-LINK : warning C4727: PCH named c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\minimax.obj and c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitboard.obj.  Using first PCH.
-     Creating library C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.lib and object C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exp
-  Generating code
-  7 of 209 functions ( 3.3%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
-  Finished generating code
-  checkers.vcxproj -> C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe
-  checkers.vcxproj -> C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.pdb (Full PDB)
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C3646: '__device__': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C2059: syntax error: '('
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(16): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C3646: '__device__': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C2059: syntax error: '('
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(17): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C3646: '__device__': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C2143: syntax error: missing ';' before '&'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(18): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(20): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(20): error C2059: syntax error: '('
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(20): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C3646: 'GPUBitBoard': unknown override specifier
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C2143: syntax error: missing ';' before '&'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(21): error C2238: unexpected token(s) preceding ';'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(23): error C2143: syntax error: missing ';' before 'user-defined conversion'
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh(23): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
