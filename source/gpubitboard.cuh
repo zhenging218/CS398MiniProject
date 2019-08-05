@@ -2,7 +2,6 @@
 
 #include "bitboard.h"
 #include "minimax.h"
-#include <thrust/device_vector.h>
 
 namespace Checkers
 {
@@ -21,9 +20,6 @@ namespace Checkers
 		__host__ GPUBitBoard &operator=(BitBoard const &src);
 
 		__host__ operator BitBoard() const;
-
-		__device__ static bool GetPossibleWhiteMoves(GPUBitBoard const &b, thrust::device_vector<GPUBitBoard> &dst);
-		__device__ static bool GetPossibleBlackMoves(GPUBitBoard const &b, thrust::device_vector<GPUBitBoard> &dst);
 
 		__device__ static board_type GetBlackMoves(GPUBitBoard const &b);
 		__device__ static board_type GetWhiteMoves(GPUBitBoard const &b);

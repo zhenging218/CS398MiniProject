@@ -53,34 +53,5 @@
     <ClInclude Include="..\source\bitwise_helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\gpuinterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\gpubitboard.cuh">
-      <Filter>Kernel Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\gpubitwise_helpers.cuh">
-      <Filter>Kernel Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\gpuminimax.cuh">
-      <Filter>Kernel Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\source\precomp.cuh">
-      <Filter>Kernel Files\Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="..\source\gpubitboard.cu">
-      <Filter>Kernel Files\Source Files</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\source\gpubitwise_helpers.cu">
-      <Filter>Kernel Files\Source Files</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\source\gpuinterface.cu">
-      <Filter>Kernel Files\Source Files</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\source\gpuminimax.cu">
-      <Filter>Kernel Files\Source Files</Filter>
-    </CudaCompile>
   </ItemGroup>
 </Project>
