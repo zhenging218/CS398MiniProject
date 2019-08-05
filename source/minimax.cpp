@@ -108,7 +108,7 @@ namespace Checkers
 		}
 	}
 
-	Minimax::Turn operator++(Minimax::Turn &turn)
+	Minimax::Turn &operator++(Minimax::Turn &turn)
 	{
 		turn = (turn == Minimax::WHITE ? Minimax::BLACK : Minimax::WHITE);
 		return turn;

@@ -10,6 +10,12 @@
     <Filter Include="Kernel Files">
       <UniqueIdentifier>{617d7dbe-141d-46f7-9e4e-fbdd6b64afae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Kernel Files\Header Files">
+      <UniqueIdentifier>{48dd6721-0b18-4c62-9d6f-8242bcdf1783}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Kernel Files\Source Files">
+      <UniqueIdentifier>{e4e107ee-162b-42a2-9402-57ed8eb5ce1b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\source\main.cpp">
@@ -47,22 +53,34 @@
     <ClInclude Include="..\source\bitwise_helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\gpuinterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\source\gpubitboard.cuh">
-      <Filter>Kernel Files</Filter>
+      <Filter>Kernel Files\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\source\gpubitwise_helpers.cuh">
-      <Filter>Kernel Files</Filter>
+      <Filter>Kernel Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\gpuminimax.cuh">
+      <Filter>Kernel Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\precomp.cuh">
+      <Filter>Kernel Files\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\source\gpubitboard_genfrontier.cu">
-      <Filter>Kernel Files</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\source\gpubitboard.cu">
-      <Filter>Kernel Files</Filter>
+      <Filter>Kernel Files\Source Files</Filter>
     </CudaCompile>
     <CudaCompile Include="..\source\gpubitwise_helpers.cu">
-      <Filter>Kernel Files</Filter>
+      <Filter>Kernel Files\Source Files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\source\gpuinterface.cu">
+      <Filter>Kernel Files\Source Files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\source\gpuminimax.cu">
+      <Filter>Kernel Files\Source Files</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

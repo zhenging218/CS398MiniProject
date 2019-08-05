@@ -1,4 +1,4 @@
-#include "gpubitwise_helpers.cuh"
+#include "precomp.cuh"
 
 namespace Checkers
 {

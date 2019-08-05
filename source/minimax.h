@@ -88,9 +88,9 @@ namespace Checkers
 		static utility_type BlackMoveMin(BitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta);
 	};
 
-	Minimax::Turn operator++(Minimax::Turn &turn);
+	Minimax::Turn &operator++(Minimax::Turn &turn);
 	Minimax::Turn operator++(Minimax::Turn &turn, int);
 
-	Minimax::Turn operator--(Minimax::Turn &turn) = delete;
+	Minimax::Turn &operator--(Minimax::Turn &turn) = delete;
 	Minimax::Turn operator--(Minimax::Turn &turn, int) = delete;
 }

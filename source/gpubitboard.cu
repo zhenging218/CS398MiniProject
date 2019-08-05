@@ -1,15 +1,25 @@
 #pragma once
 
 #include "gpubitboard.cuh"
+#include "precomp.cuh"
 
 namespace Checkers
 {
-	__host__ __device__ GPUBitBoard::GPUBitBoard() : white(0xFFF00000u), black(0x00000FFFu), kings(0u), valid(false)
+	namespace
+	{
+		constexpr BitBoard::board_type EvaluationMask = 0x81188118u;
+		constexpr BitBoard::count_type MaxUtility = 10000;
+		constexpr BitBoard::count_type MinUtility = -10000;
+
+		constexpr BitBoard::board_type Row0 = 0x10000000u;
+	}
+
+	__host__ __device__ GPUBitBoard::GPUBitBoard() : white(0xFFF00000u), black(0x00000FFFu), kings(0u)
 	{
 
 	}
 
-	__host__ __device__ GPUBitBoard::GPUBitBoard(board_type w, board_type b, board_type k, bool v) : white(w), black(b), kings(k), valid(v)
+	__host__ __device__ GPUBitBoard::GPUBitBoard(board_type w, board_type b, board_type k) : white(w), black(b), kings(k)
 	{
 
 	}
@@ -19,11 +29,10 @@ namespace Checkers
 		white = src.white;
 		black = src.black;
 		kings = src.kings;
-		valid = src.valid;
 		return *this;
 	}
 
-	__host__ GPUBitBoard::GPUBitBoard(BitBoard const &src) : white(src.white), black(src.black), kings(src.kings), valid(false)
+	__host__ GPUBitBoard::GPUBitBoard(BitBoard const &src) : white(src.white), black(src.black), kings(src.kings)
 	{
 
 	}
@@ -33,7 +42,6 @@ namespace Checkers
 		white = src.white;
 		black = src.black;
 		kings = src.kings;
-		valid = false;
 		return *this;
 	}
 

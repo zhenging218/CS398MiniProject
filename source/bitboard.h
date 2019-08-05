@@ -21,10 +21,6 @@ namespace Checkers
 		static constexpr board_type BlackKingMask = 0xF0000000u;
 		static constexpr board_type WhiteKingMask = 0x0000000Fu;
 
-	private:
-		friend struct Move;
-
-	public:
 		board_type white, black, kings;
 
 		BitBoard();
@@ -32,10 +28,6 @@ namespace Checkers
 
 		friend std::ostream &operator<<(std::ostream &os, BitBoard const &src);
 
-#if 0
-		std::uint32_t GetPossibleWhiteMoves(Move *dst) const;
-		std::uint32_t GetPossibleBlackMoves(Move *dst) const;
-#endif
 		static board_type GetBlackMoves(BitBoard const &b);
 		static board_type GetWhiteMoves(BitBoard const &b);
 
