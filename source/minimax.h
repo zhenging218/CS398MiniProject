@@ -1,6 +1,7 @@
 #pragma once
 
 #include "board.h"
+#include "bitboard.h"
 
 namespace Checkers
 {
@@ -62,9 +63,7 @@ namespace Checkers
 		Result Next();
 		Turn GetTurn() const;
 
-		// utility functions should be called by terminal test (i.e. before frontier generation).
-		static bool GetBlackUtility(BitBoard const &b, utility_type &utility, int depth, int turns_left);
-		static bool GetWhiteUtility(BitBoard const &b, utility_type &utility, int depth, int turns_left);
+		
 
 	private:
 
@@ -78,6 +77,10 @@ namespace Checkers
 		static bool WhiteLoseTest(BitBoard const &b);
 		static bool BlackWinTest(BitBoard const &b);
 		static bool BlackLoseTest(BitBoard const &b);
+
+		// utility functions should be called for terminal test (i.e. before frontier generation).
+		static bool GetBlackUtility(BitBoard const &b, utility_type &utility, int depth, int turns_left);
+		static bool GetWhiteUtility(BitBoard const &b, utility_type &utility, int depth, int turns_left);
 
 		static utility_type WhiteMoveMax(BitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta);
 		static utility_type WhiteMoveMin(BitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta);

@@ -17,92 +17,91 @@ namespace Checkers
 
 		constexpr BitBoard::board_type EvaluationMask = 0x81188118u;
 
-		std::pair<std::vector<Move>, bool> GetMoves(BitBoard const &board, Minimax::Turn turn)
+		bool GetMoves(BitBoard const &board, Minimax::Turn turn, std::vector<BitBoard> &ret)
 		{
-			std::vector<Move> ret;
+			ret.clear();
 			bool jumped = false;
 			switch (turn)
 			{
 			case Minimax::Turn::WHITE:
 			{
-				auto result = board.GetPossibleWhiteMoves(std::back_insert_iterator<decltype(ret)>(ret));
-				jumped = result.second;
+				jumped = BitBoard::GetPossibleWhiteMoves(board, std::back_insert_iterator<std::vector<BitBoard>>(ret));
+				
 			} break;
 			case Minimax::Turn::BLACK:
 			{
-				auto result = board.GetPossibleBlackMoves(std::back_insert_iterator<decltype(ret)>(ret));
-				jumped = result.second;
+				jumped = BitBoard::GetPossibleBlackMoves(board, std::back_insert_iterator<std::vector<BitBoard>>(ret));
 			} break;
 			default:
 				ASSERT(0, "GetMoves(%u) has wrong turn value!", turn);
 				break;
 			}
-			return std::make_pair(ret, jumped);
+			return jumped;
 		}
 
-		std::vector<Move> GenerateWhiteFrontier(BitBoard const &board)
+		std::vector<BitBoard> GenerateWhiteFrontier(BitBoard const &board)
 		{
-			auto moves = GetMoves(board, Minimax::Turn::WHITE);
-			std::vector<Move> frontier;
+			std::vector<BitBoard> frontier, curr_frontier;
+			bool jumped = GetMoves(board, Minimax::Turn::WHITE, curr_frontier);
 
-			if (moves.second)
+			if (jumped)
 			{
-				while (!moves.first.empty())
+				while (!curr_frontier.empty())
 				{
-					std::vector<Move> moves2;
-					for (auto i = moves.first.begin(); i != moves.first.end(); ++i)
+					std::vector<BitBoard> new_frontier;
+					for(BitBoard const &b : curr_frontier)
 					{
-
-						auto j = GetMoves(i->board, Minimax::Turn::WHITE);
-						if (j.second)
+						std::vector<BitBoard> temp_frontier;
+						bool j = GetMoves(b, Minimax::Turn::WHITE, temp_frontier);
+						if (j)
 						{
-							moves2.insert(moves2.end(), j.first.begin(), j.first.end());
+							new_frontier.insert(new_frontier.end(), temp_frontier.begin(), temp_frontier.end());
 						}
 						else
 						{
-							frontier.push_back(*i);
+							frontier.push_back(b);
 						}
 					}
-					moves.first = std::move(moves2);
+					curr_frontier = std::move(new_frontier);
 				}
 			}
 			else
 			{
-				frontier = std::move(moves.first);
+				frontier = std::move(curr_frontier);
 			}
 
 			return frontier;
 		}
 
-		std::vector<Move> GenerateBlackFrontier(BitBoard const &board)
+		std::vector<BitBoard> GenerateBlackFrontier(BitBoard const &board)
 		{
-			auto moves = GetMoves(board, Minimax::Turn::BLACK);
-			std::vector<Move> frontier;
+			std::vector<BitBoard> frontier, curr_frontier;
+			bool jumped = GetMoves(board, Minimax::Turn::BLACK, curr_frontier);
 
-			if (moves.second)
+			if (jumped)
 			{
-				while (!moves.first.empty())
+				while (!curr_frontier.empty())
 				{
-					std::vector<Move> moves2;
-					for (auto i = moves.first.begin(); i != moves.first.end(); ++i)
+					std::vector<BitBoard> new_frontier;
+					for (BitBoard const &b : curr_frontier)
 					{
-
-						auto j = GetMoves(i->board, Minimax::Turn::BLACK);
-						if (j.second)
+						std::vector<BitBoard> temp_frontier;
+						bool j = GetMoves(b, Minimax::Turn::BLACK, temp_frontier);
+						if (j)
 						{
-							moves2.insert(moves2.end(), j.first.begin(), j.first.end());
+							new_frontier.insert(new_frontier.end(), temp_frontier.begin(), temp_frontier.end());
 						}
 						else
 						{
-							frontier.push_back(*i);
+							frontier.push_back(b);
 						}
 					}
-					moves.first = std::move(moves2);
+					curr_frontier = std::move(new_frontier);
 				}
 			}
 			else
 			{
-				frontier = std::move(moves.first);
+				frontier = std::move(curr_frontier);
 			}
 
 			return frontier;
@@ -124,21 +123,21 @@ namespace Checkers
 
 	bool Minimax::BlackLoseTest(BitBoard const &b)
 	{
-		return !b.GetBlackPieceCount() || (!b.GetBlackMoves() && !b.GetBlackJumps());
+		return !BitBoard::GetBlackPieceCount(b) || (!BitBoard::GetBlackMoves(b) && !BitBoard::GetBlackJumps(b));
 	}
 
 	bool Minimax::BlackWinTest(BitBoard const &b)
 	{
-		return !b.GetWhitePieceCount() || (!b.GetWhiteMoves() && !b.GetWhiteJumps());
+		return !BitBoard::GetWhitePieceCount(b) || (!BitBoard::GetWhiteMoves(b) && !BitBoard::GetWhiteJumps(b));
 	}
 
 	bool Minimax::GetBlackUtility(BitBoard const &b, utility_type &utility, int depth, int turns_left)
 	{
-		utility_type black_pieces = b.GetBlackPieceCount() * PieceUtility;
-		utility_type white_pieces = b.GetWhitePieceCount() * PieceUtility;
+		utility_type black_pieces = BitBoard::GetBlackPieceCount(b) * PieceUtility;
+		utility_type white_pieces = BitBoard::GetWhitePieceCount(b) * PieceUtility;
 
-		utility_type black_kings = b.GetBlackKingsCount() * KingsUtility;
-		utility_type white_kings = b.GetWhiteKingsCount() * KingsUtility;
+		utility_type black_kings = BitBoard::GetBlackKingsCount(b) * KingsUtility;
+		utility_type white_kings = BitBoard::GetWhiteKingsCount(b) * KingsUtility;
 		
 		if(BlackWinTest(b))
 		{
@@ -177,21 +176,21 @@ namespace Checkers
 
 	bool Minimax::WhiteWinTest(BitBoard const &b)
 	{
-		return !b.GetBlackPieceCount() || (!b.GetBlackMoves() && !b.GetBlackJumps());
+		return !BitBoard::GetBlackPieceCount(b) || (!BitBoard::GetBlackMoves(b) && !BitBoard::GetBlackJumps(b));
 	}
 
 	bool Minimax::WhiteLoseTest(BitBoard const &b)
 	{
-		return !b.GetWhitePieceCount() || (!b.GetWhiteMoves() && !b.GetWhiteJumps());
+		return !BitBoard::GetWhitePieceCount(b) || (!BitBoard::GetWhiteMoves(b) && !BitBoard::GetWhiteJumps(b));
 	}
 
 	bool Minimax::GetWhiteUtility(BitBoard const &b, utility_type &utility, int depth, int turns_left)
 	{
-		utility_type black_pieces = b.GetBlackPieceCount() * PieceUtility;
-		utility_type white_pieces = b.GetWhitePieceCount() * PieceUtility;
+		utility_type black_pieces = BitBoard::GetBlackPieceCount(b) * PieceUtility;
+		utility_type white_pieces = BitBoard::GetWhitePieceCount(b) * PieceUtility;
 
-		utility_type black_kings = b.GetBlackKingsCount() * KingsUtility;
-		utility_type white_kings = b.GetWhiteKingsCount() * KingsUtility;
+		utility_type black_kings = BitBoard::GetBlackKingsCount(b) * KingsUtility;
+		utility_type white_kings = BitBoard::GetWhiteKingsCount(b) * KingsUtility;
 
 		if (WhiteWinTest(b))
 		{
@@ -278,7 +277,7 @@ namespace Checkers
 
 			for (int i = 0; i < size; ++i)
 			{
-				utility_type v = WhiteMoveMin(frontier[i].board, GetSearchDepth(), turn_count, -Infinity, Infinity);
+				utility_type v = WhiteMoveMin(frontier[i], GetSearchDepth(), turn_count, -Infinity, Infinity);
 				if (X < v)
 				{
 					X = v;
@@ -288,7 +287,7 @@ namespace Checkers
 
 			if (placement >= 0)
 			{
-				board = frontier[placement].board;
+				board = frontier[placement];
 			}
 		}
 		else
@@ -305,7 +304,7 @@ namespace Checkers
 
 			for (int i = 0; i < size; ++i)
 			{
-				utility_type v = BlackMoveMin(frontier[i].board, GetSearchDepth(), turn_count, -Infinity, Infinity);
+				utility_type v = BlackMoveMin(frontier[i], GetSearchDepth(), turn_count, -Infinity, Infinity);
 				if (X < v)
 				{
 					X = v;
@@ -315,7 +314,7 @@ namespace Checkers
 
 			if (placement >= 0)
 			{
-				board = frontier[placement].board;
+				board = frontier[placement];
 			}
 		}
 
@@ -344,7 +343,7 @@ namespace Checkers
 
 		for (auto const &move : frontier)
 		{
-			v = std::max(WhiteMoveMin(move.board, depth - 1, turns_left - 1, alpha, beta), v);
+			v = std::max(WhiteMoveMin(move, depth - 1, turns_left - 1, alpha, beta), v);
 			if (v > beta)
 			{
 				// prune
@@ -368,7 +367,7 @@ namespace Checkers
 
 		for (auto const &move : frontier)
 		{
-			v = std::min(WhiteMoveMax(move.board, depth - 1, turns_left - 1, alpha, beta), v);
+			v = std::min(WhiteMoveMax(move, depth - 1, turns_left - 1, alpha, beta), v);
 			if (v < alpha)
 			{
 				// prune
@@ -392,7 +391,7 @@ namespace Checkers
 
 		for (auto const &move : frontier)
 		{
-			v = std::max(BlackMoveMin(move.board, depth - 1, turns_left - 1, alpha, beta), v);
+			v = std::max(BlackMoveMin(move, depth - 1, turns_left - 1, alpha, beta), v);
 			if (v > beta)
 			{
 				// prune
@@ -415,7 +414,7 @@ namespace Checkers
 
 		for (auto const &move : frontier)
 		{
-			v = std::min(BlackMoveMax(move.board, depth - 1, turns_left - 1, alpha, beta), v);
+			v = std::min(BlackMoveMax(move, depth - 1, turns_left - 1, alpha, beta), v);
 			if (v < alpha)
 			{
 				// prune

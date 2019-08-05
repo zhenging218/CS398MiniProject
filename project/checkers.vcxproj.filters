@@ -15,9 +15,6 @@
     <ClCompile Include="..\source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\source\board.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\source\minimax.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -25,6 +22,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\source\bitwise_helpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\bitboard_templates.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,5 +47,22 @@
     <ClInclude Include="..\source\bitwise_helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\gpubitboard.cuh">
+      <Filter>Kernel Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\gpubitwise_helpers.cuh">
+      <Filter>Kernel Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\source\gpubitboard_genfrontier.cu">
+      <Filter>Kernel Files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\source\gpubitboard.cu">
+      <Filter>Kernel Files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\source\gpubitwise_helpers.cu">
+      <Filter>Kernel Files</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

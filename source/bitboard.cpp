@@ -17,43 +17,33 @@ namespace Checkers
 
 		BitBoard::board_type InitializeWhitePieces()
 		{
-			return 0xFFF00000;
+			return 0xFFF00000u;
 		}
 
 		BitBoard::board_type InitializeBlackPieces()
 		{
-			return 0x00000FFF;
+			return 0x00000FFFu;
 		}
 	}
 
-	Move::Move() : board(), jump(false)
+	BitBoard::count_type BitBoard::GetBlackPieceCount(BitBoard const &b)
 	{
-
+		return SWAR32(b.black);
 	}
 
-	Move::Move(BitBoard const &bb, bool j) : board(bb), jump(j)
+	BitBoard::count_type BitBoard::GetWhitePieceCount(BitBoard const &b)
 	{
-
+		return SWAR32(b.white);
 	}
 
-	BitBoard::count_type BitBoard::GetBlackPieceCount() const
+	BitBoard::count_type BitBoard::GetBlackKingsCount(BitBoard const &b)
 	{
-		return SWAR(black);
+		return SWAR32(b.black & b.kings);
 	}
 
-	BitBoard::count_type BitBoard::GetWhitePieceCount() const
+	BitBoard::count_type BitBoard::GetWhiteKingsCount(BitBoard const &b)
 	{
-		return SWAR(white);
-	}
-
-	BitBoard::count_type BitBoard::GetBlackKingsCount() const
-	{
-		return SWAR(black & kings);
-	}
-
-	BitBoard::count_type BitBoard::GetWhiteKingsCount() const
-	{
-		return SWAR(white & kings);
+		return SWAR32(b.white & b.kings);
 	}
 
 	BitBoard::BitBoard() : white(InitializeWhitePieces()), black(InitializeBlackPieces()), kings(0)
@@ -67,69 +57,69 @@ namespace Checkers
 	}
 
 
-	BitBoard::board_type BitBoard::GetWhiteMoves() const
+	BitBoard::board_type BitBoard::GetWhiteMoves(BitBoard const &b)
 	{
-		const board_type not_occupied = ~(black | white);
-		const board_type white_kings = white & kings;
+		const board_type not_occupied = ~(b.black | b.white);
+		const board_type white_kings = b.white & b.kings;
 		board_type LL = (((not_occupied & R5Mask) >> 5) & white_kings) | ((not_occupied >> 4) & white_kings);
 		board_type LR = (((not_occupied) >> 4) & white_kings) | (((not_occupied & R3Mask) >> 3) & white_kings);
-		board_type UL = (((not_occupied & L5Mask) << 5) & white) | ((not_occupied << 4) & white);
-		board_type UR = (((not_occupied << 4) & white) | ((not_occupied & L3Mask) << 3) & white);
+		board_type UL = (((not_occupied & L5Mask) << 5) & b.white) | ((not_occupied << 4) & b.white);
+		board_type UR = (((not_occupied << 4) & b.white) | ((not_occupied & L3Mask) << 3) & b.white);
 
 		return  (LL | LR | UL | UR);
 	}
 
-	BitBoard::board_type BitBoard::GetBlackMoves() const
+	BitBoard::board_type BitBoard::GetBlackMoves(BitBoard const &b)
 	{
-		const board_type not_occupied = ~(black | white);
-		const board_type black_kings = black & kings;
-		board_type LL = (((not_occupied & R5Mask) >> 5) & black) | ((not_occupied >> 4) & black);
-		board_type LR = (((not_occupied) >> 4) & black) | (((not_occupied & R3Mask) >> 3) & black);
-		board_type UL = (((not_occupied & L5Mask) << 5) & black_kings) | ((not_occupied << 4) & black);
+		const board_type not_occupied = ~(b.black | b.white);
+		const board_type black_kings = b.black & b.kings;
+		board_type LL = (((not_occupied & R5Mask) >> 5) & b.black) | ((not_occupied >> 4) & b.black);
+		board_type LR = (((not_occupied) >> 4) & b.black) | (((not_occupied & R3Mask) >> 3) & b.black);
+		board_type UL = (((not_occupied & L5Mask) << 5) & black_kings) | ((not_occupied << 4) & black_kings);
 		board_type UR = (((not_occupied << 4) & black_kings) | ((not_occupied & L3Mask) << 3) & black_kings);
 
 		return  (LL | LR | UL | UR);
 	}
 
-	BitBoard::board_type BitBoard::GetWhiteJumps() const
+	BitBoard::board_type BitBoard::GetWhiteJumps(BitBoard const &b)
 	{
-		const board_type not_occupied = ~(black | white);
-		const board_type white_kings = white & kings;
-		board_type LL_even_to_odd = (((((not_occupied & R5Mask) >> 5) & black) >> 4) & white_kings);
-		board_type LR_even_to_odd = (((((not_occupied >> 4) & black) & R3Mask) >> 3) & white_kings);
-		board_type UL_even_to_odd = (((((not_occupied & L5Mask) << 5) & black) << 4) & white);
-		board_type UR_even_to_odd = (((((not_occupied << 4) & black) & L3Mask) << 3) & white);
+		const board_type not_occupied = ~(b.black | b.white);
+		const board_type white_kings = b.white & b.kings;
+		board_type LL_even_to_odd = (((((not_occupied & R5Mask) >> 5) & b.black) >> 4) & white_kings);
+		board_type LR_even_to_odd = (((((not_occupied >> 4) & b.black) & R3Mask) >> 3) & white_kings);
+		board_type UL_even_to_odd = (((((not_occupied & L5Mask) << 5) & b.black) << 4) & b.white);
+		board_type UR_even_to_odd = (((((not_occupied << 4) & b.black) & L3Mask) << 3) & b.white);
 
-		board_type LL_odd_to_even = (((((not_occupied >> 4) & black) & R5Mask) >> 5) & white_kings);
-		board_type LR_odd_to_even = (((((not_occupied & R3Mask) >> 3) & black) >> 4) & white_kings);
-		board_type UL_odd_to_even = (((((not_occupied << 4) & black) & L5Mask) << 5) & white);
-		board_type UR_odd_to_even = (((((not_occupied & L3Mask) << 3) & black) << 4) & white);
+		board_type LL_odd_to_even = (((((not_occupied >> 4) & b.black) & R5Mask) >> 5) & white_kings);
+		board_type LR_odd_to_even = (((((not_occupied & R3Mask) >> 3) & b.black) >> 4) & white_kings);
+		board_type UL_odd_to_even = (((((not_occupied << 4) & b.black) & L5Mask) << 5) & b.white);
+		board_type UR_odd_to_even = (((((not_occupied & L3Mask) << 3) & b.black) << 4) & b.white);
 
 		board_type move = (LL_even_to_odd | LR_even_to_odd | UL_even_to_odd | UR_even_to_odd |
 			LL_odd_to_even | LR_odd_to_even | UL_odd_to_even | UR_odd_to_even);
 		return move;
 	}
 
-	BitBoard::board_type BitBoard::GetBlackJumps() const
+	BitBoard::board_type BitBoard::GetBlackJumps(BitBoard const &b)
 	{
-		const board_type not_occupied = ~(black | white);
-		const board_type black_kings = black & kings;
-		board_type LL_even_to_odd = (((((not_occupied & R5Mask) >> 5) & white) >> 4) & black);
+		const board_type not_occupied = ~(b.black | b.white);
+		const board_type black_kings = b.black & b.kings;
+		board_type LL_even_to_odd = (((((not_occupied & R5Mask) >> 5) & b.white) >> 4) & b.black);
 
-		board_type LR_even_to_odd = (((((not_occupied >> 4) & white) & R3Mask) >> 3) & black);
+		board_type LR_even_to_odd = (((((not_occupied >> 4) & b.white) & R3Mask) >> 3) & b.black);
 
-		board_type UL_even_to_odd = (((((not_occupied & L5Mask) << 5) & white) << 4) & black_kings);
+		board_type UL_even_to_odd = (((((not_occupied & L5Mask) << 5) & b.white) << 4) & black_kings);
 		
-		board_type UR_even_to_odd = (((((not_occupied << 4) & white) & L3Mask) << 3) & black_kings);
+		board_type UR_even_to_odd = (((((not_occupied << 4) & b.white) & L3Mask) << 3) & black_kings);
 		
 
-		board_type LL_odd_to_even = (((((not_occupied >> 4) & white) & R5Mask) >> 5) & black);
+		board_type LL_odd_to_even = (((((not_occupied >> 4) & b.white) & R5Mask) >> 5) & b.black);
 
-		board_type LR_odd_to_even = (((((not_occupied & R3Mask) >> 3) & white) >> 4) & black);
+		board_type LR_odd_to_even = (((((not_occupied & R3Mask) >> 3) & b.white) >> 4) & b.black);
 
-		board_type UL_odd_to_even = (((((not_occupied << 4) & white) & L5Mask) << 5) & black_kings);
+		board_type UL_odd_to_even = (((((not_occupied << 4) & b.white) & L5Mask) << 5) & black_kings);
 
-		board_type UR_odd_to_even = (((((not_occupied & L3Mask) << 3) & white) << 4) & black_kings);
+		board_type UR_odd_to_even = (((((not_occupied & L3Mask) << 3) & b.white) << 4) & black_kings);
 		board_type move = (LL_even_to_odd | LR_even_to_odd | UL_even_to_odd | UR_even_to_odd |
 			LL_odd_to_even | LR_odd_to_even | UL_odd_to_even | UR_odd_to_even);
 		return move;

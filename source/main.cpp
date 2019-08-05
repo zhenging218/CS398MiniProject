@@ -16,21 +16,19 @@
 
 namespace
 {
-	std::pair<std::vector<Checkers::Move>, bool> TestGetMoves(Checkers::BitBoard const &board, Checkers::Minimax::Turn turn)
+	std::pair<std::vector<Checkers::BitBoard>, bool> TestGetMoves(Checkers::BitBoard const &board, Checkers::Minimax::Turn turn)
 	{
-		std::vector<Checkers::Move> ret;
+		std::vector<Checkers::BitBoard> ret;
 		bool jumped = false;
 		switch (turn)
 		{
 		case Checkers::Minimax::Turn::WHITE:
 		{
-			auto result = board.GetPossibleWhiteMoves(std::back_insert_iterator<decltype(ret)>(ret));
-			jumped = result.second;
+			jumped = Checkers::BitBoard::GetPossibleWhiteMoves(board, std::back_insert_iterator<decltype(ret)>(ret));
 		} break;
 		case Checkers::Minimax::Turn::BLACK:
 		{
-			auto result = board.GetPossibleBlackMoves(std::back_insert_iterator<decltype(ret)>(ret));
-			jumped = result.second;
+			jumped = Checkers::BitBoard::GetPossibleBlackMoves(board, std::back_insert_iterator<decltype(ret)>(ret));
 		} break;
 		default:
 			ASSERT(0, "GetMoves(%u) has wrong turn value!", turn);
@@ -77,41 +75,8 @@ int RandomStart()
 int main()
 {
 	srand((unsigned int)time(0));
-	Checkers::Board board = Checkers::Board();
 	int temp = RandomStart();
 	std::cout << "Random Start number: "<< temp << std::endl;
-	//switch (temp)
-	//{
-	//	case 1:board.Move(2, 0, Checkers::Board::Movement::BOTTOM_RIGHT);
-	//		break;
-	//	case 2:board.Move(2, 2, Checkers::Board::Movement::BOTTOM_LEFT);
-	//		break;
-	//	case 3:board.Move(2, 2, Checkers::Board::Movement::BOTTOM_RIGHT);
-	//		break;
-	//	case 4:board.Move(2, 4, Checkers::Board::Movement::BOTTOM_LEFT);
-	//		break;
-	//	case 5:board.Move(2, 4, Checkers::Board::Movement::BOTTOM_RIGHT);
-	//		break;
-	//	case 6:board.Move(2, 6, Checkers::Board::Movement::BOTTOM_LEFT);
-	//		break;
-	//	case 7:board.Move(2, 6, Checkers::Board::Movement::BOTTOM_RIGHT);
-	//		break;
-
-	//	/*case 1:board.Move(5, 1, Checkers::Board::Movement::TOP_RIGHT);
-	//		break;
-	//	case 2:board.Move(5, 3, Checkers::Board::Movement::TOP_LEFT);
-	//		break;
-	//	case 3:board.Move(5, 3, Checkers::Board::Movement::TOP_RIGHT);
-	//		break;
-	//	case 4:board.Move(5, 5, Checkers::Board::Movement::TOP_LEFT);
-	//		break;
-	//	case 5:board.Move(5, 5, Checkers::Board::Movement::TOP_RIGHT);
-	//		break;
-	//	case 6:board.Move(5, 7, Checkers::Board::Movement::TOP_LEFT);
-	//		break;
-	//	case 7:board.Move(5, 7, Checkers::Board::Movement::TOP_RIGHT);
-	//		break;*/
-	//}
 	
 	/*
 	StopWatchInterface *hTimer = NULL;
@@ -285,11 +250,11 @@ int main()
 		std::cout << "Draw!\n" << std::endl;
 	}
 #else
-
-    system("cls");
-    Checkers::Minimax::SetSearchDepth(5);
+    Checkers::Minimax::SetSearchDepth(4);
     Checkers::Minimax::SetMaxTurns(100);
-	auto minimax = Checkers::CreateMinimaxBoard(CreateRandomWhiteBitBoard(),Checkers::Minimax::BLACK);
+	//auto minimax = Checkers::CreateMinimaxBoard(CreateRandomWhiteBitBoard(),Checkers::Minimax::BLACK);
+	auto minimax = Checkers::CreateMinimaxBoard(Checkers::BitBoard(0xFFD10000u,0x00000FFFu,0u), Checkers::Minimax::BLACK);
+	
 	Checkers::Minimax::Result result = Checkers::Minimax::INPROGRESS;
 	
 
