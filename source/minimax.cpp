@@ -17,93 +17,21 @@ namespace Checkers
 
 		constexpr BitBoard::board_type EvaluationMask = 0x81188118u;
 
-		bool GetMoves(BitBoard const &board, Minimax::Turn turn, std::vector<BitBoard> &ret)
-		{
-			ret.clear();
-			bool jumped = false;
-			switch (turn)
-			{
-			case Minimax::Turn::WHITE:
-			{
-				jumped = BitBoard::GetPossibleWhiteMoves(board, std::back_insert_iterator<std::vector<BitBoard>>(ret));
-				
-			} break;
-			case Minimax::Turn::BLACK:
-			{
-				jumped = BitBoard::GetPossibleBlackMoves(board, std::back_insert_iterator<std::vector<BitBoard>>(ret));
-			} break;
-			default:
-				ASSERT(0, "GetMoves(%u) has wrong turn value!", turn);
-				break;
-			}
-			return jumped;
-		}
+		using frontier_type = std::vector<BitBoard>;
 
-		std::vector<BitBoard> GenerateWhiteFrontier(BitBoard const &board)
+		frontier_type GenerateWhiteFrontier(BitBoard const &board)
 		{
-			std::vector<BitBoard> frontier, curr_frontier;
-			bool jumped = GetMoves(board, Minimax::Turn::WHITE, curr_frontier);
+			frontier_type frontier;
 
-			if (jumped)
-			{
-				while (!curr_frontier.empty())
-				{
-					std::vector<BitBoard> new_frontier;
-					for(BitBoard const &b : curr_frontier)
-					{
-						std::vector<BitBoard> temp_frontier;
-						bool j = GetMoves(b, Minimax::Turn::WHITE, temp_frontier);
-						if (j)
-						{
-							new_frontier.insert(new_frontier.end(), temp_frontier.begin(), temp_frontier.end());
-						}
-						else
-						{
-							frontier.push_back(b);
-						}
-					}
-					curr_frontier = std::move(new_frontier);
-				}
-			}
-			else
-			{
-				frontier = std::move(curr_frontier);
-			}
+			BitBoard::GetPossibleWhiteMoves(board, std::back_insert_iterator<frontier_type>(frontier));
 
 			return frontier;
 		}
 
-		std::vector<BitBoard> GenerateBlackFrontier(BitBoard const &board)
+		frontier_type GenerateBlackFrontier(BitBoard const &board)
 		{
-			std::vector<BitBoard> frontier, curr_frontier;
-			bool jumped = GetMoves(board, Minimax::Turn::BLACK, curr_frontier);
-
-			if (jumped)
-			{
-				while (!curr_frontier.empty())
-				{
-					std::vector<BitBoard> new_frontier;
-					for (BitBoard const &b : curr_frontier)
-					{
-						std::vector<BitBoard> temp_frontier;
-						bool j = GetMoves(b, Minimax::Turn::BLACK, temp_frontier);
-						if (j)
-						{
-							new_frontier.insert(new_frontier.end(), temp_frontier.begin(), temp_frontier.end());
-						}
-						else
-						{
-							frontier.push_back(b);
-						}
-					}
-					curr_frontier = std::move(new_frontier);
-				}
-			}
-			else
-			{
-				frontier = std::move(curr_frontier);
-			}
-
+			frontier_type frontier;
+			BitBoard::GetPossibleBlackMoves(board, std::back_insert_iterator<frontier_type>(frontier));
 			return frontier;
 		}
 	}

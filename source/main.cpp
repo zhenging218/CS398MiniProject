@@ -72,8 +72,26 @@ int RandomStart()
 	return (rand() % 7 + 1);
 }
 
-int main()
+int main(int argc, char **argv)
 {
+	std::uint32_t max_depth = 4;
+	std::uint32_t max_turns = 100;
+
+	if (argc > 3)
+	{
+		std::cout << "usage: " << argv[0] << " [max_depth] [max_turns]\n";
+		return 0;
+	}
+	else if (argc == 2)
+	{
+		max_depth = (std::uint32_t)atoi(argv[1]);
+	}
+	else if (argc == 3)
+	{
+		max_depth = (std::uint32_t)atoi(argv[1]);
+		max_turns = (std::uint32_t)atoi(argv[2]);
+	}
+
 	srand((unsigned int)time(0));
 	int temp = RandomStart();
 	std::cout << "Random Start number: "<< temp << std::endl;
@@ -112,10 +130,11 @@ int main()
 	}
 	*/
 	
-    Checkers::Minimax::SetSearchDepth(4);
-    Checkers::Minimax::SetMaxTurns(100);
-	//auto minimax = Checkers::CreateMinimaxBoard(CreateRandomWhiteBitBoard(),Checkers::Minimax::BLACK);
-	auto minimax = Checkers::CreateMinimaxBoard(Checkers::BitBoard(0xFFD10000u,0x00000FFFu,0u), Checkers::Minimax::BLACK);
+	std::cout << "search depth: " << max_depth << ", maximum game turns: " << max_turns << "\n";
+    Checkers::Minimax::SetSearchDepth(max_depth);
+    Checkers::Minimax::SetMaxTurns(max_turns);
+	auto minimax = Checkers::CreateMinimaxBoard(CreateRandomWhiteBitBoard(),Checkers::Minimax::BLACK);
+	// auto minimax = Checkers::CreateMinimaxBoard(Checkers::BitBoard(0xFFD10000u,0x00000FFFu,0u), Checkers::Minimax::BLACK);
 	
 	Checkers::Minimax::Result result = Checkers::Minimax::INPROGRESS;
 	
@@ -131,17 +150,17 @@ int main()
 	while (result == Checkers::Minimax::INPROGRESS)
 	{
 		Checkers::Minimax::Turn turn = minimax.GetTurn();
-		std::cout << (turn == Checkers::Minimax::WHITE ? "White" : "Black") << ":\n";
-		sdkResetTimer(&hTimer);
-		sdkStartTimer(&hTimer);
+		auto start = std::chrono::high_resolution_clock::now();
 		result = minimax.Next();
-		std::cout << minimax.GetBoard() << std::endl;
-		sdkStopTimer(&hTimer);
-		double dAvgSecs = 1.0e-3 * (double)sdkGetTimerValue(&hTimer);
-		
+		std::chrono::duration<double, std::milli> time = std::chrono::high_resolution_clock::now() - start;
+		double dAvgSecs = time.count();
+
+		// system("cls");
+		std::cout << (turn == Checkers::Minimax::WHITE ? "White" : "Black") << ": ";
+
 		if (result == Checkers::Minimax::LOSE)
 		{
-			std::cout << (turn == Checkers::Minimax::WHITE ? "White" : "Black") << " lost!\n";
+			std::cout << "Lost!\n";
 		}
 		else if (result == Checkers::Minimax::DRAW)
 		{
@@ -149,17 +168,19 @@ int main()
 		}
 		else
 		{
-			std::cout << "Time taken for this turn's decision: " << dAvgSecs << " seconds" << std::endl;
+			std::cout << "Time taken for this turn's decision: " << dAvgSecs << " milliseconds\n";
+			std::cout << minimax.GetBoard() << std::endl;
 			totalTime += dAvgSecs;
 			longestTime = std::max(longestTime, dAvgSecs);
 			shortestTime = std::min(shortestTime, dAvgSecs);
 			++turns;
 		}
+		
 	}
 	std::cout << "Total decisions made: " << turns << std::endl;
-	std::cout << "Average time taken for each decision: " << (totalTime / (double)turns) << " seconds" << std::endl;
-	std::cout << "Slowest decision took " << longestTime << " seconds\n";
-	std::cout << "Fastest decision took " << shortestTime << " seconds\n";
+	std::cout << "Average time taken for each decision: " << (totalTime / (double)turns) << " milliseconds" << std::endl;
+	std::cout << "Slowest decision took " << longestTime << " milliseconds\n";
+	std::cout << "Fastest decision took " << shortestTime << " milliseconds\n";
 
 	sdkDeleteTimer(&hTimer);
 
