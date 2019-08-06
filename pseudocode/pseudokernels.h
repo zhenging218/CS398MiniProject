@@ -294,7 +294,7 @@ __device__ gen_black_move[2] = { GenBlackMove, GenBlackJump };
 // will need master_black_max_kernel, master_black_min_kernel, black_max_kernel and black_min_kernel as well.
 // non_master kernels will create 4 streams to use on its own per thread.
 
-__global__ master_white_max_kernel(GPUBitBoard::utility_type *v, GPUBitBoard::utility_type *utility, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns)
+__global__ void master_white_max_kernel(utility_type *v, utility_type *utility, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns)
 {
 	int tx = threadIdx.x;
 	int index = blockIdx.x * blockDim.x + tx;
@@ -327,17 +327,17 @@ __global__ master_white_max_kernel(GPUBitBoard::utility_type *v, GPUBitBoard::ut
 	__syncthreads();
 }
 
-__global__ master_white_min_kernel(GPUBitBoard::utility_type *v, GPUBitBoard::utility_type *utility, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns)
+__global__ master_white_min_kernel(utility_type *v, utility_type *utility, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns)
 {
 	// same logic as master_white_max_kernel, but use min node logic
 }
 
-__global__ white_min_kernel(GPUBitBoard::utility_type *v, GPUBitBoard const *src, int alpha, int beta, int depth, int turns)
+__global__ white_min_kernel(utility_type *v, GPUBitBoard const *src, int alpha, int beta, int depth, int turns)
 {
 	int tx = threadIdx.x;
 	int t_beta = beta;
 	__shared__ bool terminated;
-	__shared__ GPUBitBoard::utility_type utilities[32];
+	__shared__ utility_type utilities[32];
 
 	if(tx < 32)
 	{
@@ -348,7 +348,7 @@ __global__ white_min_kernel(GPUBitBoard::utility_type *v, GPUBitBoard const *src
 
 	if(tx == 0)
 	{
-		GPUBitBoard::utility_type terminal_value = 0;
+		utility_type terminal_value = 0;
 		if(src->valid)
 		{
 			*v = Infinity;
@@ -372,7 +372,7 @@ __global__ white_min_kernel(GPUBitBoard::utility_type *v, GPUBitBoard const *src
 	}
 	else
 	{
-		GPUBitBoard::utility_type *utility = cudaMalloc(sizeof(GPUBitBoard::utility_type) * 4);
+		utility_type *utility = cudaMalloc(sizeof(utility_type) * 4);
 		utility[0] = utility[1] = utility[2] = utility[3] = utilities[tx];
 		GPUBitBoard *new_boards = cudaMalloc(sizeof(GPUBitBoard) * 4);
 		
@@ -382,11 +382,9 @@ __global__ white_min_kernel(GPUBitBoard::utility_type *v, GPUBitBoard const *src
 		cudaStreamCreateWithFlags(&streams[2], cudaStreamNonBlocking);
 		cudaStreamCreateWithFlags(&streams[3], cudaStreamNonBlocking);
 		
-		int gen_Whitemove_type = (int)(GetWhiteJumps(src) != 0);
-		gen_white_move[gen_Whitemove_type](1u << tx, new_board, src);
-		
-		int gen_Blackmove_type = (int)(GetBlackJumps(src) != 0);
-		gen_black_move[gen_Blackmove_type](1u << tx, new_board, src);
+		// in the max kernel, use gen_black_move_type instead
+		int gen_black_move_type = (int)GPUBitBoard::GetBlackJumps(src) != 0);
+		gen_black_move[gen_black_move_type](1u << tx, new_board, src);
 		
 		white_max_kernel<<<dim3(1,1,1), dim3(32,1,1), streams[0]>>>(utility, new_boards[0], t_alpha, t_beta, depth - 1, turns - 1);
 		white_max_kernel<<<dim3(1,1,1), dim3(32,1,1), streams[1]>>>(utility + 1, new_boards[1], alpha, t_beta, depth - 1, turns - 1);
@@ -440,7 +438,7 @@ __global__ white_min_kernel(GPUBitBoard::utility_type *v, GPUBitBoard const *src
 	}
 }
 
-__global__ white_max_kernel(GPUBitBoard::utility_type *v, GPUBitBoard const *src, int alpha, int beta, int depth, int turns)
+__global__ white_max_kernel(utility_type *v, GPUBitBoard const *src, int alpha, int beta, int depth, int turns)
 {
 	// same as white_min_kernel, but use max logic.
 }
