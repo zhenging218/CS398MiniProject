@@ -5,3 +5,4 @@
 #include "board.h"
 #include "bitboard.h"
 #include "minimax.h"
+#include "gpuminimax.h"
