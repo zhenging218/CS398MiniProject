@@ -320,8 +320,9 @@ __global__ void master_white_max_kernel(utility_type *v, utility_type *utility, 
 			{
 				break;
 			}
+			alpha = max(alpha, *v);
 		}
-		alpha = max(alpha, *v);
+		
 	}
 	
 	__syncthreads();

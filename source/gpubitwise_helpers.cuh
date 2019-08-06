@@ -1,6 +1,7 @@
 #pragma once
 
 #include <helper_cuda.h>
+#include <device_functions.h>
 
 namespace Checkers
 {

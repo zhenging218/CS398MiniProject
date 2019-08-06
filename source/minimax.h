@@ -24,8 +24,17 @@ namespace Checkers
 		}
 
 	public:
-
 		using utility_type = std::int32_t;
+
+		static constexpr utility_type PieceUtility = 1;
+		static constexpr utility_type KingsUtility = 3;
+
+		static constexpr utility_type MaxUtility = KingsUtility * 12;
+		static constexpr utility_type MinUtility = -MaxUtility;
+
+		static constexpr utility_type Infinity = 10000;
+
+		static constexpr BitBoard::board_type EvaluationMask = 0x81188118u;
 
 		enum Turn : unsigned char
 		{

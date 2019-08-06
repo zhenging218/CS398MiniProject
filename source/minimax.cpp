@@ -7,16 +7,6 @@ namespace Checkers
 {
 	namespace
 	{
-		
-		constexpr Minimax::utility_type PieceUtility = 1;
-		constexpr Minimax::utility_type KingsUtility = 3;
-		constexpr Minimax::utility_type MaxUtility = KingsUtility * 12;
-		constexpr Minimax::utility_type MinUtility = -MaxUtility;
-
-		constexpr Minimax::utility_type Infinity = 10000;
-
-		constexpr BitBoard::board_type EvaluationMask = 0x81188118u;
-
 		using frontier_type = std::vector<BitBoard>;
 
 		frontier_type GenerateWhiteFrontier(BitBoard const &board)
