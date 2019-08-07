@@ -10,33 +10,14 @@
 #include <chrono>
 #include <iterator>
 
+#include "gpuminimax.h"
+
 #define BLOCK_SIZE 32
 
 #define RUN_RNG_CHECKERS 0
 
 namespace
 {
-	std::pair<std::vector<Checkers::BitBoard>, bool> TestGetMoves(Checkers::BitBoard const &board, Checkers::Minimax::Turn turn)
-	{
-		std::vector<Checkers::BitBoard> ret;
-		bool jumped = false;
-		switch (turn)
-		{
-		case Checkers::Minimax::Turn::WHITE:
-		{
-			jumped = Checkers::BitBoard::GetPossibleWhiteMoves(board, std::back_insert_iterator<decltype(ret)>(ret));
-		} break;
-		case Checkers::Minimax::Turn::BLACK:
-		{
-			jumped = Checkers::BitBoard::GetPossibleBlackMoves(board, std::back_insert_iterator<decltype(ret)>(ret));
-		} break;
-		default:
-			ASSERT(0, "GetMoves(%u) has wrong turn value!", turn);
-			break;
-		}
-		return std::make_pair(ret, jumped);
-	}
-
 	Checkers::BitBoard CreateRandomWhiteBitBoard()
 	{
 		std::mt19937_64 rng;
@@ -54,22 +35,6 @@ namespace
 		}
 		return Checkers::BitBoard((0xFFF00000u & ~((1u << pos) << del)) | (1u << pos), 0x00000FFFu, 0u);
 	}
-}
-
-int RandomStart()
-{
-	/*
-	| X |   | X |   | X |   | X |   |
-	|   | X |   | X |   | X |   | X |
-	| X |   | X |   | X |   | X |   |
-	|   |1,2|   |3,4|   |5,6|   | 7 |
-	|   |   |   |   |   |   |   |   |
-	|   | O |   | O |   | O |   | O |
-	| O |   | O |   | O |   | O |   |
-	|   | O |   | O |   | O |   | O |
-	*/
-	//1 to 7
-	return (rand() % 7 + 1);
 }
 
 int main(int argc, char **argv)
@@ -91,56 +56,15 @@ int main(int argc, char **argv)
 		max_depth = (std::uint32_t)atoi(argv[1]);
 		max_turns = (std::uint32_t)atoi(argv[2]);
 	}
-
-	srand((unsigned int)time(0));
-	int temp = RandomStart();
-	std::cout << "Random Start number: "<< temp << std::endl;
-	
-	/*
-	StopWatchInterface *hTimer = NULL;
-	float dAvgSecs;
-	for (int i = 0; i < 5; ++i)
-	{
-		std::cout << "Checkers starting..." << std::endl;
-		std::cout << std::endl;
-		
-		std::cout << board << std::endl;
-		sdkCreateTimer(&hTimer);
-
-		sdkResetTimer(&hTimer);
-		sdkStartTimer(&hTimer);
-		std::cout << std::endl;
-		std::cout << "...allocating GPU memory" << std::endl;
-
-		sdkStopTimer(&hTimer);
-		dAvgSecs = 1.0e-3 * (double)sdkGetTimerValue(&hTimer);
-		std::cout << "Time taken for GPU minimax" << std::endl;
-
-		sdkResetTimer(&hTimer);
-		sdkStartTimer(&hTimer);
-		std::cout << std::endl;
-		std::cout << "...allocating CPU memory" << std::endl;
-		// Start part of CPU minmax algorithm
-
-		sdkStopTimer(&hTimer);
-		dAvgSecs = 1.0e-3 * (double)sdkGetTimerValue(&hTimer);
-		std::cout << "Time taken for CPU minimax" << std::endl;
-		Sleep(5000);
-		system("cls");
-	}
-	*/
 	
 	std::cout << "search depth: " << max_depth << ", maximum game turns: " << max_turns << "\n";
     Checkers::Minimax::SetSearchDepth(max_depth);
     Checkers::Minimax::SetMaxTurns(max_turns);
-	auto minimax = Checkers::CreateMinimaxBoard(CreateRandomWhiteBitBoard(),Checkers::Minimax::BLACK);
+	auto board = CreateRandomWhiteBitBoard();
+	auto minimax = Checkers::CreateMinimaxBoard(board ,Checkers::Minimax::BLACK);
 	// auto minimax = Checkers::CreateMinimaxBoard(Checkers::BitBoard(0xFFD10000u,0x00000FFFu,0u), Checkers::Minimax::BLACK);
 	
 	Checkers::Minimax::Result result = Checkers::Minimax::INPROGRESS;
-	
-
-	StopWatchInterface *hTimer = NULL;
-	sdkCreateTimer(&hTimer);
 
 	double totalTime = 0.0;
 	double longestTime = std::numeric_limits<double>::min();
@@ -155,7 +79,6 @@ int main(int argc, char **argv)
 		std::chrono::duration<double, std::milli> time = std::chrono::high_resolution_clock::now() - start;
 		double dAvgSecs = time.count();
 
-		// system("cls");
 		std::cout << (turn == Checkers::Minimax::WHITE ? "White" : "Black") << ": ";
 
 		if (result == Checkers::Minimax::LOSE)
@@ -182,7 +105,49 @@ int main(int argc, char **argv)
 	std::cout << "Slowest decision took " << longestTime << " milliseconds\n";
 	std::cout << "Fastest decision took " << shortestTime << " milliseconds\n";
 
-	sdkDeleteTimer(&hTimer);
+	system("pause");
+	system("cls");
+
+	totalTime = 0.0;
+	longestTime = std::numeric_limits<double>::min();
+	shortestTime = std::numeric_limits<double>::max();
+	turns = 0;
+	int turns_left = Checkers::Minimax::GetMaxTurns();
+	Checkers::Minimax::Result gpu_result = Checkers::Minimax::INPROGRESS;
+	Checkers::Minimax::Turn gpu_turn = Checkers::Minimax::BLACK;
+	const int gpu_depth = Checkers::Minimax::GetSearchDepth();
+
+	while (gpu_result == Checkers::Minimax::INPROGRESS)
+	{
+		auto start = std::chrono::high_resolution_clock::now();
+		gpu_result = Checkers::GPUMinimax::Next(board, gpu_turn, gpu_depth, turns_left);
+		std::chrono::duration<double, std::milli> time = std::chrono::high_resolution_clock::now() - start;
+		double dAvgSecs = time.count();
+
+		std::cout << (gpu_turn == Checkers::Minimax::WHITE ? "White" : "Black") << ": ";
+
+		if (gpu_result == Checkers::Minimax::LOSE)
+		{
+			std::cout << "Lost!\n";
+		}
+		else if (gpu_result == Checkers::Minimax::DRAW)
+		{
+			std::cout << "Draw game!\n";
+		}
+		else
+		{
+			std::cout << "Time taken for this turn's decision: " << dAvgSecs << " milliseconds\n";
+			std::cout << board << std::endl;
+			totalTime += dAvgSecs;
+			longestTime = std::max(longestTime, dAvgSecs);
+			shortestTime = std::min(shortestTime, dAvgSecs);
+			++turns;
+		}
+	}
+	std::cout << "Total decisions made: " << turns << std::endl;
+	std::cout << "Average time taken for each decision: " << (totalTime / (double)turns) << " milliseconds" << std::endl;
+	std::cout << "Slowest decision took " << longestTime << " milliseconds\n";
+	std::cout << "Fastest decision took " << shortestTime << " milliseconds\n";
 
 	system("PAUSE");
 }
