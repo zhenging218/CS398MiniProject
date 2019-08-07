@@ -34,6 +34,7 @@ namespace Checkers
 
 			if (tx == 0)
 			{
+				cudaFree(ret_v);
 				for (int i = 0; i < num_boards; ++i)
 				{
 					if (X < v[i])
@@ -75,6 +76,7 @@ namespace Checkers
 
 			if (tx == 0)
 			{
+				cudaFree(ret_v);
 				for (int i = 0; i < num_boards; ++i)
 				{
 					if (X < v[i])
