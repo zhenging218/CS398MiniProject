@@ -2,7 +2,7 @@
 
 namespace Checkers
 {
-	__device__ std::uint32_t GPUSWAR32(std::uint32_t i)
+	__host__ __device__ std::uint32_t GPUSWAR32(std::uint32_t i)
 	{
 		i = i - ((i >> 1) & 0x55555555);
 		i = (i & 0x33333333) + ((i >> 2) & 0x33333333);

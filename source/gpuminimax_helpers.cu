@@ -29,13 +29,13 @@ namespace Checkers
 		}
 
 
-		__device__ bool GetBlackUtility(GPUBitBoard const &b, utility_type &utility, int depth, int turns_left)
+		__host__ __device__ bool GetBlackUtility(GPUBitBoard const &b, Minimax::utility_type &utility, int depth, int turns_left)
 		{
-			utility_type black_pieces = GPUBitBoard::GetBlackPieceCount(b) * PieceUtility;
-			utility_type white_pieces = GPUBitBoard::GetWhitePieceCount(b) * PieceUtility;
+			Minimax::utility_type black_pieces = GPUBitBoard::GetBlackPieceCount(b) * PieceUtility;
+			Minimax::utility_type white_pieces = GPUBitBoard::GetWhitePieceCount(b) * PieceUtility;
 
-			utility_type black_kings = GPUBitBoard::GetBlackKingsCount(b) * KingsUtility;
-			utility_type white_kings = GPUBitBoard::GetWhiteKingsCount(b) * KingsUtility;
+			Minimax::utility_type black_kings = GPUBitBoard::GetBlackKingsCount(b) * KingsUtility;
+			Minimax::utility_type white_kings = GPUBitBoard::GetWhiteKingsCount(b) * KingsUtility;
 
 			if (BlackWinTest(b))
 			{
@@ -72,13 +72,13 @@ namespace Checkers
 			return true;
 		}
 
-		__device__ bool GetWhiteUtility(GPUBitBoard const &b, utility_type &utility, int depth, int turns_left)
+		__host__ __device__ bool GetWhiteUtility(GPUBitBoard const &b, Minimax::utility_type &utility, int depth, int turns_left)
 		{
-			utility_type black_pieces = BitBoard::GetBlackPieceCount(b) * PieceUtility;
-			utility_type white_pieces = BitBoard::GetWhitePieceCount(b) * PieceUtility;
+			Minimax::utility_type black_pieces = GPUBitBoard::GetBlackPieceCount(b) * PieceUtility;
+			Minimax::utility_type white_pieces = GPUBitBoard::GetWhitePieceCount(b) * PieceUtility;
 
-			utility_type black_kings = BitBoard::GetBlackKingsCount(b) * KingsUtility;
-			utility_type white_kings = BitBoard::GetWhiteKingsCount(b) * KingsUtility;
+			Minimax::utility_type black_kings = GPUBitBoard::GetBlackKingsCount(b) * KingsUtility;
+			Minimax::utility_type white_kings = GPUBitBoard::GetWhiteKingsCount(b) * KingsUtility;
 
 			if (WhiteWinTest(b))
 			{

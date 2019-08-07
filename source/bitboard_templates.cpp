@@ -13,7 +13,6 @@ namespace Checkers
 		board_type empty = ~(b.white | b.black);
 
 		board_type i = 1;
-		bool jumped = false;
 
 		if (!jumps)
 		{
@@ -78,7 +77,6 @@ namespace Checkers
 		}
 		else
 		{
-			jumped = true;
 			while (jumps && i)
 			{
 
@@ -180,7 +178,6 @@ namespace Checkers
 		board_type empty = ~(b.black | b.white);
 
 		board_type i = 1;
-		bool jumped = false;
 
 		if (!jumps)
 		{
@@ -253,7 +250,6 @@ namespace Checkers
 		}
 		else
 		{
-			jumped = true;
 			while (jumps && i)
 			{
 				if (jumps & i)

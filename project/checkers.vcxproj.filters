@@ -62,11 +62,11 @@
     <ClInclude Include="..\source\precomp.cuh">
       <Filter>Kernel Files\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\gpuminimax.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\source\gpuminimax.cuh">
       <Filter>Kernel Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\gpuminimax.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

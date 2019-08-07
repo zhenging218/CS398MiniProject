@@ -1,152 +1,50 @@
 ﻿  Compiling CUDA source file ..\source\gpubitboard.cu...
   Compiling CUDA source file ..\source\gpubitwise_helpers.cu...
-  
-  C:\Users\c.fangqi\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpubitboard.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpubitboard.cu" 
-  
-  C:\Users\c.fangqi\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpubitwise_helpers.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpubitwise_helpers.cu" 
   Compiling CUDA source file ..\source\gpuminimax.cu...
+  Compiling CUDA source file ..\source\gpuminimax_white.cu...
+  Compiling CUDA source file ..\source\gpuminimax_black.cu...
+  Compiling CUDA source file ..\source\gpuminimax_master.cu...
   
-  C:\Users\c.fangqi\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpuminimax.cu" 
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.h(9): error : name followed by "::" must be a class or namespace name
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpubitboard.cuh(12): warning : class member typedef may not be redeclared
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpubitboard.cuh(40): error : expected a ";"
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(9): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(9): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(10): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(10): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(12): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(12): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(13): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(13): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(15): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(15): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(16): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(16): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(18): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(18): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(19): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(19): error : a __global__ function must have a void return type
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(27): error : identifier "GenWhiteMove" is undefined
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(27): error : identifier "GenWhiteJump" is undefined
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(28): error : identifier "GenBlackMove" is undefined
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(28): error : identifier "GenBlackJump" is undefined
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(131): error : class "Checkers::GPUBitBoard" has no member "oddrow"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(139): error : class "Checkers::GPUBitBoard" has no member "L5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(146): error : class "Checkers::GPUBitBoard" has no member "WhiteKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(149): error : class "Checkers::GPUBitBoard" has no member "R3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(151): error : class "Checkers::GPUBitBoard" has no member "WhiteKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(157): error : class "Checkers::GPUBitBoard" has no member "L3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(167): error : class "Checkers::GPUBitBoard" has no member "R5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(169): error : class "Checkers::GPUBitBoard" has no member "WhiteKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(174): error : class "Checkers::GPUBitBoard" has no member "WhiteKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(183): error : identifier "oddrow" is undefined
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(189): error : class "Checkers::GPUBitBoard" has no member "L3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(193): error : class "Checkers::GPUBitBoard" has no member "L5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(203): error : class "Checkers::GPUBitBoard" has no member "R5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(204): error : class "Checkers::GPUBitBoard" has no member "WhiteKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(207): error : class "Checkers::GPUBitBoard" has no member "R3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(211): error : class "Checkers::GPUBitBoard" has no member "WhiteKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(217): error : class "Checkers::GPUBitBoard" has no member "L3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(228): error : class "Checkers::GPUBitBoard" has no member "L5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(232): error : class "Checkers::GPUBitBoard" has no member "R5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(236): error : class "Checkers::GPUBitBoard" has no member "WhiteKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(242): error : class "Checkers::GPUBitBoard" has no member "R3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(243): error : class "Checkers::GPUBitBoard" has no member "WhiteKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(254): error : identifier "oddrow" is undefined
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(259): error : class "Checkers::GPUBitBoard" has no member "BlackKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(262): error : class "Checkers::GPUBitBoard" has no member "L5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(264): error : class "Checkers::GPUBitBoard" has no member "BlackKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(272): error : class "Checkers::GPUBitBoard" has no member "R3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(280): error : class "Checkers::GPUBitBoard" has no member "L3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(282): error : class "Checkers::GPUBitBoard" has no member "BlackKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(287): error : class "Checkers::GPUBitBoard" has no member "BlackKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(290): error : class "Checkers::GPUBitBoard" has no member "R5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(308): error : identifier "oddrow" is undefined
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(314): error : class "Checkers::GPUBitBoard" has no member "L3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(315): error : class "Checkers::GPUBitBoard" has no member "BlackKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(318): error : class "Checkers::GPUBitBoard" has no member "L5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(322): error : class "Checkers::GPUBitBoard" has no member "BlackKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(328): error : class "Checkers::GPUBitBoard" has no member "R5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(332): error : class "Checkers::GPUBitBoard" has no member "R3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(342): error : class "Checkers::GPUBitBoard" has no member "L3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(346): error : class "Checkers::GPUBitBoard" has no member "BlackKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(352): error : class "Checkers::GPUBitBoard" has no member "L5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(353): error : class "Checkers::GPUBitBoard" has no member "BlackKingMask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(356): error : class "Checkers::GPUBitBoard" has no member "R5Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(366): error : class "Checkers::GPUBitBoard" has no member "R3Mask"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(10): warning : variable "Checkers::<unnamed>::EvaluationMask" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(11): warning : variable "Checkers::<unnamed>::MaxUtility" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(12): warning : variable "Checkers::<unnamed>::MinUtility" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(14): warning : variable "Checkers::<unnamed>::Row0" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(21): warning : variable "Checkers::<unnamed>::OddRows" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(23): warning : variable "Checkers::<unnamed>::BlackKingMask" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpubitboard.cu(24): warning : variable "Checkers::<unnamed>::WhiteKingMask" was declared but never referenced
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.h(9): error : name followed by "::" must be a class or namespace name
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpubitboard.cuh(12): warning : class member typedef may not be redeclared
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpubitboard.cuh(40): error : expected a ";"
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(9): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(9): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(10): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(10): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(12): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(12): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(13): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(13): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(15): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(15): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(16): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(16): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(18): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(18): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(19): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(19): error : a __global__ function must have a void return type
-  gpubitboard.cu
-C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\BuildCustomizations\CUDA 9.2.targets(712,9): error MSB3721: The command ""C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpubitboard.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpubitboard.cu"" exited with code 1.
+  C:\Users\c.fangqi\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static -rdc true    -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpubitboard.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpubitboard.cu" 
+  
+  
+  C:\Users\c.fangqi\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static -rdc true    -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpuminimax.cu" 
+  C:\Users\c.fangqi\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static -rdc true    -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_white.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpuminimax_white.cu" 
+  
+  C:\Users\c.fangqi\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static -rdc true    -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpubitwise_helpers.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpubitwise_helpers.cu" 
+  
+  C:\Users\c.fangqi\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static -rdc true    -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_master.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpuminimax_master.cu" 
+  
+  C:\Users\c.fangqi\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static -rdc true    -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_black.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpuminimax_black.cu" 
+  Compiling CUDA source file ..\source\gpuminimax_next.cu...
+  
+  C:\Users\c.fangqi\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static -rdc true    -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_next.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpuminimax_next.cu" 
+  Compiling CUDA source file ..\source\gpuminimax_helpers.cu...
+  
+  C:\Users\c.fangqi\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static -rdc true    -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_helpers.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpuminimax_helpers.cu" 
   gpubitwise_helpers.cu
-C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\BuildCustomizations\CUDA 9.2.targets(712,9): error MSB3721: The command ""C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpubitwise_helpers.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpubitwise_helpers.cu"" exited with code 1.
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.h(9): error : name followed by "::" must be a class or namespace name
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpubitboard.cuh(12): warning : class member typedef may not be redeclared
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpubitboard.cuh(40): error : expected a ";"
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(9): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(9): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(10): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(10): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(12): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(12): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(13): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(13): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(15): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(15): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(16): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(16): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(18): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(18): error : a __global__ function must have a void return type
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(19): error : explicit type is missing ("int" assumed)
-c:\users\c.fangqi\desktop\cs398miniproject\source\gpuminimax.cuh(19): error : a __global__ function must have a void return type
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(9): error : cannot overload functions distinguished by return type alone
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(16): error : calling a __global__ function("white_min_kernel") from a __global__ function("<error>") is only allowed on the compute_35 architecture or above
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(21): error : cannot overload functions distinguished by return type alone
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(26): error : cannot overload functions distinguished by return type alone
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(31): error : cannot overload functions distinguished by return type alone
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(36): error : cannot overload functions distinguished by return type alone
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(41): error : cannot overload functions distinguished by return type alone
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(46): error : cannot overload functions distinguished by return type alone
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(51): error : cannot overload functions distinguished by return type alone
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(61): warning : missing return statement at end of non-void function "Checkers::GPUMinimax::WhiteWinTest"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(66): warning : missing return statement at end of non-void function "Checkers::GPUMinimax::WhiteLoseTest"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(71): warning : missing return statement at end of non-void function "Checkers::GPUMinimax::BlackWinTest"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(76): warning : missing return statement at end of non-void function "Checkers::GPUMinimax::BlackLoseTest"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(82): warning : missing return statement at end of non-void function "Checkers::GPUMinimax::GetBlackUtility"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(87): warning : missing return statement at end of non-void function "Checkers::GPUMinimax::GetWhiteUtility"
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(58): warning : function "Checkers::GPUMinimax::WhiteWinTest" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(63): warning : function "Checkers::GPUMinimax::WhiteLoseTest" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(68): warning : function "Checkers::GPUMinimax::BlackWinTest" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(73): warning : function "Checkers::GPUMinimax::BlackLoseTest" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(79): warning : function "Checkers::GPUMinimax::GetBlackUtility" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(84): warning : function "Checkers::GPUMinimax::GetWhiteUtility" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(89): warning : function "Checkers::GPUMinimax::WhiteMoveMax" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(94): warning : function "Checkers::GPUMinimax::WhiteMoveMin" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(99): warning : function "Checkers::GPUMinimax::BlackMoveMax" was declared but never referenced
-C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(104): warning : function "Checkers::GPUMinimax::BlackMoveMin" was declared but never referenced
+  gpubitboard.cu
   gpuminimax.cu
-C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\BuildCustomizations\CUDA 9.2.targets(712,9): error MSB3721: The command ""C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax.cu.obj "C:\Users\c.fangqi\Desktop\CS398MiniProject\source\gpuminimax.cu"" exited with code 1.
+  gpuminimax_master.cu
+  gpuminimax_next.cu
+  gpuminimax_white.cu
+  gpuminimax_black.cu
+C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(30): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+C:/Users/c.fangqi/Desktop/CS398MiniProject/source/gpuminimax.cu(83): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
+  gpuminimax_helpers.cu
+LINK : warning C4727: PCH named c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\bitboard_templates.obj and c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\bitboard.obj.  Using first PCH.
+LINK : warning C4727: PCH named c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\bitwise_helpers.obj and c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\bitboard.obj.  Using first PCH.
+LINK : warning C4727: PCH named c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\main.obj and c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\bitboard.obj.  Using first PCH.
+LINK : warning C4727: PCH named c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\minimax.obj and c:\users\c.fangqi\desktop\cs398miniproject\build\x64\release\intermediate\bitboard.obj.  Using first PCH.
+     Creating library C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\checkers.lib and object C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\checkers.exp
+gpubitboard.cu.obj : error LNK2001: unresolved external symbol __cudaRegisterLinkedBinary_46_tmpxft_00035d14_00000000_7_gpubitboard_cpp1_ii_eb513d04
+gpubitwise_helpers.cu.obj : error LNK2001: unresolved external symbol __cudaRegisterLinkedBinary_53_tmpxft_00035e70_00000000_7_gpubitwise_helpers_cpp1_ii_64ce6e3e
+gpuminimax.cu.obj : error LNK2001: unresolved external symbol "int __cdecl Checkers::GPUMinimax::WhiteMoveMin(struct Checkers::BitBoard const &,int,int,int,int)" (?WhiteMoveMin@GPUMinimax@Checkers@@YAHAEBUBitBoard@2@HHHH@Z)
+gpuminimax.cu.obj : error LNK2001: unresolved external symbol "int __cdecl Checkers::GPUMinimax::BlackMoveMin(struct Checkers::BitBoard const &,int,int,int,int)" (?BlackMoveMin@GPUMinimax@Checkers@@YAHAEBUBitBoard@2@HHHH@Z)
+gpuminimax.cu.obj : error LNK2001: unresolved external symbol __cudaRegisterLinkedBinary_45_tmpxft_00035e58_00000000_7_gpuminimax_cpp1_ii_407bfc1c
+gpuminimax_white.cu.obj : error LNK2001: unresolved external symbol __cudaRegisterLinkedBinary_51_tmpxft_00035e60_00000000_7_gpuminimax_white_cpp1_ii_16207d70
+gpuminimax_black.cu.obj : error LNK2001: unresolved external symbol __cudaRegisterLinkedBinary_51_tmpxft_00035ea8_00000000_7_gpuminimax_black_cpp1_ii_24580ed5
+gpuminimax_helpers.cu.obj : error LNK2001: unresolved external symbol __cudaRegisterLinkedBinary_53_tmpxft_00035f70_00000000_7_gpuminimax_helpers_cpp1_ii_ec45a792
+gpuminimax_master.cu.obj : error LNK2001: unresolved external symbol __cudaRegisterLinkedBinary_52_tmpxft_00035ea0_00000000_7_gpuminimax_master_cpp1_ii_3abde31e
+gpuminimax_next.cu.obj : error LNK2001: unresolved external symbol __cudaRegisterLinkedBinary_50_tmpxft_00035c94_00000000_7_gpuminimax_next_cpp1_ii_47864d3e
+C:\Users\c.fangqi\Desktop\CS398MiniProject\build\x64\Release\checkers.exe : fatal error LNK1120: 10 unresolved externals

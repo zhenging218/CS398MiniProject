@@ -1,28 +1,8 @@
-#pragma once
-
 #include "precomp.cuh"
 #include <thrust/system/cuda/config.h>
 
 namespace Checkers
 {
-	namespace
-	{
-		constexpr GPUBitBoard::board_type Row0 = 0x10000000u;
-
-		constexpr GPUBitBoard::board_type L3Mask = BitBoard::L3Mask;
-		constexpr GPUBitBoard::board_type L5Mask = BitBoard::L5Mask;
-		constexpr GPUBitBoard::board_type R3Mask = BitBoard::R3Mask;
-		constexpr GPUBitBoard::board_type R5Mask = BitBoard::R5Mask;
-
-		constexpr GPUBitBoard::board_type OddRows = BitBoard::OddRows;
-
-		constexpr GPUBitBoard::board_type BlackKingMask = BitBoard::BlackKingMask;
-		constexpr GPUBitBoard::board_type WhiteKingMask = BitBoard::WhiteKingMask;
-	}
-
-	__device__ GPUBitBoard::gen_move_func gen_white_move[2] = { GenWhiteMove, GenWhiteJump };
-	__device__ GPUBitBoard::gen_move_func gen_black_move[2] = { GenBlackMove, GenBlackJump };
-
 	__host__ __device__ GPUBitBoard::GPUBitBoard() : white(0xFFF00000u), black(0x00000FFFu), kings(0u), valid(false)
 	{
 
@@ -61,7 +41,7 @@ namespace Checkers
 		return BitBoard(white, black, kings);
 	}
 
-	__host__ __device__ GPUBitBoard::board_type GetBlackMoves(BitBoard const &b)
+	__host__ __device__ GPUBitBoard::board_type GPUBitBoard::GetBlackMoves(GPUBitBoard const &b)
 	{
 		const board_type not_occupied = ~(b.black | b.white);
 		const board_type black_kings = b.black & b.kings;
@@ -73,7 +53,7 @@ namespace Checkers
 		return  (LL | LR | UL | UR);
 	}
 
-	__host__ __device__ GPUBitBoard::board_type GetWhiteMoves(BitBoard const &b)
+	__host__ __device__ GPUBitBoard::board_type GPUBitBoard::GetWhiteMoves(GPUBitBoard const &b)
 	{
 		const board_type not_occupied = ~(b.black | b.white);
 		const board_type white_kings = b.white & b.kings;
@@ -123,34 +103,34 @@ namespace Checkers
 		return move;
 	}
 
-	__device__ GPUBitBoard::count_type GPUBitBoard::GetBlackPieceCount(GPUBitBoard const &b)
+	__host__ __device__ GPUBitBoard::count_type GPUBitBoard::GetBlackPieceCount(GPUBitBoard const &b)
 	{
 		return GPUSWAR32(b.black);
 	}
 
-	__device__ GPUBitBoard::count_type GPUBitBoard::GetWhitePieceCount(GPUBitBoard const &b)
+	__host__ __device__ GPUBitBoard::count_type GPUBitBoard::GetWhitePieceCount(GPUBitBoard const &b)
 	{
 		return GPUSWAR32(b.white);
 	}
 
-	__device__ GPUBitBoard::count_type GPUBitBoard::GetBlackKingsCount(GPUBitBoard const &b)
+	__host__ __device__ GPUBitBoard::count_type GPUBitBoard::GetBlackKingsCount(GPUBitBoard const &b)
 	{
 		return GPUSWAR32(b.black & b.kings);
 	}
 
-	__device__ GPUBitBoard::count_type GPUBitBoard::GetWhiteKingsCount(GPUBitBoard const &b)
+	__host__ __device__ GPUBitBoard::count_type GPUBitBoard::GetWhiteKingsCount(GPUBitBoard const &b)
 	{
 		return GPUSWAR32(b.white & b.kings);
 	}
 
-	__device__ void GPUBitBoard::GenWhiteMove(GPUBitBoard::board_type cell, GPUBitBoard *out, GPUBitBoard const &board)
+	__host__ __device__ void GPUBitBoard::GenWhiteMove(GPUBitBoard::board_type cell, GPUBitBoard *out, GPUBitBoard const &board)
 	{
 		// GPUBitBoard must have a validity boolean.
 		//normal move (UL, UR)
 		//king extra moves (LL, LR)
 		GPUBitBoard::board_type empty = ~(board.white | board.black);
 
-		if (GPUBitBoard::oddrow & cell)
+		if (GPUBitBoard::OddRows & cell)
 		{
 			//UL
 			if (((cell & board.kings) << 4) & empty)
@@ -198,11 +178,11 @@ namespace Checkers
 		}
 	}
 
-	__device__ void GPUBitBoard::GenWhiteJump(GPUBitBoard::board_type cell, GPUBitBoard *out, GPUBitBoard const &board)
+	__host__ __device__ void GPUBitBoard::GenWhiteJump(GPUBitBoard::board_type cell, GPUBitBoard *out, GPUBitBoard const &board)
 	{
 
 		GPUBitBoard::board_type empty = ~(board.white | board.black);
-		if (oddrow & cell)
+		if (OddRows & cell)
 		{
 			//UL
 			if (((cell & board.kings) << 4) & board.black)
@@ -267,13 +247,13 @@ namespace Checkers
 		}
 	}
 
-	__device__ void GPUBitBoard::GenBlackMove(GPUBitBoard::board_type cell, GPUBitBoard *out, GPUBitBoard const &board)
+	__host__ __device__ void GPUBitBoard::GenBlackMove(GPUBitBoard::board_type cell, GPUBitBoard *out, GPUBitBoard const &board)
 	{
 		// GPUBitBoard must have a validity boolean.
 
 		GPUBitBoard::board_type empty = ~(board.white | board.black);
 
-		if (oddrow & cell)
+		if (OddRows & cell)
 		{
 			//UL
 			if ((cell << 4) & empty)
@@ -321,13 +301,13 @@ namespace Checkers
 		}
 	}
 
-	__device__ void GPUBitBoard::GenBlackJump(GPUBitBoard::board_type cell, GPUBitBoard *out, GPUBitBoard const &board)
+	__host__ __device__ void GPUBitBoard::GenBlackJump(GPUBitBoard::board_type cell, GPUBitBoard *out, GPUBitBoard const &board)
 	{
 		// GPUBitBoard must have a validity boolean.
 
 		GPUBitBoard::board_type empty = ~(board.white | board.black);
 
-		if (oddrow & cell)
+		if (OddRows & cell)
 		{
 			//UL
 			if ((cell << 4) & board.white)
