@@ -45,7 +45,11 @@ namespace Checkers
 
 		static count_type GetBlackKingsCount(BitBoard const &b);
 		static count_type GetWhiteKingsCount(BitBoard const &b);
+
 	};
+	
+	bool operator==(BitBoard const &lhs, BitBoard const &rhs);
+	bool operator!=(BitBoard const &lhs, BitBoard const &rhs);
 }
 
 #include "bitboard_templates.cpp"

@@ -195,4 +195,14 @@ namespace Checkers
 
 		return os;
 	}
+
+	bool operator==(BitBoard const &lhs, BitBoard const &rhs)
+	{
+		return lhs.black == rhs.black && lhs.white == rhs.white && lhs.kings == rhs.kings;
+	}
+
+	bool operator!=(BitBoard const &lhs, BitBoard const &rhs)
+	{
+		return !(lhs == rhs);
+	}
 }

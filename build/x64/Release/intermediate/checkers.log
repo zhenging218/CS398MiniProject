@@ -1,77 +1,11 @@
-﻿  Compiling CUDA source file ..\source\gpubitboard.cu...
-  Compiling CUDA source file ..\source\gpubitwise_helpers.cu...
-  
-  C:\Users\zhenging.yiu\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu -rdc=true -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpubitboard.cu.obj "C:\Users\zhenging.yiu\Desktop\CS398MiniProject\source\gpubitboard.cu" 
-  Compiling CUDA source file ..\source\gpuminimax.cu...
-  Compiling CUDA source file ..\source\gpuminimax_helpers.cu...
-  Compiling CUDA source file ..\source\gpuminimax_master.cu...
-  Compiling CUDA source file ..\source\gpuminimax_white.cu...
-  Compiling CUDA source file ..\source\gpuminimax_black.cu...
-  
-  C:\Users\zhenging.yiu\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu -rdc=true -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpubitwise_helpers.cu.obj "C:\Users\zhenging.yiu\Desktop\CS398MiniProject\source\gpubitwise_helpers.cu" 
-  Compiling CUDA source file ..\source\gpuminimax_next.cu...
-  
-  C:\Users\zhenging.yiu\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu -rdc=true -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_helpers.cu.obj "C:\Users\zhenging.yiu\Desktop\CS398MiniProject\source\gpuminimax_helpers.cu" 
-  
-  C:\Users\zhenging.yiu\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu -rdc=true -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_black.cu.obj "C:\Users\zhenging.yiu\Desktop\CS398MiniProject\source\gpuminimax_black.cu" 
-  
-  C:\Users\zhenging.yiu\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu -rdc=true -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax.cu.obj "C:\Users\zhenging.yiu\Desktop\CS398MiniProject\source\gpuminimax.cu" 
-  
-  C:\Users\zhenging.yiu\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu -rdc=true -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_white.cu.obj "C:\Users\zhenging.yiu\Desktop\CS398MiniProject\source\gpuminimax_white.cu" 
-  
-  C:\Users\zhenging.yiu\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu -rdc=true -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_master.cu.obj "C:\Users\zhenging.yiu\Desktop\CS398MiniProject\source\gpuminimax_master.cu" 
-  
-  C:\Users\zhenging.yiu\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu -rdc=true -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_NDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FdC:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\vc140.pdb /FS /Zi  /MD " -o C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_next.cu.obj "C:\Users\zhenging.yiu\Desktop\CS398MiniProject\source\gpuminimax_next.cu" 
-  gpubitwise_helpers.cu
-  gpubitboard.cu
-  gpuminimax_helpers.cu
-  gpuminimax.cu
-  gpuminimax_master.cu
-  gpuminimax_black.cu
-  gpuminimax_next.cu
-  gpuminimax_white.cu
-C:/Users/zhenging.yiu/Desktop/CS398MiniProject/source/gpuminimax.cu(30): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-C:/Users/zhenging.yiu/Desktop/CS398MiniProject/source/gpuminimax.cu(83): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-C:/Users/zhenging.yiu/Desktop/CS398MiniProject/source/gpuminimax.cu(153): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-C:/Users/zhenging.yiu/Desktop/CS398MiniProject/source/gpuminimax.cu(203): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-C:/Users/zhenging.yiu/Desktop/CS398MiniProject/source/gpuminimax.cu(253): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-C:/Users/zhenging.yiu/Desktop/CS398MiniProject/source/gpuminimax.cu(303): warning C4244: 'initializing': conversion from '__int64' to 'int', possible loss of data
-  bitboard.cpp
-  bitboard_templates.cpp
-  bitwise_helpers.cpp
-  main.cpp
-  minimax.cpp
-  
-  C:\Users\zhenging.yiu\Desktop\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -dlink -o C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\checkers.device-link.obj -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD " -L"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\lib\x64" cudadevrt.lib cudart_static.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  -gencode=arch=compute_35,code=sm_35  --machine 64 C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpubitboard.cu.obj C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpubitwise_helpers.cu.obj C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax.cu.obj C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_white.cu.obj C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_black.cu.obj C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_helpers.cu.obj C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_master.cu.obj C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\intermediate\gpuminimax_next.cu.obj 
-  cudadevrt.lib
-  cudart_static.lib
-  kernel32.lib
-  user32.lib
-  gdi32.lib
-  winspool.lib
-  comdlg32.lib
-  advapi32.lib
-  shell32.lib
-  ole32.lib
-  oleaut32.lib
-  uuid.lib
-  odbc32.lib
-  odbccp32.lib
-  gpubitboard.cu.obj
-  gpubitwise_helpers.cu.obj
-  gpuminimax.cu.obj
-  gpuminimax_white.cu.obj
-  gpuminimax_black.cu.obj
-  gpuminimax_helpers.cu.obj
-  gpuminimax_master.cu.obj
-  gpuminimax_next.cu.obj
-LINK : warning C4727: PCH named c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitboard_templates.obj and c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitboard.obj.  Using first PCH.
-LINK : warning C4727: PCH named c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitwise_helpers.obj and c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitboard.obj.  Using first PCH.
-LINK : warning C4727: PCH named c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\main.obj and c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitboard.obj.  Using first PCH.
-LINK : warning C4727: PCH named c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\minimax.obj and c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitboard.obj.  Using first PCH.
+﻿  main.cpp
+LINK : warning C4727: PCH named c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitwise_helpers.obj and c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitboard_templates.obj.  Using first PCH.
+LINK : warning C4727: PCH named c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\checkers.pch with same timestamp found in c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\minimax.obj and c:\users\zhenging.yiu\desktop\cs398miniproject\build\x64\release\intermediate\bitboard_templates.obj.  Using first PCH.
      Creating library C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.lib and object C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exp
   Generating code
-  All 256 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  6 of 270 functions ( 2.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    4 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   checkers.vcxproj -> C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe
   checkers.vcxproj -> C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.pdb (Full PDB)
