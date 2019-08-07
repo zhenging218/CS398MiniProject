@@ -1,6 +1,7 @@
 #pragma once
 
 #include "minimax.h"
+#include <thrust/system/cuda/config.h>
 
 namespace Checkers
 {
@@ -16,6 +17,9 @@ namespace Checkers
 		board_type white, black, kings;
 		bool valid;
 
+		__device__ static GPUBitBoard::gen_move_func gen_white_move[2];
+		__device__ static GPUBitBoard::gen_move_func gen_black_move[2];
+
 		__host__ __device__ GPUBitBoard();
 		__host__ __device__ GPUBitBoard(board_type w, board_type b, board_type k);
 		__host__ __device__ GPUBitBoard &operator=(GPUBitBoard const &src);
@@ -25,8 +29,11 @@ namespace Checkers
 
 		__host__ operator BitBoard() const;
 
-		__device__ static board_type GetBlackJumps(GPUBitBoard const &b);
-		__device__ static board_type GetWhiteJumps(GPUBitBoard const &b);
+		__host__ __device__ static board_type GetBlackMoves(BitBoard const &b);
+		__host__ __device__ static board_type GetWhiteMoves(BitBoard const &b);
+
+		__host__ __device__ static board_type GetBlackJumps(GPUBitBoard const &b);
+		__host__ __device__ static board_type GetWhiteJumps(GPUBitBoard const &b);
 
 		__device__ static count_type GetBlackPieceCount(GPUBitBoard const &b);
 		__device__ static count_type GetWhitePieceCount(GPUBitBoard const &b);

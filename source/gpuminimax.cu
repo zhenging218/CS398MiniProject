@@ -1,612 +1,251 @@
 #include "precomp.cuh"
+#include "bitboard.h"
 #include "gpuminimax.h"
 
+#include <cstdlib>
+#include <algorithm>
 #include <helper_cuda.h>
+#include <cuda_runtime.h>
 
 namespace Checkers
 {
-	// all master kernels should already have v and the utility array values initialised to the first v value computed by the CPU PV-Split.
-
 	namespace GPUMinimax
 	{
-		// kernels
-		__global__ void master_white_max_kernel(utility_type *v, utility_type *utility, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns)
+		Minimax::Result Next(BitBoard &board, Minimax::Turn turn, int &depth, int &turns_left)
 		{
-			int tx = threadIdx.x;
-			int t_v = -Minimax::Infinity;
-			int index = blockIdx.x * blockDim.x + tx;
-
-			if (index < num_boards)
+			if (turns_left == 0)
 			{
-				white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + index, src[index], alpha, beta, depth - 1, turns - 1);
-
+				return Minimax::DRAW;
 			}
-			__syncthreads();
 
-			if (!index)
+			BitBoard frontier[32];
+
+			if (turn == Minimax::WHITE)
 			{
-				for (int i = 0; i < num_boards; ++i)
+				BitBoard *end = frontier;
+				BitBoard::GetPossibleWhiteMoves(board, end);
+				int size = end - frontier;
+				if (size == 0)
 				{
-					t_v = max(utility[index], t_v);
-					if (t_v > beta)
-						break;
-					alpha = max(alpha, t_v);
+					return Minimax::Result::LOSE;
 				}
-				*v = t_v;
-			}
-			__syncthreads();
-		}
 
-		__global__ void master_white_min_kernel(utility_type *v, utility_type *utility, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns)
-		{
-			int tx = threadIdx.x;
-			int t_v = Minimax::Infinity;
-			int index = blockIdx.x * blockDim.x + tx;
-
-			if (index < num_boards)
-			{
-				white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + index, src[index], alpha, beta, depth - 1, turns - 1);
-
-			}
-			__syncthreads();
-
-			if (index == 0)
-			{
-				for (int i = 0; i < num_boards; ++i)
-				{
-					t_v = min(utility[index], t_v);
-					if (t_v < alpha)
-						break;
-					beta = min(beta, t_v);
-				}
-				*v = t_v;
-			}
-			__syncthreads();
-		}
-
-		__global__ void white_min_kernel(utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns)
-		{
-			int tx = threadIdx.x;
-			int t_beta = beta;
-			int t_v = Minimax::Infinity;
-			__shared__ bool terminated;
-			__shared__ utility_type utilities[32];
-
-			if (tx == 0)
-			{
+				int placement = -1;
+				utility_type X = -Minimax::Infinity;
 				utility_type terminal_value = 0;
-				if (src->valid)
+
+				// CPU left-most branch
+				utility_type v = WhiteMoveMin(frontier[0], depth, turns_left, -Infinity, Infinity);
+				if (X < v)
 				{
-					terminated = GPUGetWhiteUtility(src, &terminal_value, depth, turns);
-					if (terminated)
-						*v = terminal_value;
-
+					X = v;
+					placement = 0;
 				}
-				else
-					terminated = true;
 
-			}
+				if (size > 1)
+				{
+					// GPU tree-split the rest of the branches
+					GPUBitBoard * GPUFrontier;
+					int * GPUPlacement;
 
-			__syncthreads();
+					GPUBitBoard *copy = (GPUBitBoard*)malloc(sizeof(GPUBitBoard) * (size - 1));
+					for (int i = 0; i < (size - 1); ++i)
+					{
+						new (copy + i) GPUBitBoard(frontier[i + 1]);
+					}
+					cudaMalloc((void**)&GPUFrontier, sizeof(GPUBitBoard) * (size - 1));
+					cudaMemcpy(GPUFrontier, copy, sizeof(GPUBitBoard) * (size - 1), cudaMemcpyHostToDevice);
+					free(copy);
 
-			if (terminated)
-			{
-				return;
+					cudaMalloc((void**)&GPUPlacement, sizeof(int));
+					cudaMemcpy(GPUPlacement, &placement, sizeof(int), cudaMemcpyHostToDevice);
+
+					// launch kernel
+					master_white_next_kernel << <dim3(((size - 1) / 32) + 1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, X, GPUFrontier, size - 1, depth, turns_left);
+					cudaDeviceSynchronize();
+
+					cudaMemcpy(&placement, GPUPlacement, sizeof(int), cudaMemcpyDeviceToHost);
+					cudaFree(GPUFrontier);
+					cudaFree(GPUPlacement);
+				}
+
+				if (placement >= 0)
+				{
+					board = frontier[placement];
+				}
 			}
 			else
 			{
-				if (tx < 32)
+				BitBoard *end = frontier;
+				BitBoard::GetPossibleBlackMoves(board, end);
+				int size = end - frontier;
+				if (size == 0)
 				{
-					utilities[tx] = Minimax::Infinity;
-				}
-				__syncthreads();
-
-				utility_type * utility;
-				cudaMalloc(&utility, sizeof(utility_type) * 4);
-				GPUBitBoard *new_boards;
-				cudaMalloc(&new_boards, sizeof(GPUBitBoard) * 4);
-
-				cudaStream_t streams[4];
-				cudaStreamCreateWithFlags(&streams[0], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[1], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[2], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[3], cudaStreamNonBlocking);
-
-				// in the max kernel, use gen_black_move_type instead
-				int gen_black_move_type = (int)GPUBitBoard::GetBlackJumps(src) != 0);
-				gen_black_move[gen_black_move_type](1u << tx, new_board, src);
-
-				white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[0] >> >(utility, new_boards[0], alpha, t_beta, depth - 1, turns - 1);
-				white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[1] >> >(utility + 1, new_boards[1], alpha, t_beta, depth - 1, turns - 1);
-				white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[2] >> >(utility + 2, new_boards[2], alpha, t_beta, depth - 1, turns - 1);
-				white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[3] >> >(utility + 3, new_boards[3], alpha, t_beta, depth - 1, turns - 1);
-
-
-				// sync streams here
-
-				for (int i = 0; i < 4; ++i)
-				{
-					cudaStreamSynchronize(streams[i]);
-					utilities[tx] = min(utility[i], utilities[tx]);
-					if (utilities[tx] < alpha)
-					{
-						break;
-					}
-					else
-					{
-						t_beta = min(utilities[tx], t_beta);
-					}
+					return Minimax::Result::LOSE;
 				}
 
-				cudaFree(utility);
-				cudaFree(new_boards);
-
-				cudaStreamDestroy(streams[0]);
-				cudaStreamDestroy(streams[1]);
-				cudaStreamDestroy(streams[2]);
-				cudaStreamDestroy(streams[3]);
-
-				__syncthreads();
-
-				if (tx == 0)
-				{
-					// final ab-pruning for this node
-					for (int i = 0; i < 32; ++i)
-					{
-						t_v = min(utilities[i], t_v);
-						if (t_v < alpha)
-						{
-							break;
-						}
-						else
-						{
-							beta = min(utilities[i], beta);
-						}
-					}
-					*v = t_v;
-				}
-
-				__syncthreads();
-			}
-		}
-
-		__global__ void white_max_kernel(utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns)
-		{
-			int tx = threadIdx.x;
-			int t_alpha = alpha;
-			int t_v = -Minimax::Infinity;
-			__shared__ bool terminated;
-			__shared__ utility_type utilities[32];
-
-			if (!tx)
-			{
+				int placement = -1;
+				utility_type X = -Minimax::Infinity;
 				utility_type terminal_value = 0;
-				if (src->valid)
+
+				// CPU left-most branch
+				utility_type v = BlackMoveMin(frontier[0], depth, turns_left, -Infinity, Infinity);
+				if (X < v)
 				{
-					terminated = GPUGetWhiteUtility(src, &terminal_value, depth, turns);
-					if (terminated)
-						*v = terminal_value;
-
+					X = v;
+					placement = 0;
 				}
-				else
-					terminated = true;
 
+				if (size > 1)
+				{
+					// GPU tree-split the rest of the branches
+					GPUBitBoard * GPUFrontier;
+					int * GPUPlacement;
+
+					GPUBitBoard *copy = (GPUBitBoard*)malloc(sizeof(GPUBitBoard) * (size - 1));
+					for (int i = 0; i < (size - 1); ++i)
+					{
+						new (copy + i) GPUBitBoard(frontier[i + 1]);
+					}
+					cudaMalloc((void**)&GPUFrontier, sizeof(GPUBitBoard) * (size - 1));
+					cudaMemcpy(GPUFrontier, copy, sizeof(GPUBitBoard) * (size - 1), cudaMemcpyHostToDevice);
+					free(copy);
+
+					cudaMalloc((void**)&GPUPlacement, sizeof(int));
+					cudaMemcpy(GPUPlacement, &placement, sizeof(int), cudaMemcpyHostToDevice);
+
+					// launch kernel
+					master_black_next_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, X, GPUFrontier, depth, turns_left);
+					cudaDeviceSynchronize();
+
+					cudaMemcpy(&placement, GPUPlacement, sizeof(int), cudaMemcpyDeviceToHost);
+					cudaFree(GPUFrontier);
+					cudaFree(GPUPlacement);
+				}
+
+				if (placement >= 0)
+				{
+					board = frontier[placement];
+				}
 			}
 
-			__syncthreads();
-
-			if (terminated)
+			++turn;
+			if (turns_left)
 			{
-				return;
+				--turns_left;
 			}
-			else
+
+			return Minimax::INPROGRESS;
+		}
+
+		__host__ utility_type WhiteMoveMax(BitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta)
+		{
+			utility_type v = -Infinity;
+			utility_type terminal_value = 0;
+			BitBoard frontier[32];
+			if (GetWhiteUtility(b, terminal_value, depth, turns_left))
 			{
-				if (tx < 32)
+				return terminal_value;
+			}
+
+			BitBoard *end = frontier;
+			BitBoard::GetPossibleWhiteMoves(b, end);
+			int size = end - frontier;
+
+			if (size > 0)
+			{
+
+				v = std::max(WhiteMoveMin(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
+				if (!(v > beta)) // if not pruning, then run kernel
 				{
-					utilities[tx] = -Minimax::Infinity;
-				}
-				__syncthreads();
-
-				utility_type * utility;
-				cudaMalloc(&utility, sizeof(utility_type) * 4);
-				utility[0] = utility[1] = utility[2] = utility[3] = utilities[tx];
-				GPUBitBoard *new_boards;
-				cudaMalloc(&new_boards, sizeof(GPUBitBoard) * 4);
-
-				cudaStream_t streams[4];
-				cudaStreamCreateWithFlags(&streams[0], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[1], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[2], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[3], cudaStreamNonBlocking);
-
-				// in the max kernel, use gen_black_move_type instead
-				int gen_white_move_type = (int)GPUBitBoard::GetWhiteJumps(src) != 0);
-				gen_white_move[gen_white_move_type](1u << tx, new_board, src);
-
-				white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[0] >> >(utility, new_boards[0], t_alpha, beta, depth - 1, turns - 1);
-				white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[1] >> >(utility + 1, new_boards[1], t_alpha, beta, depth - 1, turns - 1);
-				white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[2] >> >(utility + 2, new_boards[2], t_alpha, beta, depth - 1, turns - 1);
-				white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[3] >> >(utility + 3, new_boards[3], t_alpha, beta, depth - 1, turns - 1);
-
-
-				// sync streams here
-
-				for (int i = 0; i < 4; ++i)
-				{
-					cudaStreamSynchronize(streams[i]);
-					utilities[tx] = max(utility[i], utilities[tx]);
-					if (utilities[tx] > beta)
+					alpha = std::max(alpha, v);
+					if (size > 1)
 					{
-						break;
-					}
-					else
-					{
-						t_alpha = max(utilities[tx], t_alpha);
-					}
-				}
+						// GPU tree-split the rest of the branches
+						GPUBitBoard * GPUFrontier;
+						utility_type * GPUv;
 
-				cudaFree(utility);
-				cudaFree(new_boards);
-
-				cudaStreamDestroy(streams[0]);
-				cudaStreamDestroy(streams[1]);
-				cudaStreamDestroy(streams[2]);
-				cudaStreamDestroy(streams[3]);
-
-				__syncthreads();
-
-				if (tx == 0)
-				{
-					// final ab-pruning for this node
-					for (int i = 0; i < 32; ++i)
-					{
-						t_v = max(utilities[i], t_v);
-						if (t_v > beta)
+						GPUBitBoard *copy = (GPUBitBoard*)malloc(sizeof(GPUBitBoard) * (size - 1));
+						for (int i = 0; i < (size - 1); ++i)
 						{
-							break;
+							new (copy + i) GPUBitBoard(frontier[i + 1]);
 						}
-						else
+						cudaMalloc((void**)&GPUFrontier, sizeof(GPUBitBoard) * (size - 1));
+						cudaMemcpy(GPUFrontier, copy, sizeof(GPUBitBoard) * (size - 1), cudaMemcpyHostToDevice);
+						free(copy);
+
+						cudaMalloc((void**)&GPUv, sizeof(utility_type));
+						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
+
+						// call master_white_max_kernel because we are in the max function.
+						master_white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
+						cudaDeviceSynchronize();
+						cudaMemcpy(&v, GPUv, sizeof(utility_type), cudaMemcpyDeviceToHost);
+						cudaFree(GPUFrontier);
+						cudaFree(GPUv);
+					}
+				}
+				return v;
+			}
+		}
+
+		__host__ utility_type WhiteMoveMin(BitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta)
+		{
+			utility_type v = -Infinity;
+			utility_type terminal_value = 0;
+			BitBoard frontier[32];
+			if (GetWhiteUtility(b, terminal_value, depth, turns_left))
+			{
+				return terminal_value;
+			}
+
+			BitBoard *end = frontier;
+			BitBoard::GetPossibleBlackMoves(b, end);
+			int size = end - frontier;
+
+			if (size > 0)
+			{
+
+				v = std::max(WhiteMoveMax(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
+				if (!(v < alpha)) // if not pruning, then run kernel
+				{
+					beta = std::min(beta, v);
+					if (size > 1)
+					{
+						// GPU tree-split the rest of the branches
+						GPUBitBoard * GPUFrontier;
+						utility_type * GPUv;
+
+						GPUBitBoard *copy = (GPUBitBoard*)malloc(sizeof(GPUBitBoard) * (size - 1));
+						for (int i = 0; i < (size - 1); ++i)
 						{
-							alpha = max(utilities[i], alpha);
+							new (copy + i) GPUBitBoard(frontier[i + 1]);
 						}
-					}
+						cudaMalloc((void**)&GPUFrontier, sizeof(GPUBitBoard) * (size - 1));
+						cudaMemcpy(GPUFrontier, copy, sizeof(GPUBitBoard) * (size - 1), cudaMemcpyHostToDevice);
+						free(copy);
 
-					*v = t_v;
-				}
+						cudaMalloc((void**)&GPUv, sizeof(utility_type));
+						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
 
-				__syncthreads();
-			}
-		}
-
-		__global__ void master_black_max_kernel(utility_type *v, utility_type *utility, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns)
-		{
-			int tx = threadIdx.x;
-			int index = blockIdx.x * blockDim.x + tx;
-			int t_v = -Minimax::Infinity;
-
-			if (index < num_boards)
-			{
-				black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + index, src[index], alpha, beta, depth - 1, turns - 1);
-
-			}
-			__syncthreads();
-
-			if (!index)
-			{
-				for (int i = 0; i < num_boards; ++i)
-				{
-					t_v = max(utility[index], t_v);
-					if (t_v > beta)
-						break;
-					alpha = max(alpha, t_v);
-				}
-				*v = t_v;
-			}
-			__syncthreads();
-		}
-
-		__global__ void master_black_min_kernel(utility_type *v, utility_type *utility, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns)
-		{
-			int tx = threadIdx.x;
-			int index = blockIdx.x * blockDim.x + tx;
-			int t_v = Minimax::Infinity;
-
-			if (index < num_boards)
-			{
-				black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + index, src + index, alpha, beta, depth - 1, turns - 1);
-
-			}
-			__syncthreads();
-
-			if (index == 0)
-			{
-				for (int i = 0; i < num_boards; ++i)
-				{
-					t_v = min(utility[index], t_v);
-					if (t_v < alpha)
-						break;
-					beta = min(beta, t_v);
-				}
-				*v = t_v;
-			}
-			__syncthreads();
-		}
-
-		__global__ void black_min_kernel(utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns)
-		{
-			int tx = threadIdx.x;
-			int t_beta = beta;
-			int t_v = Minimax::Infinity;
-			__shared__ bool terminated;
-			__shared__ utility_type utilities[32];
-
-			if (tx == 0)
-			{
-				utility_type terminal_value = 0;
-				if (src->valid)
-				{
-					terminated = GPUGetWhiteUtility(src, &terminal_value, depth, turns);
-					if (terminated)
-						*v = terminal_value;
-
-				}
-				else
-					terminated = true;
-
-			}
-
-			__syncthreads();
-
-			if (terminated)
-			{
-				return;
-			}
-			else
-			{
-				if (tx < 32)
-				{
-					utilities[tx] = Minimax::Infinity;
-				}
-				__syncthreads();
-
-				utility_type * utility;
-				cudaMalloc(&utility, sizeof(utility_type) * 4);
-				utility[0] = utility[1] = utility[2] = utility[3] = utilities[tx];
-				GPUBitBoard *new_boards;
-				cudaMalloc(&new_boards, sizeof(GPUBitBoard) * 4);
-
-				cudaStream_t streams[4];
-				cudaStreamCreateWithFlags(&streams[0], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[1], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[2], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[3], cudaStreamNonBlocking);
-
-				// in the max kernel, use gen_black_move_type instead
-				int gen_White_move_type = (int)GPUBitBoard::GetWhiteJumps(src) != 0);
-				gen_white_move[gen_White_move_type](1u << tx, new_board, src);
-
-				black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[0] >> >(utility, new_boards[0], alpha, t_beta, depth - 1, turns - 1);
-				black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[1] >> >(utility + 1, new_boards[1], alpha, t_beta, depth - 1, turns - 1);
-				black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[2] >> >(utility + 2, new_boards[2], alpha, t_beta, depth - 1, turns - 1);
-				black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[3] >> >(utility + 3, new_boards[3], alpha, t_beta, depth - 1, turns - 1);
-
-
-				// sync streams here
-
-				for (int i = 0; i < 4; ++i)
-				{
-					cudaStreamSynchronize(streams[i]);
-					utilities[tx] = min(utility[i], utilities[tx]);
-					if (utilities[tx] < alpha)
-					{
-						break;
-					}
-					else
-					{
-						t_beta = min(utilities[tx], t_beta);
+						// call master_white_min_kernel because we are in the min function.
+						master_white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
+						cudaDeviceSynchronize();
+						cudaMemcpy(&v, GPUv, sizeof(utility_type), cudaMemcpyDeviceToHost);
+						cudaFree(GPUFrontier);
+						cudaFree(GPUv);
 					}
 				}
-
-				cudaFree(utility);
-				cudaFree(new_boards);
-
-				cudaStreamDestroy(streams[0]);
-				cudaStreamDestroy(streams[1]);
-				cudaStreamDestroy(streams[2]);
-				cudaStreamDestroy(streams[3]);
-
-				__syncthreads();
-
-				if (tx == 0)
-				{
-					// final ab-pruning for this node
-					for (int i = 0; i < 32; ++i)
-					{
-						t_v = min(utilities[i], t_v);
-						if (t_v < alpha))
-						{
-							break;
-						}
-						else
-						{
-							beta = min(utilities[i], beta);
-						}
-					}
-
-					*v = t_v;
-				}
-
-				__syncthreads();
+				return v;
 			}
 		}
 
-		__global__ void black_max_kernel(utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns)
-		{
-			int tx = threadIdx.x;
-			int t_alpha = alpha;
-			int t_v = -Minimax::Infinity;
-			__shared__ bool terminated;
-			__shared__ utility_type utilities[32];
-
-			if (tx == 0)
-			{
-				utility_type terminal_value = 0;
-				if (src->valid)
-				{
-					terminated = GPUGetWhiteUtility(src, &terminal_value, depth, turns);
-					if (terminated)
-						*v = terminal_value;
-
-				}
-				else
-					terminated = true;
-
-			}
-
-			__syncthreads();
-
-			if (terminated)
-			{
-				return;
-			}
-			else
-			{
-				if (tx < 32)
-				{
-					utilities[tx] = -Minimax::Infinity;
-				}
-				__syncthreads();
-
-				utility_type * utility;
-				cudaMalloc(&utility, sizeof(utility_type) * 4);
-				utility[0] = utility[1] = utility[2] = utility[3] = utilities[tx];
-				GPUBitBoard *new_boards;
-				cudaMalloc(&new_boards, sizeof(GPUBitBoard) * 4);
-
-				cudaStream_t streams[4];
-				cudaStreamCreateWithFlags(&streams[0], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[1], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[2], cudaStreamNonBlocking);
-				cudaStreamCreateWithFlags(&streams[3], cudaStreamNonBlocking);
-
-				// in the max kernel, use gen_black_move_type instead
-				int gen_black_move_type = (int)GPUBitBoard::GetBlackJumps(src) != 0);
-				gen_black_move[gen_black_move_type](1u << tx, new_board, src);
-
-				black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[0] >> >(utility, new_boards[0], t_alpha, beta, depth - 1, turns - 1);
-				black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[1] >> >(utility + 1, new_boards[1], t_alpha, beta, depth - 1, turns - 1);
-				black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[2] >> >(utility + 2, new_boards[2], t_alpha, beta, depth - 1, turns - 1);
-				black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), streams[3] >> >(utility + 3, new_boards[3], t_alpha, beta, depth - 1, turns - 1);
-
-
-				// sync streams here
-
-				for (int i = 0; i < 4; ++i)
-				{
-					cudaStreamSynchronize(streams[i]);
-					utilities[tx] = max(utility[i], utilities[tx]);
-					if (utilities[tx] > beta)
-					{
-						break;
-					}
-					else
-					{
-						t_alpha = max(utilities[tx], t_alpha);
-					}
-				}
-
-				cudaFree(utility);
-				cudaFree(new_boards);
-
-				cudaStreamDestroy(streams[0]);
-				cudaStreamDestroy(streams[1]);
-				cudaStreamDestroy(streams[2]);
-				cudaStreamDestroy(streams[3]);
-
-				__syncthreads();
-
-				if (tx == 0)
-				{
-					// final ab-pruning for this node
-					for (int i = 0; i < 32; ++i)
-					{
-						t_v = max(utilities[i], t_v);
-						if (t_v > beta)
-						{
-							break;
-						}
-						else
-						{
-							alpha = max(utilities[i], alpha);
-						}
-					}
-
-					*v = t_v;
-				}
-
-				__syncthreads();
-			}
-		}
-
-		__device__ bool GPUGetWhiteUtility(GPUBitBoard const &src, utility_type &terminal_value, int depth, int turns)
+		__host__ utility_type BlackMoveMax(BitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta)
 		{
 
 		}
 
-		__device__ bool GPUGetBlackUtility(GPUBitBoard const &src, utility_type &terminal_value, int depth, int turns)
-		{
-
-		}
-
-		// define the host functions here as well because it needs to run the kernels
-
-		bool WhiteWinTest(GPUBitBoard const &b)
-		{
-
-		}
-
-		bool WhiteLoseTest(GPUBitBoard const &b)
-		{
-
-		}
-
-		bool BlackWinTest(GPUBitBoard const &b)
-		{
-
-		}
-
-		bool BlackLoseTest(GPUBitBoard const &b)
-		{
-
-		}
-
-
-		bool GetBlackUtility(GPUBitBoard const &b, utility_type &utility, int depth, int turns_left)
-		{
-
-		}
-
-		bool GetWhiteUtility(GPUBitBoard const &b, utility_type &utility, int depth, int turns_left)
-		{
-
-		}
-
-		utility_type WhiteMoveMax(GPUBitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta)
-		{
-
-		}
-
-		utility_type WhiteMoveMin(GPUBitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta)
-		{
-
-		}
-
-		utility_type BlackMoveMax(GPUBitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta)
-		{
-
-		}
-
-		utility_type BlackMoveMin(GPUBitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta)
+		__host__ utility_type BlackMoveMin(BitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta)
 		{
 
 		}

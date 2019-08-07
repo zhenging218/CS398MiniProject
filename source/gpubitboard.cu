@@ -7,10 +7,6 @@ namespace Checkers
 {
 	namespace
 	{
-		constexpr GPUBitBoard::board_type EvaluationMask = 0x81188118u;
-		constexpr GPUBitBoard::count_type MaxUtility = 10000;
-		constexpr GPUBitBoard::count_type MinUtility = -10000;
-
 		constexpr GPUBitBoard::board_type Row0 = 0x10000000u;
 
 		constexpr GPUBitBoard::board_type L3Mask = BitBoard::L3Mask;
@@ -65,7 +61,31 @@ namespace Checkers
 		return BitBoard(white, black, kings);
 	}
 
-	__device__ GPUBitBoard::board_type GPUBitBoard::GetBlackJumps(GPUBitBoard const &b)
+	__host__ __device__ GPUBitBoard::board_type GetBlackMoves(BitBoard const &b)
+	{
+		const board_type not_occupied = ~(b.black | b.white);
+		const board_type black_kings = b.black & b.kings;
+		board_type LL = (((not_occupied & R5Mask) >> 5) & b.black) | ((not_occupied >> 4) & b.black);
+		board_type LR = (((not_occupied) >> 4) & b.black) | (((not_occupied & R3Mask) >> 3) & b.black);
+		board_type UL = (((not_occupied & L5Mask) << 5) & black_kings) | ((not_occupied << 4) & black_kings);
+		board_type UR = (((not_occupied << 4) & black_kings) | ((not_occupied & L3Mask) << 3) & black_kings);
+
+		return  (LL | LR | UL | UR);
+	}
+
+	__host__ __device__ GPUBitBoard::board_type GetWhiteMoves(BitBoard const &b)
+	{
+		const board_type not_occupied = ~(b.black | b.white);
+		const board_type white_kings = b.white & b.kings;
+		board_type LL = (((not_occupied & R5Mask) >> 5) & white_kings) | ((not_occupied >> 4) & white_kings);
+		board_type LR = (((not_occupied) >> 4) & white_kings) | (((not_occupied & R3Mask) >> 3) & white_kings);
+		board_type UL = (((not_occupied & L5Mask) << 5) & b.white) | ((not_occupied << 4) & b.white);
+		board_type UR = (((not_occupied << 4) & b.white) | ((not_occupied & L3Mask) << 3) & b.white);
+
+		return  (LL | LR | UL | UR);
+	}
+
+	__host__ __device__ GPUBitBoard::board_type GPUBitBoard::GetBlackJumps(GPUBitBoard const &b)
 	{
 		const board_type not_occupied = ~(b.black | b.white);
 		const board_type black_kings = b.black & b.kings;
@@ -84,7 +104,7 @@ namespace Checkers
 		return move;
 	}
 
-	__device__ GPUBitBoard::board_type GPUBitBoard::GetWhiteJumps(GPUBitBoard const &b)
+	__host__ __device__ GPUBitBoard::board_type GPUBitBoard::GetWhiteJumps(GPUBitBoard const &b)
 	{
 		const board_type not_occupied = ~(b.black | b.white);
 		const board_type white_kings = b.white & b.kings;

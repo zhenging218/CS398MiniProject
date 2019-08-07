@@ -34,6 +34,11 @@
     <CudaCompile Include="..\source\gpubitboard.cu" />
     <CudaCompile Include="..\source\gpubitwise_helpers.cu" />
     <CudaCompile Include="..\source\gpuminimax.cu" />
+    <CudaCompile Include="..\source\gpuminimax_white.cu" />
+    <CudaCompile Include="..\source\gpuminimax_black.cu" />
+    <CudaCompile Include="..\source\gpuminimax_helpers.cu" />
+    <CudaCompile Include="..\source\gpuminimax_master.cu" />
+    <CudaCompile Include="..\source\gpuminimax_next.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C144999E-B9AD-4C28-B718-541D736F1BDD}</ProjectGuid>
