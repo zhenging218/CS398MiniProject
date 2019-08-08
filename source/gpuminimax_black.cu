@@ -66,9 +66,16 @@ namespace Checkers
 
 				for (int i = 0; i < frontier_size; ++i)
 				{
+					utility[i] = utilities[tx];
 					black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), 0, streams[i % 4] >> >(utility + i, new_boards[i], alpha, t_beta, depth - 1, turns - 1);
-					cudaStreamWaitEvent(streams[i % 4], stream_events[i], 0);
 				}
+
+				__syncthreads();
+				if (tx == 0)
+				{
+					cudaDeviceSynchronize();
+				}
+				__syncthreads();
 
 				for (int i = 0; i < frontier_size; ++i)
 				{
@@ -181,9 +188,16 @@ namespace Checkers
 
 				for (int i = 0; i < frontier_size; ++i)
 				{
+					utility[i] = utilities[tx];
 					black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), 0, streams[i % 4] >> >(utility + i, new_boards[i], t_alpha, beta, depth - 1, turns - 1);
-					cudaStreamWaitEvent(streams[i % 4], stream_events[i], 0);
 				}
+
+				__syncthreads();
+				if (tx == 0)
+				{
+					cudaDeviceSynchronize();
+				}
+				__syncthreads();
 
 				for (int i = 0; i < frontier_size; ++i)
 				{
