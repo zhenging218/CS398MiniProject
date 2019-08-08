@@ -25,7 +25,7 @@ namespace Checkers
 				Minimax::utility_type terminal_value = 0;
 				if (src.valid)
 				{
-					terminated = GetBlackUtility(src, terminal_value, depth, turns);
+					terminated = GetWhiteUtility(src, terminal_value, depth, turns);
 					if (terminated)
 						*v = terminal_value;
 
