@@ -14,7 +14,7 @@ namespace Checkers
 			utility_type v = -Infinity;
 			utility_type terminal_value = 0;
 			// check if need to stop the search
-			if (GetWhiteUtility(b, terminal_value, depth, turns_left))
+			if (GetBlackUtility(b, terminal_value, depth, turns_left))
 				return terminal_value;
 
 			BitBoard frontier[32];
@@ -64,7 +64,7 @@ namespace Checkers
 			utility_type v = Infinity;
 			utility_type terminal_value = 0;
 			// check if need to stop the search
-			if (GetWhiteUtility(b, terminal_value, depth, turns_left))
+			if (GetBlackUtility(b, terminal_value, depth, turns_left))
 				return terminal_value;
 
 			BitBoard frontier[32];
