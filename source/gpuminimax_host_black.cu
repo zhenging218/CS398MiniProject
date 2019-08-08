@@ -46,7 +46,7 @@ namespace Checkers
 						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
 
 						// launch kernel
-						master_black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
+						master_black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 
 						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
@@ -74,7 +74,7 @@ namespace Checkers
 
 			if (size > 0)
 			{
-				v = std::max(BlackMoveMax(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
+				v = std::min(BlackMoveMax(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
 				if (!(v < alpha))
 				{
 					beta = std::min(beta, v);
@@ -96,7 +96,7 @@ namespace Checkers
 						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
 
 						// launch kernel
-						master_black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
+						master_black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 
 						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
