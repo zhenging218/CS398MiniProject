@@ -57,20 +57,31 @@ namespace Checkers
 						new (copy + i) GPUBitBoard(frontier[i + 1]);
 					}
 					cudaMalloc((void**)&GPUFrontier, sizeof(GPUBitBoard) * (size - 1));
+					CHECK_ERRORS();
 
 					cudaMemcpy(GPUFrontier, copy, sizeof(GPUBitBoard) * (size - 1), cudaMemcpyHostToDevice);
+					CHECK_ERRORS();
+
 					free(copy);
 
 					cudaMalloc((void**)&GPUPlacement, sizeof(int));
+					CHECK_ERRORS();
+
 					cudaMemcpy(GPUPlacement, &placement, sizeof(int), cudaMemcpyHostToDevice);
+					CHECK_ERRORS();
 
 					// launch kernel
 					master_white_next_kernel << < dim3(((size - 1) / 32) + 1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, X, GPUFrontier, size - 1, depth, turns_left);
 					cudaDeviceSynchronize();
+					CHECK_ERRORS();
 
 					cudaMemcpy(&placement, GPUPlacement, sizeof(int), cudaMemcpyDeviceToHost);
+					CHECK_ERRORS();
 					cudaFree(GPUFrontier);
+					CHECK_ERRORS();
 					cudaFree(GPUPlacement);
+					CHECK_ERRORS();
+
 				}
 
 				if (placement >= 0)
@@ -111,20 +122,29 @@ namespace Checkers
 						new (copy + i) GPUBitBoard(frontier[i + 1]);
 					}
 					cudaMalloc((void**)&GPUFrontier, sizeof(GPUBitBoard) * (size - 1));
+					CHECK_ERRORS();
 					cudaMemcpy(GPUFrontier, copy, sizeof(GPUBitBoard) * (size - 1), cudaMemcpyHostToDevice);
+					CHECK_ERRORS();
 					free(copy);
 
 					cudaMalloc((void**)&GPUPlacement, sizeof(int));
+					CHECK_ERRORS();
 					cudaMemcpy(GPUPlacement, &placement, sizeof(int), cudaMemcpyHostToDevice);
+					CHECK_ERRORS();
 
 					// launch kernel
 					master_black_next_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, X, GPUFrontier, size - 1, depth, turns_left);
 					cudaDeviceSynchronize();
+					CHECK_ERRORS();
 
 					int temp = 0;
 					cudaMemcpy(&placement, GPUPlacement, sizeof(int), cudaMemcpyDeviceToHost);
+					CHECK_ERRORS();
 					cudaFree(GPUFrontier);
+					CHECK_ERRORS();
 					cudaFree(GPUPlacement);
+					CHECK_ERRORS();
+
 				}
 
 				if (placement >= 0)

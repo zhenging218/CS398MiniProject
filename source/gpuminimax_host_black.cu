@@ -39,20 +39,28 @@ namespace Checkers
 							new (copy + i) GPUBitBoard(frontier[i + 1]);
 						}
 						cudaMalloc((void**)&GPUFrontier, sizeof(GPUBitBoard) * (size - 1));
+						CHECK_ERRORS();
 						cudaMemcpy(GPUFrontier, copy, sizeof(GPUBitBoard) * (size - 1), cudaMemcpyHostToDevice);
+						CHECK_ERRORS();
 						free(copy);
 
 						cudaMalloc((void**)&GPUv, sizeof(utility_type));
+						CHECK_ERRORS();
 						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
+						CHECK_ERRORS();
 
 						// launch kernel
 						master_black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
-						getLastCudaError("");
+						CHECK_ERRORS();
 
 						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
+						CHECK_ERRORS();
 						cudaFree(GPUFrontier);
+						CHECK_ERRORS();
 						cudaFree(GPUv);
+						CHECK_ERRORS();
+
 					}
 				}
 			}
@@ -90,20 +98,28 @@ namespace Checkers
 							new (copy + i) GPUBitBoard(frontier[i + 1]);
 						}
 						cudaMalloc((void**)&GPUFrontier, sizeof(GPUBitBoard) * (size - 1));
+						CHECK_ERRORS();
 						cudaMemcpy(GPUFrontier, copy, sizeof(GPUBitBoard) * (size - 1), cudaMemcpyHostToDevice);
+						CHECK_ERRORS();
 						free(copy);
 
 						cudaMalloc((void**)&GPUv, sizeof(utility_type));
+						CHECK_ERRORS();
 						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
+						CHECK_ERRORS();
 
 						// launch kernel
 						master_black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
-						getLastCudaError("");
+						CHECK_ERRORS();
 
 						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
+						CHECK_ERRORS();
 						cudaFree(GPUFrontier);
+						CHECK_ERRORS();
 						cudaFree(GPUv);
+						CHECK_ERRORS();
+
 					}
 				}
 			}

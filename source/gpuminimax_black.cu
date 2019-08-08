@@ -22,10 +22,8 @@ namespace Checkers
 				if (src.valid)
 				{
 					terminated = GetBlackUtility(src, terminal_value, depth, turns);
-					/*
 					if (terminated)
 						*v = terminal_value;
-					*/
 				}
 				else
 					terminated = true;
@@ -55,14 +53,17 @@ namespace Checkers
 
 				if (frontier_size > 0)
 				{
-					Minimax::utility_type * utility;
-					cudaMalloc(&utility, sizeof(Minimax::utility_type) * frontier_size);
+					Minimax::utility_type * utility = (utility_type *)malloc(sizeof(utility_type) * frontier_size);
 
 					for (int i = 0; i < frontier_size; ++i)
 					{
 						utility[i] = utilities[tx];
 						black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[i], alpha, t_beta, depth - 1, turns - 1);
 					}
+
+					__syncthreads();
+					cudaDeviceSynchronize();
+					__syncthreads();
 
 					for (int i = 0; i < frontier_size; ++i)
 					{
@@ -77,7 +78,7 @@ namespace Checkers
 						}
 					}
 
-					cudaFree(utility);
+					free(utility);
 				}
 
 				__syncthreads();
@@ -125,10 +126,8 @@ namespace Checkers
 				if (src.valid)
 				{
 					terminated = GetBlackUtility(src, terminal_value, depth, turns);
-					/*
 					if (terminated)
 						*v = terminal_value;
-					*/
 				}
 				else
 					terminated = true;
@@ -159,14 +158,18 @@ namespace Checkers
 
 				if (frontier_size > 0)
 				{
-					Minimax::utility_type * utility;
-					cudaMalloc(&utility, sizeof(Minimax::utility_type) * frontier_size);
+					Minimax::utility_type * utility = (utility_type *)malloc(sizeof(utility_type) * frontier_size);
 
 					for (int i = 0; i < frontier_size; ++i)
 					{
 						utility[i] = utilities[tx];
 						black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[i], t_alpha, beta, depth - 1, turns - 1);
+						
 					}
+
+					__syncthreads();
+					cudaDeviceSynchronize();
+					__syncthreads();
 
 					for (int i = 0; i < frontier_size; ++i)
 					{
@@ -181,7 +184,7 @@ namespace Checkers
 						}
 					}
 
-					cudaFree(utility);
+					free(utility);
 				}
 
 				__syncthreads();

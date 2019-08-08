@@ -58,12 +58,13 @@ namespace Checkers
 				if (frontier_size > 0)
 				{
 					Minimax::utility_type * utility;
-					cudaMalloc(&utility, sizeof(Minimax::utility_type) * frontier_size);
+					utility = (Minimax::utility_type *) malloc(sizeof(Minimax::utility_type) * frontier_size);
 
 					for (int i = 0; i < frontier_size; ++i)
 					{
 						utility[i] = utilities[tx];
 						white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[i], alpha, t_beta, depth - 1, turns - 1);
+						cudaDeviceSynchronize();
 					}
 
 					for (int i = 0; i < frontier_size; ++i)
@@ -79,7 +80,7 @@ namespace Checkers
 						}
 					}
 
-					cudaFree(utility);
+					free(utility);
 				}
 
 				__syncthreads();
@@ -160,12 +161,13 @@ namespace Checkers
 				if (frontier_size > 0)
 				{
 					Minimax::utility_type * utility;
-					cudaMalloc(&utility, sizeof(Minimax::utility_type) * frontier_size);
+					utility = (Minimax::utility_type *) malloc(sizeof(Minimax::utility_type) * frontier_size);
 
 					for (int i = 0; i < frontier_size; ++i)
 					{
 						utility[i] = utilities[tx];
 						white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), 0 >> > (utility + i, new_boards[i], t_alpha, beta, depth - 1, turns - 1);
+						cudaDeviceSynchronize();
 					}
 
 					for (int i = 0; i < frontier_size; ++i)
@@ -181,7 +183,7 @@ namespace Checkers
 						}
 					}
 
-					cudaFree(utility);
+					free(utility);
 				}
 
 				__syncthreads();

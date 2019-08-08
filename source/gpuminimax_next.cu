@@ -24,6 +24,7 @@ namespace Checkers
 			if (tx < num_boards)
 			{
 				white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (ret_v + tx, boards[tx], -Infinity, Infinity, depth, turns);
+				cudaDeviceSynchronize();
 				v[tx] = ret_v[tx];
 			}
 
@@ -65,6 +66,7 @@ namespace Checkers
 			if (tx < num_boards)
 			{
 				black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (ret_v + tx, boards[tx], -Infinity, Infinity, depth, turns);
+				cudaDeviceSynchronize();
 				v[tx] = ret_v[tx];
 			}
 

@@ -15,7 +15,7 @@ namespace Checkers
 
 			if (tx == 0)
 			{
-				cudaMalloc(&utility, sizeof(Minimax::utility_type) * num_boards);
+				utility = (Minimax::utility_type *) malloc(sizeof(Minimax::utility_type) * num_boards);
 				memset(utility, t_v, sizeof(Minimax::utility_type) * num_boards);
 			}
 
@@ -28,10 +28,12 @@ namespace Checkers
 			}
 
 			__syncthreads();
+			cudaDeviceSynchronize();
+			__syncthreads();
 
 			if (tx == 0)
 			{
-				cudaFree(utility);
+				free(utility);
 				for (int i = 0; i < num_boards; ++i)
 				{
 					t_v = max(t_utility[tx], t_v);
@@ -53,7 +55,7 @@ namespace Checkers
 
 			if (tx == 0)
 			{
-				cudaMalloc(&utility, sizeof(Minimax::utility_type) * num_boards);
+				utility = (Minimax::utility_type *) malloc(sizeof(Minimax::utility_type) * num_boards);
 				memset(utility, t_v, sizeof(Minimax::utility_type) * num_boards);
 			}
 
@@ -66,10 +68,12 @@ namespace Checkers
 			}
 
 			__syncthreads();
+			cudaDeviceSynchronize();
+			__syncthreads();
 
 			if (tx == 0)
 			{
-				cudaFree(utility);
+				free(utility);
 				for (int i = 0; i < num_boards; ++i)
 				{
 					t_v = min(t_utility[tx], t_v);
