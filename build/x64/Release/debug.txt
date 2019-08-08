@@ -1,0 +1,30 @@
+========= CUDA-MEMCHECK
+========= Error: process didn't terminate successfully
+========= Invalid __global__ write of size 4
+=========     at 0x000021f0 in Checkers::GPUMinimax::black_max_kernel(int*, Checkers::GPUBitBoard, int, int, int, int)
+=========     by thread (0,0,0) in block (0,0,0)
+=========     Address 0x702fff920 is out of bounds
+=========
+========= Program hit cudaErrorLaunchFailure (error 4) due to "unspecified launch failure" on CUDA API call to cudaDeviceSynchronize. 
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:C:\WINDOWS\system32\nvcuda.dll (cuMemcpyPeer_ptds + 0x3043ac) [0x313beb]
+=========     Host Frame:C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe (cudaDeviceSynchronize + 0xf9) [0x6999]
+=========     Host Frame:C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe (Checkers::GPUMinimax::BlackMoveMin + 0x281) [0x1bf91]
+=========     Host Frame:C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe (Checkers::GPUMinimax::Next + 0x2fa) [0x1b6aa]
+=========     Host Frame:C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe (main + 0x206) [0x16556]
+=========     Host Frame:C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe (__scrt_common_main_seh + 0x11d) [0x1e891]
+=========     Host Frame:C:\WINDOWS\System32\KERNEL32.DLL (BaseThreadInitThunk + 0x14) [0x14034]
+=========     Host Frame:C:\WINDOWS\SYSTEM32\ntdll.dll (RtlUserThreadStart + 0x21) [0x73691]
+=========
+========= Program hit cudaErrorLaunchFailure (error 4) due to "unspecified launch failure" on CUDA API call to cudaGetLastError. 
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:C:\WINDOWS\system32\nvcuda.dll (cuMemcpyPeer_ptds + 0x3043ac) [0x313beb]
+=========     Host Frame:C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe (cudaGetLastError + 0xf2) [0x6ab2]
+=========     Host Frame:C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe (Checkers::GPUMinimax::BlackMoveMin + 0x286) [0x1bf96]
+=========     Host Frame:C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe (Checkers::GPUMinimax::Next + 0x2fa) [0x1b6aa]
+=========     Host Frame:C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe (main + 0x206) [0x16556]
+=========     Host Frame:C:\Users\zhenging.yiu\Desktop\CS398MiniProject\build\x64\Release\checkers.exe (__scrt_common_main_seh + 0x11d) [0x1e891]
+=========     Host Frame:C:\WINDOWS\System32\KERNEL32.DLL (BaseThreadInitThunk + 0x14) [0x14034]
+=========     Host Frame:C:\WINDOWS\SYSTEM32\ntdll.dll (RtlUserThreadStart + 0x21) [0x73691]
+=========
+========= No CUDA-MEMCHECK results found

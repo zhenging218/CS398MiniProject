@@ -230,7 +230,7 @@ namespace
 
 		while (gpu_result == Checkers::Minimax::INPROGRESS)
 		{
-			std::cout << "GPU Version: Turn " << gpu_turns << "...\r";
+			// std::cout << "GPU Version: Turn " << gpu_turns << "...\r";
 			auto start = std::chrono::high_resolution_clock::now();
 			gpu_result = Checkers::GPUMinimax::Next(gpu_board, gpu_turn, gpu_depth, turns_left);
 			std::chrono::duration<double, std::milli> time = std::chrono::high_resolution_clock::now() - start;
@@ -338,8 +338,8 @@ int main(int argc, char **argv)
 	Checkers::Minimax::SetSearchDepth(max_depth);
 	Checkers::Minimax::SetMaxTurns(max_turns);
 
-	auto board = CreateRandomWhiteBitBoard();
-	// auto board = Checkers::BitBoard(0xFFD10000u, 0x00000FFFu, 0u);
+	// auto board = CreateRandomWhiteBitBoard();
+	auto board = Checkers::BitBoard(0xFFD10000u, 0x00000FFFu, 0u);
 
 	double longestTime;
 	double shortestTime;
@@ -386,5 +386,6 @@ int main(int argc, char **argv)
 		break;
 	}
 
-	system("PAUSE");
+	// system("PAUSE");
+	return 0;
 }

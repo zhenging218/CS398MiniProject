@@ -2,6 +2,8 @@
 #include "bitboard.h"
 #include "gpuminimax.h"
 
+#include <helper_cuda.h>
+
 #include <cstdlib>
 #include <algorithm>
 
@@ -19,6 +21,7 @@ namespace Checkers
 				return Minimax::DRAW;
 			}
 
+			int placement = -1;
 			BitBoard frontier[32];
 
 			if (turn == Minimax::WHITE)
@@ -31,7 +34,7 @@ namespace Checkers
 					return Minimax::LOSE;
 				}
 
-				int placement = -1;
+				
 				Minimax::utility_type X = -Minimax::Infinity;
 
 				// CPU left-most branch
@@ -54,6 +57,7 @@ namespace Checkers
 						new (copy + i) GPUBitBoard(frontier[i + 1]);
 					}
 					cudaMalloc((void**)&GPUFrontier, sizeof(GPUBitBoard) * (size - 1));
+
 					cudaMemcpy(GPUFrontier, copy, sizeof(GPUBitBoard) * (size - 1), cudaMemcpyHostToDevice);
 					free(copy);
 
@@ -117,6 +121,7 @@ namespace Checkers
 					master_black_next_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, X, GPUFrontier, size - 1, depth, turns_left);
 					cudaDeviceSynchronize();
 
+					int temp = 0;
 					cudaMemcpy(&placement, GPUPlacement, sizeof(int), cudaMemcpyDeviceToHost);
 					cudaFree(GPUFrontier);
 					cudaFree(GPUPlacement);
@@ -133,6 +138,8 @@ namespace Checkers
 			{
 				--turns_left;
 			}
+
+			getLastCudaError("");
 
 			return Minimax::INPROGRESS;
 		}

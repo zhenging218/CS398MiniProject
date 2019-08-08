@@ -1,0 +1,50 @@
+search depth: 8, maximum game turns: 100
+GPU Device 0: "GeForce GTX 1060 6GB" with compute capability 6.1
+
+CUDA device GeForce GTX 1060 6GB has 10 multi-processors, Compute capability 6.1
+X: 1
+X: -1
+X: 1
+X: -1
+X: 1
+X: -1
+X: 2
+X: 0
+X: 1
+X: -1
+X: 2
+X: -2
+X: 3
+X: -2
+X: 2
+X: -2
+X: 2
+X: -2
+X: 3
+X: -3
+X: 4
+X: -3
+X: 3
+X: -3
+X: 4
+X: -4
+X: 4
+X: -4
+X: 4
+X: -4
+X: 4
+X: -4
+X: 5
+X: -5
+X: 36
+X: -36
+X: 36
+X: -36
+X: 36
+X: -36
+X: 36
+X: -36
+X: 36
+Average time taken for each decision: 4.88974 milliseconds
+Slowest decision took 213.315 milliseconds
+Fastest decision took 0.000293 milliseconds

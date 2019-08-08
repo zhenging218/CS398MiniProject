@@ -76,9 +76,6 @@
     <CudaCompile Include="..\source\gpubitwise_helpers.cu">
       <Filter>Kernel Files\Source Files</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\source\gpuminimax_master.cu">
-      <Filter>Kernel Files\Source Files</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\source\gpuminimax_next.cu">
       <Filter>Kernel Files\Source Files</Filter>
     </CudaCompile>
@@ -98,6 +95,12 @@
       <Filter>Kernel Files\Source Files</Filter>
     </CudaCompile>
     <CudaCompile Include="..\source\gpuminimax_host_black.cu">
+      <Filter>Kernel Files\Source Files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\source\gpuminimax_master_white.cu">
+      <Filter>Kernel Files\Source Files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\source\gpuminimax_master_black.cu">
       <Filter>Kernel Files\Source Files</Filter>
     </CudaCompile>
   </ItemGroup>

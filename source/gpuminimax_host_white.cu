@@ -48,6 +48,7 @@ namespace Checkers
 						// launch kernel
 						master_white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
+						getLastCudaError("");
 
 						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
 						cudaFree(GPUFrontier);
@@ -98,6 +99,7 @@ namespace Checkers
 						// launch kernel
 						master_white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
+						getLastCudaError("");
 
 						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
 						cudaFree(GPUFrontier);

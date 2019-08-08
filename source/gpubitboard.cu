@@ -21,7 +21,7 @@ namespace Checkers
 		return *this;
 	}
 
-	__host__ GPUBitBoard::GPUBitBoard(BitBoard const &src) : white(src.white), black(src.black), kings(src.kings)
+	__host__ GPUBitBoard::GPUBitBoard(BitBoard const &src) : white(src.white), black(src.black), kings(src.kings), valid(true)
 	{
 
 	}
