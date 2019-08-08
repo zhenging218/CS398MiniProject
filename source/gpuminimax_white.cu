@@ -2,9 +2,6 @@
 #include "bitboard.h"
 #include "gpuminimax.h"
 
-#include <helper_cuda.h>
-#include <cuda_runtime.h>
-
 namespace Checkers
 {
 	// all master kernels should already have v and the utility array values initialised to the first v value computed by the CPU PV-Split.

@@ -4,8 +4,6 @@
 
 #include <cstdlib>
 #include <algorithm>
-#include <helper_cuda.h>
-#include <cuda_runtime.h>
 
 namespace Checkers
 {

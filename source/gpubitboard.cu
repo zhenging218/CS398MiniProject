@@ -1,5 +1,4 @@
 #include "precomp.cuh"
-#include <thrust/system/cuda/config.h>
 
 namespace Checkers
 {

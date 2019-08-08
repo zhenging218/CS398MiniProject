@@ -1,7 +1,6 @@
 #pragma once
 
 #include "minimax.h"
-#include <thrust/system/cuda/config.h>
 
 namespace Checkers
 {

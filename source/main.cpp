@@ -1,10 +1,13 @@
 #include "precomp.h"
-#include <stdlib.h>
-#include <ctime>
-#include <helper_cuda.h>
-#include <helper_functions.h>
+
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+
+#include <stdlib.h>
+#include <ctime>
+
+#include <helper_cuda.h>
+#include <helper_functions.h>
 
 #include <random>
 #include <chrono>
@@ -18,6 +21,19 @@
 
 namespace
 {
+	void StartCUDA()
+	{
+		cudaDeviceProp deviceProp;
+		int dev = findCudaDevice(argc, (const char **)argv);
+		checkCudaErrors(cudaGetDeviceProperties(&deviceProp, dev));
+		std::cout << "CUDA device " << deviceProp.name << " has " << deviceProp.multiProcessorCount << " multi-processors, Compute " << deviceProp.major << "." << deviceProp.minor << "\n";
+	}
+
+	void EndCUDA()
+	{
+		cudaDeviceReset();
+	}
+
 	Checkers::BitBoard CreateRandomWhiteBitBoard()
 	{
 		std::mt19937_64 rng;
@@ -345,19 +361,25 @@ int main(int argc, char **argv)
 		std::cout << "Fastest decision took " << shortestTime << " milliseconds\n";
 		break;
 	case 2:
+		StartCUDA();
 		RunGPUVersion(board, Checkers::Minimax::BLACK, shortestTime, longestTime, average, turns, true);
 		std::cout << "Average time taken for each decision: " << average << " milliseconds" << std::endl;
 		std::cout << "Slowest decision took " << longestTime << " milliseconds\n";
 		std::cout << "Fastest decision took " << shortestTime << " milliseconds\n";
+		EndCUDA();
 		break;
 	case 3:
+		StartCUDA();
 		RunGPUVersion(board, Checkers::Minimax::BLACK, shortestTime, longestTime, average, turns, false);
 		std::cout << "Average time taken for each decision: " << average << " milliseconds" << std::endl;
 		std::cout << "Slowest decision took " << longestTime << " milliseconds\n";
 		std::cout << "Fastest decision took " << shortestTime << " milliseconds\n";
+		EndCUDA();
 		break;
 	case 4:
+		StartCUDA();
 		BenchBoth(board, Checkers::Minimax::BLACK);
+		EndCUDA();
 		break;
 	default:
 		ASSERT(0, "run_which value is wrong (%d)!", run_which);

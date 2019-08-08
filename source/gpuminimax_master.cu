@@ -2,8 +2,6 @@
 #include "bitboard.h"
 #include "gpuminimax.h"
 
-#include <helper_cuda.h>
-
 namespace Checkers
 {
 	namespace GPUMinimax
@@ -135,7 +133,7 @@ namespace Checkers
 			if (tx < num_boards)
 			{
 				black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + tx, src[tx], alpha, beta, depth - 1, turns - 1);
-
+				t_utility[tx] = utility[tx];
 			}
 			__syncthreads();
 

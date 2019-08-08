@@ -2,8 +2,6 @@
 #include "bitboard.h"
 #include "gpuminimax.h"
 
-#include <helper_cuda.h>
-
 namespace Checkers
 {
 	namespace GPUMinimax
