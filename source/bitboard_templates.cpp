@@ -6,7 +6,193 @@
 namespace Checkers
 {
 	template <typename OutIt>
-	bool BitBoard::GetPossibleWhiteMoves(BitBoard const &b, OutIt &dst)
+	void BitBoard::GetMoreWhiteJumps(BitBoard const &b, BitBoard::board_type i, OutIt &dst)
+	{
+		board_type jumps = GetWhiteJumps(b);
+		board_type empty = ~(b.white | b.black);
+
+		if (jumps & i)
+		{
+			if (BitBoard::OddRows & i)
+			{
+				if (((i & b.kings) << 4) & b.black) //UL from odd
+				{
+					board_type j = i << 4;
+					if (((j & L3Mask) << 3) & empty) // UL from even
+					{
+						GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j << 3), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 3)), j << 3, dst);
+					}
+				}
+
+				if ((((i & L5Mask)& b.kings) << 5) & b.black) //UR from odd
+				{
+					board_type j = i << 5;
+					if ((j << 4) & empty) // UR from even
+					{
+						GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j << 4), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 4)), j << 4, dst);
+					}
+				}
+
+				if ((i >> 4) & b.black) //LL from odd
+				{
+					board_type j = i >> 4;
+					if (((j & R5Mask) >> 5) & empty) // LL from even
+					{
+						GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j >> 5), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 4) >> 5) | ((j >> 5) & WhiteKingMask))), j >> 5, dst);
+					}
+				}
+
+				if (((i & R3Mask) >> 3) & b.black)//LR
+				{
+					board_type j = i >> 3;
+					if ((j >> 4) & empty)
+					{
+						GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j >> 4), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 3) >> 4) | ((j >> 4) & WhiteKingMask))), j >> 4, dst);
+					}
+				}
+			}
+			else
+			{
+				if ((((i & L3Mask) & b.kings) << 3) & b.black) //UL
+				{
+					board_type j = i << 3;
+					if ((j << 4) & empty)
+					{
+						GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j << 4), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 4)), j << 4, dst);
+					}
+
+
+				}
+				if (((i & b.kings) << 4) & b.black) //UR
+				{
+					board_type j = i << 4;
+					if (((j & L5Mask) << 5) & empty)
+					{
+						GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j << 5), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 5)), j << 5, dst);
+					}
+
+				}
+
+				if (((i & R5Mask) >> 5) & b.black) //LL
+				{
+					board_type j = i >> 5;
+					if ((j >> 4) & empty)
+					{
+						GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j >> 4), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 5) >> 4) | ((j >> 4) & WhiteKingMask))), j >> 4, dst);
+					}
+				}
+				if ((i >> 4) & b.black)//LR
+				{
+					board_type j = i >> 4;
+					if (((j & R3Mask) >> 3) & empty)
+					{
+						GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j >> 3), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 4) >> 3) | ((j >> 3) & WhiteKingMask))), j >> 3, dst);
+					}
+
+				}
+			}
+		}
+		else
+		{
+			*(dst++) = b;
+		}
+	}
+
+	template <typename OutIt>
+	void BitBoard::GetMoreBlackJumps(BitBoard const &b, BitBoard::board_type i, OutIt &dst)
+	{
+		board_type jumps = GetBlackJumps(b);
+		board_type empty = ~(b.white | b.black);
+
+		if (jumps & i)
+		{
+			if (OddRows & i)
+			{
+				// odd rows, jump lands in odd row (enemy piece in even row)
+				if ((i << 4) & b.white) // UL from odd
+				{
+					board_type j = i << 4;
+					if (((j & L3Mask) << 3) & empty) // UL from even
+					{
+						GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j << 3), (b.kings & (~i ^ j)) | ((((b.kings & i) << 4) << 3) | ((j << 3) & BlackKingMask))), j << 3, dst);
+					}
+				}
+
+				if (((i & L5Mask) << 5) & b.white) // UR from odd
+				{
+					board_type j = i << 5;
+					if ((j << 4) & empty) // UR from even
+					{
+						GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j << 4), (b.kings & (~i ^ j)) | ((((b.kings & i) << 5) << 4) | ((j << 4) & BlackKingMask))), j << 4, dst);
+					}
+				}
+
+				if ((((i & R3Mask) & b.kings) >> 3) & b.white) // LR from odd
+				{
+					board_type j = i >> 3;
+					if ((j >> 4) & empty)// LR from even
+					{
+						GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j >> 4), (b.kings & (~i ^ j)) | (j >> 4)), j >> 4, dst);
+					}
+				}
+
+				if (((i & b.kings) >> 4) & b.white) // LL from odd
+				{
+					board_type j = i >> 4;
+					if (((j & R5Mask) >> 5) & empty) // LL from even
+					{
+						GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j >> 5), (b.kings & (~i ^ j)) | (j >> 5)), j >> 5, dst);
+					}
+				}
+			}
+			else
+			{
+				// even rows
+				if ((((i & L3Mask)) << 3) & b.white) // UL from even
+				{
+					board_type j = i << 3;
+					if ((j << 4) & empty) // UL from odd
+					{
+						GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j << 4), (b.kings & (~i ^ j)) | ((((b.kings & i) << 3) << 4) | ((j << 4) & BlackKingMask))), j << 4, dst);
+					}
+				}
+
+				if ((i << 4) & b.white) // UR from even
+				{
+					board_type j = i << 4;
+					if (((j & L5Mask) << 5) & empty) // UR from odd
+					{
+						GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j << 5), (b.kings & (~i ^ j)) | ((((b.kings & i) << 4) << 5) | ((j << 5) & BlackKingMask))), j << 5, dst);
+					}
+				}
+
+				if (((i & b.kings) >> 4) & b.white) // LR from even
+				{
+					board_type j = i >> 4;
+					if (((j & R3Mask) >> 3) & empty)// LR from odd
+					{
+						GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j >> 3), (b.kings & (~i ^ j)) | (j >> 3)), j >> 3, dst);
+					}
+				}
+
+				if ((((i & b.kings) & R5Mask) >> 5) & b.white) // LL from even
+				{
+					board_type j = i >> 5;
+					if ((j >> 4) & empty) // LL from odd
+					{
+						GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j >> 4), (b.kings & (~i ^ j)) | (j >> 4)), j >> 4, dst);
+					}
+				}
+			}
+		}
+		else
+		{
+			*(dst++) = b;
+		}
+	}
+
+	template <typename OutIt>
+	void BitBoard::GetPossibleWhiteMoves(BitBoard const &b, OutIt &dst)
 	{
 		board_type moves = GetWhiteMoves(b);
 		board_type jumps = GetWhiteJumps(b);
@@ -89,7 +275,7 @@ namespace Checkers
 							board_type j = i << 4;
 							if (((j & L3Mask) << 3) & empty) // UL from even
 							{
-								*(dst++) = BitBoard((b.white & ~i) | (j << 3), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 3));
+								GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j << 3), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 3)), j << 3, dst);
 							}
 						}
 
@@ -98,7 +284,7 @@ namespace Checkers
 							board_type j = i << 5;
 							if ((j << 4) & empty) // UR from even
 							{
-								*(dst++) = BitBoard((b.white & ~i) | (j << 4), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 4));
+								GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j << 4), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 4)), j << 4, dst);
 							}
 						}
 
@@ -107,7 +293,7 @@ namespace Checkers
 							board_type j = i >> 4;
 							if (((j & R5Mask) >> 5) & empty) // LL from even
 							{
-								*(dst++) = BitBoard((b.white & ~i) | (j >> 5), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 4) >> 5) | ((j >> 5) & WhiteKingMask)));
+								GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j >> 5), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 4) >> 5) | ((j >> 5) & WhiteKingMask))), j >> 5, dst);
 							}
 						}
 
@@ -116,7 +302,7 @@ namespace Checkers
 							board_type j = i >> 3;
 							if ((j >> 4) & empty)
 							{
-								*(dst++) = BitBoard((b.white & ~i) | (j >> 4), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 3) >> 4) | ((j >> 4) & WhiteKingMask)));
+								GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j >> 4), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 3) >> 4) | ((j >> 4) & WhiteKingMask))), j >> 4, dst);
 							}
 						}
 					}
@@ -127,7 +313,7 @@ namespace Checkers
 							board_type j = i << 3;
 							if ((j << 4) & empty)
 							{
-								*(dst++) = BitBoard((b.white & ~i) | (j << 4), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 4));
+								GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j << 4), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 4)), j << 4, dst);
 							}
 
 
@@ -137,7 +323,7 @@ namespace Checkers
 							board_type j = i << 4;
 							if (((j & L5Mask) << 5) & empty)
 							{
-								*(dst++) = BitBoard((b.white & ~i) | (j << 5), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 5));
+								GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j << 5), (b.black & ~j), (b.kings & (~i ^ j)) | (j << 5)), j << 5, dst);
 							}
 
 						}
@@ -147,7 +333,7 @@ namespace Checkers
 							board_type j = i >> 5;
 							if ((j >> 4) & empty)
 							{
-								*(dst++) = BitBoard((b.white & ~i) | (j >> 4), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 5) >> 4) | ((j >> 4) & WhiteKingMask)));
+								GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j >> 4), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 5) >> 4) | ((j >> 4) & WhiteKingMask))), j >> 4, dst);
 							}
 						}
 						if ((i >> 4) & b.black)//LR
@@ -155,9 +341,8 @@ namespace Checkers
 							board_type j = i >> 4;
 							if (((j & R3Mask) >> 3) & empty)
 							{
-								*(dst++) = BitBoard((b.white & ~i) | (j >> 3), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 4) >> 3) | ((j >> 3) & WhiteKingMask)));
+								GetMoreWhiteJumps(BitBoard((b.white & ~i) | (j >> 3), (b.black & ~j), (b.kings & (~i ^ j)) | ((((b.kings & i) >> 4) >> 3) | ((j >> 3) & WhiteKingMask))), j >> 3, dst);
 							}
-
 						}
 					}
 				}
@@ -165,13 +350,11 @@ namespace Checkers
 				jumps &= ~i;
 				i = i << 1;
 			}
-			return true;
 		}
-		return false;
 	}
 
 	template <typename OutIt>
-	bool BitBoard::GetPossibleBlackMoves(BitBoard const &b, OutIt &dst)
+	void BitBoard::GetPossibleBlackMoves(BitBoard const &b, OutIt &dst)
 	{
 		board_type moves = GetBlackMoves(b);
 		board_type jumps = GetBlackJumps(b);
@@ -262,7 +445,7 @@ namespace Checkers
 							board_type j = i << 4;
 							if (((j & L3Mask) << 3) & empty) // UL from even
 							{
-								*(dst++) = BitBoard((b.white & ~j), (b.black & ~i) | (j << 3), (b.kings & (~i ^ j)) | ((((b.kings & i) << 4) << 3) | ((j << 3) & BlackKingMask)));
+								GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j << 3), (b.kings & (~i ^ j)) | ((((b.kings & i) << 4) << 3) | ((j << 3) & BlackKingMask))), j << 3, dst);
 							}
 						}
 
@@ -271,7 +454,7 @@ namespace Checkers
 							board_type j = i << 5;
 							if ((j << 4) & empty) // UR from even
 							{
-								*(dst++) = BitBoard((b.white & ~j), (b.black & ~i) | (j << 4), (b.kings & (~i ^ j)) | ((((b.kings & i) << 5) << 4) | ((j << 4) & BlackKingMask)));
+								GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j << 4), (b.kings & (~i ^ j)) | ((((b.kings & i) << 5) << 4) | ((j << 4) & BlackKingMask))), j << 4, dst);
 							}
 						}
 
@@ -280,7 +463,7 @@ namespace Checkers
 							board_type j = i >> 3;
 							if ((j >> 4) & empty)// LR from even
 							{
-								*(dst++) = BitBoard((b.white & ~j), (b.black & ~i) | (j >> 4), (b.kings & (~i ^ j)) | (j >> 4));
+								GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j >> 4), (b.kings & (~i ^ j)) | (j >> 4)), j >> 4, dst);
 							}
 						}
 
@@ -289,7 +472,7 @@ namespace Checkers
 							board_type j = i >> 4;
 							if (((j & R5Mask) >> 5) & empty) // LL from even
 							{
-								*(dst++) = BitBoard((b.white & ~j), (b.black & ~i) | (j >> 5), (b.kings & (~i ^ j)) | (j >> 5));
+								GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j >> 5), (b.kings & (~i ^ j)) | (j >> 5)), j >> 5, dst);
 							}
 						}
 					}
@@ -301,7 +484,7 @@ namespace Checkers
 							board_type j = i << 3;
 							if ((j << 4) & empty) // UL from odd
 							{
-								*(dst++) = BitBoard((b.white & ~j), (b.black & ~i) | (j << 4), (b.kings & (~i ^ j)) | ((((b.kings & i) << 3) << 4) | ((j << 4) & BlackKingMask)));
+								GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j << 4), (b.kings & (~i ^ j)) | ((((b.kings & i) << 3) << 4) | ((j << 4) & BlackKingMask))), j << 4, dst);
 							}
 						}
 
@@ -310,7 +493,7 @@ namespace Checkers
 							board_type j = i << 4;
 							if (((j & L5Mask) << 5) & empty) // UR from odd
 							{
-								*(dst++) = BitBoard((b.white & ~j), (b.black & ~i) | (j << 5), (b.kings & (~i ^ j)) | ((((b.kings & i) << 4) << 5) | ((j << 5) & BlackKingMask)));
+								GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j << 5), (b.kings & (~i ^ j)) | ((((b.kings & i) << 4) << 5) | ((j << 5) & BlackKingMask))), j << 5, dst);
 							}
 						}
 
@@ -319,7 +502,7 @@ namespace Checkers
 							board_type j = i >> 4;
 							if (((j & R3Mask) >> 3) & empty)// LR from odd
 							{
-								*(dst++) = BitBoard((b.white & ~j), (b.black & ~i) | (j >> 3), (b.kings & (~i ^ j)) | (j >> 3));
+								GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j >> 3), (b.kings & (~i ^ j)) | (j >> 3)), j >> 3, dst);
 							}
 						}
 
@@ -328,7 +511,7 @@ namespace Checkers
 							board_type j = i >> 5;
 							if ((j >> 4) & empty) // LL from odd
 							{
-								*(dst++) = BitBoard((b.white & ~j), (b.black & ~i) | (j >> 4), (b.kings & (~i ^ j)) | (j >> 4));
+								GetMoreBlackJumps(BitBoard((b.white & ~j), (b.black & ~i) | (j >> 4), (b.kings & (~i ^ j)) | (j >> 4)), j >> 4, dst);
 							}
 						}
 					}
@@ -337,9 +520,7 @@ namespace Checkers
 				jumps &= ~i;
 				i = i << 1;
 			}
-			return true;
 		}
-		return false;
 	}
 }
 

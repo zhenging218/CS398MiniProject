@@ -23,7 +23,7 @@ namespace Checkers
 		static constexpr GPUBitBoard::board_type BlackKingMask = BitBoard::BlackKingMask;
 		static constexpr GPUBitBoard::board_type WhiteKingMask = BitBoard::WhiteKingMask;
 
-		using gen_move_func = void(*)(GPUBitBoard::board_type, GPUBitBoard *, GPUBitBoard const &);
+		using gen_move_func = void(*)(GPUBitBoard::board_type, GPUBitBoard *&, GPUBitBoard const &);
 
 		board_type white, black, kings;
 		bool valid;
@@ -49,9 +49,12 @@ namespace Checkers
 		__host__ __device__ static count_type GetBlackKingsCount(GPUBitBoard const &b);
 		__host__ __device__ static count_type GetWhiteKingsCount(GPUBitBoard const &b);
 
-		__host__ __device__ static void GenWhiteMove(board_type cell, GPUBitBoard *out, GPUBitBoard const &board);
-		__host__ __device__ static void GenWhiteJump(board_type cell, GPUBitBoard *out, GPUBitBoard const &board);
-		__host__ __device__ static void GenBlackMove(board_type cell, GPUBitBoard *out, GPUBitBoard const &board);
-		__host__ __device__ static void GenBlackJump(board_type cell, GPUBitBoard *out, GPUBitBoard const &board);
+		__host__ __device__ static void GenMoreWhiteJumps(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
+		__host__ __device__ static void GenMoreBlackJumps(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
+
+		__host__ __device__ static void GenWhiteMove(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
+		__host__ __device__ static void GenWhiteJump(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
+		__host__ __device__ static void GenBlackMove(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
+		__host__ __device__ static void GenBlackJump(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
 	};
 }

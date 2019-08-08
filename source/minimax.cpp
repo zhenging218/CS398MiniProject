@@ -12,9 +12,7 @@ namespace Checkers
 		frontier_type GenerateWhiteFrontier(BitBoard const &board)
 		{
 			frontier_type frontier;
-
 			BitBoard::GetPossibleWhiteMoves(board, std::back_insert_iterator<frontier_type>(frontier));
-
 			return frontier;
 		}
 

@@ -74,6 +74,7 @@ namespace
 					shortestTime = std::min(shortestTime, dAvgSecs);
 					++turns;
 				}
+				system("pause");
 			}
 			else
 			{
@@ -132,6 +133,7 @@ namespace
 					shortestTime = std::min(shortestTime, dAvgSecs);
 					++turns;
 				}
+				system("pause");
 			}
 			else
 			{
