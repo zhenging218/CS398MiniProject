@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include <helper_cuda.h>
 
 namespace Checkers
 {

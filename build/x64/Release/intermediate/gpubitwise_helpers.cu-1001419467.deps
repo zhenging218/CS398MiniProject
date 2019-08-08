@@ -328,7 +328,6 @@ c:\program files\nvidia gpu computing toolkit\cuda\v9.2\include\crt/host_defines
 c:\program files\nvidia gpu computing toolkit\cuda\v9.2\include\device_launch_parameters.h
 c:\program files\nvidia gpu computing toolkit\cuda\v9.2\include\vector_types.h
 c:\users\zhenging.yiu\desktop\cs398miniproject\source\precomp.cuh
-c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitwise_helpers.cuh
 C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc\helper_cuda.h
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\stdint.h
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime.h
@@ -409,8 +408,7 @@ C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\system_error
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\cerrno
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\share.h
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\string
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\device_functions.h
-c:\program files\nvidia gpu computing toolkit\cuda\v9.2\include\crt/device_functions.h
+c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitwise_helpers.cuh
 c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpubitboard.cuh
 c:\users\zhenging.yiu\desktop\cs398miniproject\source\minimax.h
 c:\users\zhenging.yiu\desktop\cs398miniproject\source\board.h
@@ -422,18 +420,4 @@ c:\users\zhenging.yiu\desktop\cs398miniproject\source\bitboard_templates.cpp
 c:\users\zhenging.yiu\desktop\cs398miniproject\source\precomp.h
 c:\users\zhenging.yiu\desktop\cs398miniproject\source\macros.h
 c:\users\zhenging.yiu\desktop\cs398miniproject\source\bitwise_helpers.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/system/cuda/config.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config/config.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config/simple_defines.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config/compiler.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\cuda.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config/host_system.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config/device_system.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config/host_device.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config/debug.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config/compiler_fence.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config/forceinline.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config/exec_check_disable.h
-C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\thrust/detail/config/global_workarounds.h
 c:\users\zhenging.yiu\desktop\cs398miniproject\source\gpuminimax.cuh

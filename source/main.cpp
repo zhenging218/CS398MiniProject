@@ -21,12 +21,12 @@
 
 namespace
 {
-	void StartCUDA()
+	void StartCUDA(int argc, char **argv)
 	{
 		cudaDeviceProp deviceProp;
 		int dev = findCudaDevice(argc, (const char **)argv);
 		checkCudaErrors(cudaGetDeviceProperties(&deviceProp, dev));
-		std::cout << "CUDA device " << deviceProp.name << " has " << deviceProp.multiProcessorCount << " multi-processors, Compute " << deviceProp.major << "." << deviceProp.minor << "\n";
+		std::cout << "CUDA device " << deviceProp.name << " has " << deviceProp.multiProcessorCount << " multi-processors, Compute capability " << deviceProp.major << "." << deviceProp.minor << "\n";
 	}
 
 	void EndCUDA()
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
 		std::cout << "Fastest decision took " << shortestTime << " milliseconds\n";
 		break;
 	case 2:
-		StartCUDA();
+		StartCUDA(argc, argv);
 		RunGPUVersion(board, Checkers::Minimax::BLACK, shortestTime, longestTime, average, turns, true);
 		std::cout << "Average time taken for each decision: " << average << " milliseconds" << std::endl;
 		std::cout << "Slowest decision took " << longestTime << " milliseconds\n";
@@ -369,7 +369,7 @@ int main(int argc, char **argv)
 		EndCUDA();
 		break;
 	case 3:
-		StartCUDA();
+		StartCUDA(argc, argv);
 		RunGPUVersion(board, Checkers::Minimax::BLACK, shortestTime, longestTime, average, turns, false);
 		std::cout << "Average time taken for each decision: " << average << " milliseconds" << std::endl;
 		std::cout << "Slowest decision took " << longestTime << " milliseconds\n";
@@ -377,7 +377,7 @@ int main(int argc, char **argv)
 		EndCUDA();
 		break;
 	case 4:
-		StartCUDA();
+		StartCUDA(argc, argv);
 		BenchBoth(board, Checkers::Minimax::BLACK);
 		EndCUDA();
 		break;

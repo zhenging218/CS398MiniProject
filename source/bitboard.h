@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <vector>
-#include <helper_cuda.h>
 
 namespace Checkers
 {
