@@ -94,5 +94,11 @@
     <CudaCompile Include="..\source\gpuminimax.cu">
       <Filter>Kernel Files\Source Files</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\source\gpuminimax_host_white.cu">
+      <Filter>Kernel Files\Source Files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\source\gpuminimax_host_black.cu">
+      <Filter>Kernel Files\Source Files</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

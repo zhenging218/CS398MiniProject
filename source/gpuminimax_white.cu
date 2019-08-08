@@ -18,6 +18,9 @@ namespace Checkers
 			int t_v = Minimax::Infinity;
 			__shared__ bool terminated;
 			__shared__ Minimax::utility_type utilities[32];
+			__shared__ cudaStream_t streams[4];
+			__shared__ bool valid[32];
+			cudaEvent_t stream_events[32];
 			GPUBitBoard new_boards[32];
 
 			if (tx == 0)
@@ -46,12 +49,16 @@ namespace Checkers
 				if (tx < 32)
 				{
 					utilities[tx] = Minimax::Infinity;
+
+					if (tx == 0)
+					{
+						cudaStreamCreateWithFlags(&streams[0], cudaStreamNonBlocking);
+						cudaStreamCreateWithFlags(&streams[1], cudaStreamNonBlocking);
+						cudaStreamCreateWithFlags(&streams[2], cudaStreamNonBlocking);
+						cudaStreamCreateWithFlags(&streams[3], cudaStreamNonBlocking);
+					}
 				}
 				__syncthreads();
-
-				Minimax::utility_type * utility;
-				cudaMalloc(&utility, sizeof(Minimax::utility_type));
-				*utility = utilities[tx];
 
 				// in the max kernel, use gen_black_move_type instead
 				int gen_black_move_type = (int)(GPUBitBoard::GetBlackJumps(src) != 0);
@@ -59,31 +66,58 @@ namespace Checkers
 				gen_black_move[gen_black_move_type](1u << tx, end, src);
 				int frontier_size = end - new_boards;
 
-				GPUBitBoard *frontier;
-				cudaMalloc(&frontier, sizeof(GPUBitBoard) * frontier_size);
-				memcpy(frontier, new_boards, sizeof(GPUBitBoard) * frontier_size);
+				valid[tx] = (frontier_size != 0);
 
-				master_white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility, frontier, frontier_size, alpha, t_beta, depth - 1, turns - 1);
-				utilities[tx] = *utility;
+				Minimax::utility_type * utility;
+				cudaMalloc(&utility, sizeof(Minimax::utility_type) * frontier_size);
 
-				cudaFree(frontier);
+				for (int i = 0; i < frontier_size; ++i)
+				{
+					utility[i] = utilities[tx];
+					white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), 0, streams[i % 4] >> >(utility + i, new_boards[i], alpha, t_beta, depth - 1, turns - 1);
+					cudaStreamWaitEvent(streams[i % 4], stream_events[i], 0);
+				}
+
+				for (int i = 0; i < frontier_size; ++i)
+				{
+					utilities[tx] = min(utility[i], utilities[tx]);
+					if (utilities[tx] < alpha)
+					{
+						break;
+					}
+					else
+					{
+						t_beta = min(utilities[tx], t_beta);
+					}
+				}
+
 				cudaFree(utility);
 
 				__syncthreads();
 
 				if (tx == 0)
 				{
+					// all streams in the block should have completed processing by now.
+					for (int i = 0; i < 4; ++i)
+					{
+						// cudaStreamSynchronize(streams[i]);
+						cudaStreamDestroy(streams[i]);
+					}
+
 					// final ab-pruning for this node
 					for (int i = 0; i < 32; ++i)
 					{
-						t_v = min(utilities[i], t_v);
-						if (t_v < alpha)
+						if (valid[i])
 						{
-							break;
-						}
-						else
-						{
-							beta = min(utilities[i], beta);
+							t_v = min(utilities[i], t_v);
+							if (t_v < alpha)
+							{
+								break;
+							}
+							else
+							{
+								beta = min(utilities[i], beta);
+							}
 						}
 					}
 					*v = t_v;
@@ -100,7 +134,10 @@ namespace Checkers
 			int t_v = -Minimax::Infinity;
 			__shared__ bool terminated;
 			__shared__ Minimax::utility_type utilities[32];
+			__shared__ cudaStream_t streams[4];
+			__shared__ bool valid[32];
 			GPUBitBoard new_boards[32];
+			cudaEvent_t stream_events[32];
 
 			if (!tx)
 			{
@@ -128,45 +165,75 @@ namespace Checkers
 				if (tx < 32)
 				{
 					utilities[tx] = -Minimax::Infinity;
-				}
 
+					if (tx == 0)
+					{
+						cudaStreamCreateWithFlags(&streams[0], cudaStreamNonBlocking);
+						cudaStreamCreateWithFlags(&streams[1], cudaStreamNonBlocking);
+						cudaStreamCreateWithFlags(&streams[2], cudaStreamNonBlocking);
+						cudaStreamCreateWithFlags(&streams[3], cudaStreamNonBlocking);
+					}
+				}
 				__syncthreads();
 
-				Minimax::utility_type * utility;
-				cudaMalloc(&utility, sizeof(Minimax::utility_type));
-				*utility = utilities[tx];
-				GPUBitBoard *end = new_boards;
 				// in the max kernel, use gen_black_move_type instead
 				int gen_white_move_type = (int)(GPUBitBoard::GetWhiteJumps(src) != 0);
+				GPUBitBoard *end = new_boards;
 				gen_white_move[gen_white_move_type](1u << tx, end, src);
 
 				int frontier_size = end - new_boards;
+				valid[tx] = (frontier_size != 0);
 
-				GPUBitBoard *frontier;
-				cudaMalloc(&frontier, sizeof(GPUBitBoard) * frontier_size);
-				memcpy(frontier, new_boards, sizeof(GPUBitBoard) * frontier_size);
+				Minimax::utility_type * utility;
+				cudaMalloc(&utility, sizeof(Minimax::utility_type) * frontier_size);
 
-				master_white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility, frontier, frontier_size, t_alpha, beta, depth - 1, turns - 1);
-				utilities[tx] = *utility;
+				for (int i = 0; i < frontier_size; ++i)
+				{
+					utility[i] = utilities[tx];
+					white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), 0, streams[i % 4] >> >(utility + i, new_boards[i], t_alpha, beta, depth - 1, turns - 1);
+					cudaStreamWaitEvent(streams[i % 4], stream_events[i], 0);
+				}
 
-				cudaFree(frontier);
+				for (int i = 0; i < frontier_size; ++i)
+				{
+					utilities[tx] = max(utility[i], utilities[tx]);
+					if (utilities[tx] > beta)
+					{
+						break;
+					}
+					else
+					{
+						t_alpha = max(utilities[tx], t_alpha);
+					}
+				}
+
 				cudaFree(utility);
 
 				__syncthreads();
 
 				if (tx == 0)
 				{
+					// all streams in the block should have completed processing by now.
+					for (int i = 0; i < 4; ++i)
+					{
+						// cudaStreamSynchronize(streams[i]);
+						cudaStreamDestroy(streams[i]);
+					}
+
 					// final ab-pruning for this node
 					for (int i = 0; i < 32; ++i)
 					{
-						t_v = max(utilities[i], t_v);
-						if (t_v > beta)
+						if (valid[i])
 						{
-							break;
-						}
-						else
-						{
-							alpha = max(utilities[i], alpha);
+							t_v = max(utilities[i], t_v);
+							if (t_v > beta)
+							{
+								break;
+							}
+							else
+							{
+								alpha = max(utilities[i], alpha);
+							}
 						}
 					}
 

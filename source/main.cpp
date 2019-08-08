@@ -150,11 +150,6 @@ namespace
 
 	void BenchBoth(Checkers::BitBoard const &src_board, Checkers::Minimax::Turn start_turn)
 	{
-		char const *progress_tick[] = 
-		{
-			".", "..", "..."
-		};
-
 		int progress = 0;
 
 		double cpu_totalTime = 0.0;
@@ -162,6 +157,8 @@ namespace
 		double cpu_longestTime = std::numeric_limits<double>::min();
 		double cpu_average;
 		int cpu_turns = 0;
+		int slowest_cpu_turn = 0;
+		int fastest_cpu_turn = 0;
 		Checkers::Minimax::Result cpu_result = Checkers::Minimax::INPROGRESS;
 		Checkers::Minimax::Turn cpu_turn = start_turn;
 
@@ -170,6 +167,8 @@ namespace
 		double gpu_longestTime = std::numeric_limits<double>::min();
 		double gpu_average;
 		int gpu_turns = 0;
+		int slowest_gpu_turn = 0;
+		int fastest_gpu_turn = 0;
 		Checkers::Minimax::Result gpu_result = Checkers::Minimax::INPROGRESS;
 		Checkers::Minimax::Turn gpu_turn = start_turn;
 
@@ -179,8 +178,7 @@ namespace
 
 		while (cpu_result == Checkers::Minimax::INPROGRESS)
 		{
-			std::cout << "CPU Version: Running..." << progress_tick[progress] << "\r";
-			progress = (progress + 1 < 3) ? (progress + 1) : 0;
+			std::cout << "CPU Version: Turn " << cpu_turns << "...\r";
 			Checkers::Minimax::Turn cpu_turn = minimax.GetTurn();
 			auto start = std::chrono::high_resolution_clock::now();
 			cpu_result = minimax.Next();
@@ -190,8 +188,16 @@ namespace
 			{
 				cpu_out.emplace_back(minimax.GetBoard());
 				cpu_totalTime += dAvgSecs;
-				cpu_longestTime = std::max(cpu_longestTime, dAvgSecs);
-				cpu_shortestTime = std::min(cpu_shortestTime, dAvgSecs);
+				if (dAvgSecs > cpu_longestTime)
+				{
+					cpu_longestTime = dAvgSecs;
+					slowest_cpu_turn = cpu_turns;
+				}
+				else if (dAvgSecs < cpu_shortestTime)
+				{
+					cpu_shortestTime = dAvgSecs;
+					fastest_cpu_turn = cpu_turns;
+				}
 				++cpu_turns;
 			}
 		}
@@ -208,8 +214,7 @@ namespace
 
 		while (gpu_result == Checkers::Minimax::INPROGRESS)
 		{
-			std::cout << "GPU Version: Running..." << progress_tick[progress] << "\r";
-			progress = (progress + 1 < 3) ? (progress + 1) : 0;
+			std::cout << "GPU Version: Turn " << gpu_turns << "...\r";
 			auto start = std::chrono::high_resolution_clock::now();
 			gpu_result = Checkers::GPUMinimax::Next(gpu_board, gpu_turn, gpu_depth, turns_left);
 			std::chrono::duration<double, std::milli> time = std::chrono::high_resolution_clock::now() - start;
@@ -219,8 +224,16 @@ namespace
 			{
 				gpu_out.emplace_back(gpu_board);
 				gpu_totalTime += dAvgSecs;
-				gpu_longestTime = std::max(gpu_longestTime, dAvgSecs);
-				gpu_shortestTime = std::min(gpu_shortestTime, dAvgSecs);
+				if (dAvgSecs > gpu_longestTime)
+				{
+					gpu_longestTime = dAvgSecs;
+					slowest_gpu_turn = gpu_turns;
+				}
+				else if (dAvgSecs < gpu_shortestTime)
+				{
+					gpu_shortestTime = dAvgSecs;
+					fastest_gpu_turn = gpu_turns;
+				}
 				++gpu_turns;
 			}
 		}
@@ -236,16 +249,16 @@ namespace
 		std::cout << "CPU: took " << cpu_turns << " turns and ran for " << cpu_totalTime << " milliseconds in total\n";
 		std::cout << "The game result was " << (cpu_result == Checkers::Minimax::DRAW ? "a draw game." : (cpu_turn == Checkers::Minimax::WHITE ? "black won." : "white won.")) << "\n";
 		std::cout << "Average time taken for each decision: " << cpu_average << " milliseconds\n";
-		std::cout << "Slowest decision took " << cpu_longestTime << " milliseconds\n";
-		std::cout << "Fastest decision took " << cpu_shortestTime << " milliseconds\n";
+		std::cout << "Slowest decision took " << cpu_longestTime << " milliseconds at turn " << slowest_cpu_turn << "\n";
+		std::cout << "Fastest decision took " << cpu_shortestTime << " milliseconds at turn " << fastest_cpu_turn << "\n";
 
 		std::cout << "\n\n";
 
 		std::cout << "GPU: took " << gpu_turns << " turns and ran for " << gpu_totalTime << " milliseconds in total\n";
 		std::cout << "The game result was " << (gpu_result == Checkers::Minimax::DRAW ? "a draw game." : (gpu_turn == Checkers::Minimax::WHITE ? "black won." : "white won.")) << "\n";
 		std::cout << "Average time taken for each decision: " << gpu_average << " milliseconds\n";
-		std::cout << "Slowest decision took " << gpu_longestTime << " milliseconds\n";
-		std::cout << "Fastest decision took " << gpu_shortestTime << " milliseconds\n";
+		std::cout << "Slowest decision took " << gpu_longestTime << " milliseconds at turn " << slowest_gpu_turn << "\n";
+		std::cout << "Fastest decision took " << gpu_shortestTime << " milliseconds at turn " << fastest_gpu_turn << "\n";
 
 		std::cout << "\n\n";
 

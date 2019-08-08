@@ -34,6 +34,8 @@
     <CudaCompile Include="..\source\gpubitboard.cu" />
     <CudaCompile Include="..\source\gpubitwise_helpers.cu" />
     <CudaCompile Include="..\source\gpuminimax.cu" />
+    <CudaCompile Include="..\source\gpuminimax_host_black.cu" />
+    <CudaCompile Include="..\source\gpuminimax_host_white.cu" />
     <CudaCompile Include="..\source\gpuminimax_white.cu" />
     <CudaCompile Include="..\source\gpuminimax_black.cu" />
     <CudaCompile Include="..\source\gpuminimax_helpers.cu" />
