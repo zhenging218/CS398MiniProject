@@ -14,7 +14,7 @@ namespace Checkers
 
 			if (tx < num_boards)
 			{
-				v[tx] = WhiteMoveMin(boards[tx], depth, turns, -Infinity, Infinity);
+				v[tx] = white_min_device(boards[tx], depth, turns, -Infinity, Infinity);
 				// cudaDeviceSynchronize();
 			}
 			__syncthreads();
@@ -43,7 +43,7 @@ namespace Checkers
 
 			if (tx < num_boards)
 			{
-				v[tx] = BlackMoveMin(boards[tx], depth, turns, -Infinity, Infinity);
+				v[tx] = black_min_device(boards[tx], -Infinity, Infinity,depth, turns );
 			}
 
 			__syncthreads();

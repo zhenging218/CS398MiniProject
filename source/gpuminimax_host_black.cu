@@ -46,7 +46,7 @@ namespace Checkers
 						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
 
 						// launch kernel
-						master_black_max_kernel(GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
+						master_black_max_kernel(GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						CHECK_ERRORS();
 
 						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);

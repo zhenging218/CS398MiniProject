@@ -16,11 +16,11 @@ namespace Checkers
 			if (GetWhiteUtility(b, terminal_value, depth, turns_left))
 				return terminal_value;
 
-			auto frontier = GenerateBlackFrontier(b);
+			//auto frontier = GenerateBlackFrontier(b);
 
 			for (auto const &move : frontier)
 			{
-				v = min(WhiteMoveMax(move, depth - 1, turns_left - 1, alpha, beta), v);
+				v = min(white_max_device(move, depth - 1, turns_left - 1, alpha, beta), v);
 				if (v < alpha)
 				{
 					// prune
@@ -40,11 +40,11 @@ namespace Checkers
 			if (GetWhiteUtility(b, terminal_value, depth, turns_left))
 				return terminal_value;
 
-			auto frontier = GenerateWhiteFrontier(b);
+			//auto frontier = GenerateWhiteFrontier(b);
 
 			for (auto const &move : frontier)
 			{
-				v = max(WhiteMoveMin(move, depth - 1, turns_left - 1, alpha, beta), v);
+				v = max(white_min_device(move, depth - 1, turns_left - 1, alpha, beta), v);
 				if (v > beta)
 				{
 					// prune

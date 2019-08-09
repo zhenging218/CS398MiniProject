@@ -14,7 +14,7 @@ namespace Checkers
 
 			if (tx == 0)
 			{
-				utility[tx] = white_min_device(src[tx], depth - 1, turns - 1, alpha, beta);
+				t_utility[tx] = white_min_device(src[tx], depth - 1, turns - 1, alpha, beta);
 			}
 
 			__syncthreads();
@@ -42,7 +42,7 @@ namespace Checkers
 
 			if (tx == 0)
 			{
-				utility[tx] = white_max_device(src[tx], depth - 1, turns - 1, alpha, beta);
+				t_utility[tx] = white_max_device(src[tx], depth - 1, turns - 1, alpha, beta);
 			}
 			__syncthreads();
 
