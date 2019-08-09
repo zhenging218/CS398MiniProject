@@ -9,7 +9,7 @@ namespace Checkers
 {
 	namespace GPUMinimax
 	{
-		__host__ Minimax::utility_type BlackMoveMax(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta)
+		__host__ __device__ Minimax::utility_type BlackMoveMax(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta)
 		{
 			utility_type v = -Infinity;
 			utility_type terminal_value = 0;
@@ -24,7 +24,7 @@ namespace Checkers
 
 			if (size > 0)
 			{
-				v = std::max(BlackMoveMin(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
+				v = max(BlackMoveMin(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
 				if (!(v > beta))
 				{
 					alpha = std::max(alpha, v);
@@ -39,23 +39,17 @@ namespace Checkers
 							new (copy + i) GPUBitBoard(frontier[i + 1]);
 						}
 						cudaMalloc((void**)&GPUFrontier, sizeof(GPUBitBoard) * (size - 1));
-						CHECK_ERRORS();
 						cudaMemcpy(GPUFrontier, copy, sizeof(GPUBitBoard) * (size - 1), cudaMemcpyHostToDevice);
-						CHECK_ERRORS();
 						free(copy);
 
 						cudaMalloc((void**)&GPUv, sizeof(utility_type));
-						CHECK_ERRORS();
 						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
-						CHECK_ERRORS();
 
 						// launch kernel
-						master_black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
-						cudaDeviceSynchronize();
+						master_black_max_kernel(GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						CHECK_ERRORS();
 
 						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
-						CHECK_ERRORS();
 						cudaFree(GPUFrontier);
 						CHECK_ERRORS();
 						cudaFree(GPUv);
@@ -68,7 +62,7 @@ namespace Checkers
 			return v;
 		}
 
-		__host__ Minimax::utility_type BlackMoveMin(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta)
+		__host__ __device__ Minimax::utility_type BlackMoveMin(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta)
 		{
 			utility_type v = Infinity;
 			utility_type terminal_value = 0;
@@ -83,7 +77,7 @@ namespace Checkers
 
 			if (size > 0)
 			{
-				v = std::min(BlackMoveMax(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
+				v = min(BlackMoveMax(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
 				if (!(v < alpha))
 				{
 					beta = std::min(beta, v);
@@ -109,8 +103,7 @@ namespace Checkers
 						CHECK_ERRORS();
 
 						// launch kernel
-						master_black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
-						cudaDeviceSynchronize();
+						master_black_min_kernel(GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						CHECK_ERRORS();
 
 						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);

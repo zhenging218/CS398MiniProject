@@ -24,7 +24,7 @@ namespace Checkers
 
 			if (size > 0)
 			{
-				v = std::max(WhiteMoveMin(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
+				v = max(WhiteMoveMin(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
 				if (!(v > beta))
 				{
 					alpha = std::max(alpha, v);
@@ -50,8 +50,8 @@ namespace Checkers
 						CHECK_ERRORS();
 
 						// launch kernel
-						master_white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
-						cudaDeviceSynchronize();
+						master_white_max_kernel(GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
+						//cudaDeviceSynchronize();
 						CHECK_ERRORS();
 
 						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
@@ -83,7 +83,7 @@ namespace Checkers
 
 			if (size > 0)
 			{
-				v = std::min(WhiteMoveMax(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
+				v = min(WhiteMoveMax(frontier[0], depth - 1, turns_left - 1, alpha, beta), v);
 				if (!(v < alpha))
 				{
 					beta = std::min(beta, v);
@@ -109,7 +109,7 @@ namespace Checkers
 						CHECK_ERRORS();
 
 						// launch kernel
-						master_white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
+						master_white_min_kernel(GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 						CHECK_ERRORS();
 

@@ -71,7 +71,7 @@ namespace Checkers
 					CHECK_ERRORS();
 
 					// launch kernel
-					master_white_next_kernel << < dim3(((size - 1) / 32) + 1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, X, GPUFrontier, size - 1, depth, turns_left);
+					master_white_next_kernel(GPUPlacement, X, GPUFrontier, size - 1, depth, turns_left);
 					cudaDeviceSynchronize();
 					CHECK_ERRORS();
 

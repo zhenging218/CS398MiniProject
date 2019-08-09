@@ -6,213 +6,52 @@ namespace Checkers
 {
 	namespace GPUMinimax
 	{
-		__global__ void black_min_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns)
+		__device__ utility_type black_min_device(GPUBitBoard src, int alpha, int beta, int depth, int turns)
 		{
-			int tx = threadIdx.x;
-			int t_beta = beta;
-			int t_v = Minimax::Infinity;
-			__shared__ bool terminated;
-			__shared__ Minimax::utility_type utilities[32];
-			__shared__ bool valid[32];
-			GPUBitBoard new_boards[32];
+			utility_type v = Infinity;
+			utility_type terminal_value = 0;
+			// check if need to stop the search
+			if (GetBlackUtility(src, terminal_value, depth, turns))
+				return terminal_value;
 
-			if (tx == 0)
+			auto frontier = GPUBitBoard::GenWhiteMove(,src,);
+
+			for (auto const &move : frontier)
 			{
-				Minimax::utility_type terminal_value = 0;
-				if (src.valid)
+				v = min(BlackMoveMax(move, depth - 1, turns - 1, alpha, beta), v);
+				if (v < alpha)
 				{
-					terminated = GetBlackUtility(src, terminal_value, depth, turns);
-					if (terminated)
-						*v = terminal_value;
+					// prune
+					break;
 				}
-				else
-					terminated = true;
-
+				beta = min(beta, v);
 			}
 
-			__syncthreads();
-
-			if (terminated)
-			{
-				return;
-			}
-			else
-			{
-				if (tx < 32)
-				{
-					utilities[tx] = Minimax::Infinity;
-				}
-				__syncthreads();
-
-				// in the max kernel, use gen_black_move_type instead
-				int gen_white_move_type = (int)(GPUBitBoard::GetWhiteJumps(src) != 0);
-				GPUBitBoard *end = new_boards;
-				gen_white_move[gen_white_move_type](1u << tx, end, src);
-				int frontier_size = end - new_boards;
-				valid[tx] = (frontier_size != 0);
-
-				if (frontier_size > 0)
-				{
-					Minimax::utility_type * utility = (utility_type *)malloc(sizeof(utility_type) * frontier_size);
-
-					for (int i = 0; i < frontier_size; ++i)
-					{
-						utility[i] = utilities[tx];
-						black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[i], alpha, t_beta, depth - 1, turns - 1);
-					}
-
-					__syncthreads();
-					cudaDeviceSynchronize();
-					__syncthreads();
-
-					for (int i = 0; i < frontier_size; ++i)
-					{
-						utilities[tx] = min(utility[i], utilities[tx]);
-						if (utilities[tx] < alpha)
-						{
-							break;
-						}
-						else
-						{
-							t_beta = min(utilities[tx], t_beta);
-						}
-					}
-
-					free(utility);
-				}
-
-				__syncthreads();
-
-				if (tx == 0)
-				{
-
-					// final ab-pruning for this node
-					for (int i = 0; i < 32; ++i)
-					{
-						if (valid[i])
-						{
-							t_v = min(utilities[i], t_v);
-							if (t_v < alpha)
-							{
-								break;
-							}
-							else
-							{
-								beta = min(utilities[i], beta);
-							}
-						}
-					}
-
-					*v = t_v;
-				}
-
-				__syncthreads();
-			}
+			return v;
 		}
 
-		__global__ void black_max_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns)
+		__device__ utility_type black_max_device(GPUBitBoard src, int alpha, int beta, int depth, int turns)
 		{
-			int tx = threadIdx.x;
-			int t_alpha = alpha;
-			int t_v = -Minimax::Infinity;
-			__shared__ bool terminated;
-			__shared__ Minimax::utility_type utilities[32];
-			__shared__ bool valid[32];
-			GPUBitBoard new_boards[32];
+			utility_type v = -Infinity;
+			utility_type terminal_value = 0;
+			// check if need to stop the search
+			if (GetBlackUtility(src, terminal_value, depth, turns))
+				return terminal_value;
 
-			if (tx == 0)
+			auto frontier = GenerateBlackFrontier(b);
+
+			for (auto const &move : frontier)
 			{
-				Minimax::utility_type terminal_value = 0;
-				if (src.valid)
+				v = max(BlackMoveMin(move, depth - 1, turns - 1, alpha, beta), v);
+				if (v > beta)
 				{
-					terminated = GetBlackUtility(src, terminal_value, depth, turns);
-					if (terminated)
-						*v = terminal_value;
+					// prune
+					break;
 				}
-				else
-					terminated = true;
-
+				alpha = max(alpha, v);
 			}
 
-			__syncthreads();
-
-			if (terminated)
-			{
-				return;
-			}
-			else
-			{
-				if (tx < 32)
-				{
-					utilities[tx] = -Minimax::Infinity;
-				}
-				__syncthreads();
-
-				// in the max kernel, use gen_black_move_type instead
-				int gen_black_move_type = (int)(GPUBitBoard::GetBlackJumps(src) != 0);
-				GPUBitBoard *end = new_boards;
-				gen_black_move[gen_black_move_type](1u << tx, end, src);
-
-				int frontier_size = end - new_boards;
-				valid[tx] = (frontier_size != 0);
-
-				if (frontier_size > 0)
-				{
-					Minimax::utility_type * utility = (utility_type *)malloc(sizeof(utility_type) * frontier_size);
-
-					for (int i = 0; i < frontier_size; ++i)
-					{
-						utility[i] = utilities[tx];
-						black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[i], t_alpha, beta, depth - 1, turns - 1);
-						
-					}
-
-					__syncthreads();
-					cudaDeviceSynchronize();
-					__syncthreads();
-
-					for (int i = 0; i < frontier_size; ++i)
-					{
-						utilities[tx] = max(utility[i], utilities[tx]);
-						if (utilities[tx] > beta)
-						{
-							break;
-						}
-						else
-						{
-							t_alpha = max(utilities[tx], t_alpha);
-						}
-					}
-
-					free(utility);
-				}
-
-				__syncthreads();
-
-				if (tx == 0)
-				{
-					// final ab-pruning for this node
-					for (int i = 0; i < 32; ++i)
-					{
-						if (valid[i])
-						{
-							t_v = max(utilities[i], t_v);
-							if (t_v > beta)
-							{
-								break;
-							}
-							else
-							{
-								alpha = max(utilities[i], alpha);
-							}
-						}
-					}
-
-					*v = t_v;
-				}
-
-				__syncthreads();
-			}
+			return v;
 		}
 	}
 }

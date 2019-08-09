@@ -27,14 +27,14 @@ namespace Checkers
 		__global__ void master_white_max_kernel(Minimax::utility_type *v, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns);
 		__global__ void master_white_min_kernel(Minimax::utility_type *v, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns);
 
-		__global__ void white_min_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns);
-		__global__ void white_max_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns);
+		__device__ utility_type white_min_device(GPUBitBoard src, int alpha, int beta, int depth, int turns);
+		__device__ utility_type white_max_device(GPUBitBoard src, int alpha, int beta, int depth, int turns);
 
 		__global__ void master_black_max_kernel(Minimax::utility_type *v, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns);
 		__global__ void master_black_min_kernel(Minimax::utility_type *v, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns);
 
-		__global__ void black_min_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns);
-		__global__ void black_max_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns);
+		__device__ utility_type black_min_device(GPUBitBoard src, int alpha, int beta, int depth, int turns);
+		__device__ utility_type black_max_device(GPUBitBoard src, int alpha, int beta, int depth, int turns);
 
 		__host__ __device__ bool GetWhiteUtility(GPUBitBoard const &src, Minimax::utility_type &terminal_value, int depth, int turns);
 		__host__ __device__ bool GetBlackUtility(GPUBitBoard const &src, Minimax::utility_type &terminal_value, int depth, int turns);
@@ -44,9 +44,9 @@ namespace Checkers
 		__host__ __device__ bool BlackWinTest(BitBoard const &b);
 		__host__ __device__ bool BlackLoseTest(BitBoard const &b);
 
-		__host__ Minimax::utility_type WhiteMoveMax(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta);
-		__host__ Minimax::utility_type WhiteMoveMin(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta);
-		__host__ Minimax::utility_type BlackMoveMax(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta);
-		__host__ Minimax::utility_type BlackMoveMin(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta);
+		__host__ __device__ Minimax::utility_type WhiteMoveMax(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta);
+		__host__ __device__ Minimax::utility_type WhiteMoveMin(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta);
+		__host__ __device__ Minimax::utility_type BlackMoveMax(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta);
+		__host__ __device__ Minimax::utility_type BlackMoveMin(BitBoard const &b, int depth, int turns_left, Minimax::utility_type alpha, Minimax::utility_type beta);
 	}
 }

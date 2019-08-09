@@ -10,29 +10,17 @@ namespace Checkers
 		{
 			int tx = threadIdx.x;
 			__shared__ Minimax::utility_type v[32];
-			__shared__ Minimax::utility_type *ret_v;
 			int t_placement = *placement;
-
-			if (tx == 0)
-			{
-				cudaMalloc(&ret_v, sizeof(Minimax::utility_type) * num_boards);
-				memset(ret_v, X, sizeof(Minimax::utility_type) * num_boards);
-			}
-
-			__syncthreads();
 
 			if (tx < num_boards)
 			{
-				white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (ret_v + tx, boards[tx], -Infinity, Infinity, depth, turns);
-				cudaDeviceSynchronize();
-				v[tx] = ret_v[tx];
+				v[tx] = WhiteMoveMin(boards[tx], depth, turns, -Infinity, Infinity);
+				// cudaDeviceSynchronize();
 			}
-
 			__syncthreads();
 
 			if (tx == 0)
 			{
-				cudaFree(ret_v);
 				for (int i = 0; i < num_boards; ++i)
 				{
 					if (X < v[i])
@@ -49,32 +37,19 @@ namespace Checkers
 
 		__global__ void master_black_next_kernel(int *placement, utility_type X, GPUBitBoard const *boards, int num_boards, int depth, int turns)
 		{
-			
 			int tx = threadIdx.x;
 			__shared__ Minimax::utility_type v[32];
-			__shared__ Minimax::utility_type *ret_v;
 			int t_placement = *placement;
-
-			if (tx == 0)
-			{
-				cudaMalloc(&ret_v, sizeof(Minimax::utility_type) * num_boards);
-				memset(ret_v, X, sizeof(Minimax::utility_type) * num_boards);
-			}
-
-			__syncthreads();
 
 			if (tx < num_boards)
 			{
-				black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (ret_v + tx, boards[tx], -Infinity, Infinity, depth, turns);
-				cudaDeviceSynchronize();
-				v[tx] = ret_v[tx];
+				v[tx] = BlackMoveMin(boards[tx], depth, turns, -Infinity, Infinity);
 			}
 
 			__syncthreads();
 
 			if (tx == 0)
 			{
-				cudaFree(ret_v);
 				for (int i = 0; i < num_boards; ++i)
 				{
 					if (X < v[i])
