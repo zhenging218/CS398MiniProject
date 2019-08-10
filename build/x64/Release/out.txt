@@ -1,0 +1,25 @@
+search depth: 4, maximum game turns: 3
+GPU Device 0: "GeForce GTX 1060 6GB" with compute capability 6.1
+
+CUDA device GeForce GTX 1060 6GB has 10 multi-processors, Compute capability 6.1
+CPU Version: Turn 0...CPU Version: Turn 1...CPU Version: Turn 2...CPU Version: Turn 3...CPU version run complete
+GPU Version: Turn 0...GPU Version: Turn 1...GPU Version: Turn 2...GPU Version: Turn 3...GPU version run complete
+
+
+Showing results:
+CPU: took 3 turns and ran for 0.19941 milliseconds in total
+The game result was a draw game.
+Average time taken for each decision: 0.06647 milliseconds
+Slowest decision took 0.174483 milliseconds at turn 0
+Fastest decision took 0.000587 milliseconds at turn 2
+
+
+GPU: took 3 turns and ran for 14214.8 milliseconds in total
+The game result was a draw game.
+Average time taken for each decision: 4738.26 milliseconds
+Slowest decision took 8211.35 milliseconds at turn 0
+Fastest decision took 1737.58 milliseconds at turn 2
+
+
+Testing correctness...
+CPU and GPU ran the same game!

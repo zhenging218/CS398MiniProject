@@ -50,6 +50,7 @@ namespace Checkers
 						CHECK_ERRORS();
 
 						// launch kernel
+						cudaError_t err = cudaDeviceSetLimit(cudaLimitDevRuntimeSyncDepth, depth - 1);
 						master_black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 						CHECK_ERRORS();
@@ -109,6 +110,7 @@ namespace Checkers
 						CHECK_ERRORS();
 
 						// launch kernel
+						cudaError_t err = cudaDeviceSetLimit(cudaLimitDevRuntimeSyncDepth, depth - 1);
 						master_black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 						CHECK_ERRORS();

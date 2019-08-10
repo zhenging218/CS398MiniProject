@@ -16,7 +16,7 @@ namespace Checkers
 			__shared__ bool terminated;
 			__shared__ Minimax::utility_type utilities[32];
 			__shared__ bool valid[32];
-			GPUBitBoard new_boards[32];
+			__shared__ GPUBitBoard new_boards[32][32];
 
 			if (tx == 0)
 			{
@@ -26,7 +26,6 @@ namespace Checkers
 					terminated = GetWhiteUtility(src, terminal_value, depth, turns);
 					if (terminated)
 						*v = terminal_value;
-
 				}
 				else
 					terminated = true;
@@ -44,14 +43,18 @@ namespace Checkers
 				if (tx < 32)
 				{
 					utilities[tx] = Minimax::Infinity;
+					for (int i = 0; i < 32; ++i)
+					{
+						new_boards[tx][i] = GPUBitBoard();
+					}
 				}
 				__syncthreads();
 
 				// in the max kernel, use gen_black_move_type instead
-				int gen_black_move_type = (int)(GPUBitBoard::GetBlackJumps(src) != 0);
-				GPUBitBoard *end = new_boards;
-				gen_black_move[gen_black_move_type](1u << tx, end, src);
-				int frontier_size = end - new_boards;
+				int gen_white_move_type = (int)(GPUBitBoard::GetWhiteJumps(src) != 0);
+				GPUBitBoard *end = new_boards[tx];
+				gen_white_move[gen_white_move_type](1u << tx, end, src);
+				int frontier_size = end - new_boards[tx];
 
 				valid[tx] = (frontier_size != 0);
 
@@ -63,9 +66,11 @@ namespace Checkers
 					for (int i = 0; i < frontier_size; ++i)
 					{
 						utility[i] = utilities[tx];
-						white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[i], alpha, t_beta, depth - 1, turns - 1);
+						white_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[tx][i], alpha, t_beta, depth - 1, turns - 1);
 						cudaDeviceSynchronize();
 					}
+
+					__syncthreads();
 
 					for (int i = 0; i < frontier_size; ++i)
 					{
@@ -119,7 +124,7 @@ namespace Checkers
 			__shared__ bool terminated;
 			__shared__ Minimax::utility_type utilities[32];
 			__shared__ bool valid[32];
-			GPUBitBoard new_boards[32];
+			GPUBitBoard new_boards[32][32];
 
 			if (!tx)
 			{
@@ -147,15 +152,19 @@ namespace Checkers
 				if (tx < 32)
 				{
 					utilities[tx] = -Minimax::Infinity;
+					for (int i = 0; i < 32; ++i)
+					{
+						new_boards[tx][i] = GPUBitBoard();
+					}
 				}
 				__syncthreads();
 
 				// in the max kernel, use gen_black_move_type instead
-				int gen_white_move_type = (int)(GPUBitBoard::GetWhiteJumps(src) != 0);
-				GPUBitBoard *end = new_boards;
-				gen_white_move[gen_white_move_type](1u << tx, end, src);
+				int gen_black_move_type = (int)(GPUBitBoard::GetBlackJumps(src) != 0);
+				GPUBitBoard *end = new_boards[tx];
+				gen_black_move[gen_black_move_type](1u << tx, end, src);
 
-				int frontier_size = end - new_boards;
+				int frontier_size = end - new_boards[tx];
 				valid[tx] = (frontier_size != 0);
 
 				if (frontier_size > 0)
@@ -166,9 +175,11 @@ namespace Checkers
 					for (int i = 0; i < frontier_size; ++i)
 					{
 						utility[i] = utilities[tx];
-						white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), 0 >> > (utility + i, new_boards[i], t_alpha, beta, depth - 1, turns - 1);
+						white_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1), 0 >> > (utility + i, new_boards[tx][i], t_alpha, beta, depth - 1, turns - 1);
 						cudaDeviceSynchronize();
 					}
+
+					__syncthreads();
 
 					for (int i = 0; i < frontier_size; ++i)
 					{

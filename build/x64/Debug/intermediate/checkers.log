@@ -1,0 +1,41 @@
+﻿  Compiling CUDA source file ..\source\gpuminimax_master_black.cu...
+  
+  C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_35,code=\"sm_35,compute_35\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu -rdc=true -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"     --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static     -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FdC:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\vc140.pdb /FS /Zi /RTC1 /MDd " -o C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpuminimax_master_black.cu.obj "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\source\gpuminimax_master_black.cu" 
+  gpuminimax_master_black.cu
+  
+  C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\project>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -dlink -o C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\checkers.device-link.obj -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd " -L"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\lib\x64" cudadevrt.lib cudart_static.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  -gencode=arch=compute_35,code=sm_35  --machine 64 "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpubitboard.cu.obj" "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpubitwise_helpers.cu.obj" "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpuminimax.cu.obj" "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpuminimax_host_black.cu.obj" "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpuminimax_host_white.cu.obj" "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpuminimax_master_black.cu.obj" "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpuminimax_white.cu.obj" "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpuminimax_black.cu.obj" "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpuminimax_helpers.cu.obj" "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpuminimax_master_white.cu.obj" "C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\intermediate\gpuminimax_next.cu.obj" 
+CUDALINK : nvlink warning : Stack size for entry function '_ZN8Checkers10GPUMinimax16black_min_kernelEPiNS_11GPUBitBoardEiiii' cannot be statically determined
+CUDALINK : nvlink warning : Stack size for entry function '_ZN8Checkers10GPUMinimax16black_min_kernelEPiNS_11GPUBitBoardEiiii' cannot be statically determined
+CUDALINK : nvlink warning : Stack size for entry function '_ZN8Checkers10GPUMinimax16black_max_kernelEPiNS_11GPUBitBoardEiiii' cannot be statically determined
+CUDALINK : nvlink warning : Stack size for entry function '_ZN8Checkers10GPUMinimax16black_max_kernelEPiNS_11GPUBitBoardEiiii' cannot be statically determined
+CUDALINK : nvlink warning : Stack size for entry function '_ZN8Checkers10GPUMinimax16white_max_kernelEPiNS_11GPUBitBoardEiiii' cannot be statically determined
+CUDALINK : nvlink warning : Stack size for entry function '_ZN8Checkers10GPUMinimax16white_max_kernelEPiNS_11GPUBitBoardEiiii' cannot be statically determined
+CUDALINK : nvlink warning : Stack size for entry function '_ZN8Checkers10GPUMinimax16white_min_kernelEPiNS_11GPUBitBoardEiiii' cannot be statically determined
+CUDALINK : nvlink warning : Stack size for entry function '_ZN8Checkers10GPUMinimax16white_min_kernelEPiNS_11GPUBitBoardEiiii' cannot be statically determined
+  cudadevrt.lib
+  cudart_static.lib
+  kernel32.lib
+  user32.lib
+  gdi32.lib
+  winspool.lib
+  comdlg32.lib
+  advapi32.lib
+  shell32.lib
+  ole32.lib
+  oleaut32.lib
+  uuid.lib
+  odbc32.lib
+  odbccp32.lib
+  gpubitboard.cu.obj
+  gpubitwise_helpers.cu.obj
+  gpuminimax.cu.obj
+  gpuminimax_host_black.cu.obj
+  gpuminimax_host_white.cu.obj
+  gpuminimax_master_black.cu.obj
+  gpuminimax_white.cu.obj
+  gpuminimax_black.cu.obj
+  gpuminimax_helpers.cu.obj
+  gpuminimax_master_white.cu.obj
+  gpuminimax_next.cu.obj
+  checkers.vcxproj -> C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\checkers.exe
+  checkers.vcxproj -> C:\Users\zijian.ng\Desktop\CS398MiniProject-master\CS398MiniProject\build\x64\Debug\checkers.pdb (Full PDB)

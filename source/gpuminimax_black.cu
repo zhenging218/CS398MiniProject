@@ -14,19 +14,14 @@ namespace Checkers
 			__shared__ bool terminated;
 			__shared__ Minimax::utility_type utilities[32];
 			__shared__ bool valid[32];
-			GPUBitBoard new_boards[32];
+			__shared__ GPUBitBoard new_boards[32][32];
 
 			if (tx == 0)
 			{
 				Minimax::utility_type terminal_value = 0;
-				if (src.valid)
-				{
-					terminated = GetBlackUtility(src, terminal_value, depth, turns);
-					if (terminated)
-						*v = terminal_value;
-				}
-				else
-					terminated = true;
+				terminated = GetBlackUtility(src, terminal_value, depth, turns);
+				if (terminated)
+					*v = terminal_value;
 
 			}
 
@@ -41,28 +36,32 @@ namespace Checkers
 				if (tx < 32)
 				{
 					utilities[tx] = Minimax::Infinity;
+					for (int i = 0; i < 32; ++i)
+					{
+						new_boards[tx][i] = GPUBitBoard();
+					}
 				}
 				__syncthreads();
 
 				// in the max kernel, use gen_black_move_type instead
-				int gen_white_move_type = (int)(GPUBitBoard::GetWhiteJumps(src) != 0);
-				GPUBitBoard *end = new_boards;
-				gen_white_move[gen_white_move_type](1u << tx, end, src);
-				int frontier_size = end - new_boards;
+				int gen_black_move_type = (int)(GPUBitBoard::GetBlackJumps(src) != 0);
+				GPUBitBoard *end = new_boards[tx];
+				gen_black_move[gen_black_move_type](1u << tx, end, src);
+				int frontier_size = end - new_boards[tx];
 				valid[tx] = (frontier_size != 0);
 
 				if (frontier_size > 0)
 				{
-					Minimax::utility_type * utility = (utility_type *)malloc(sizeof(utility_type) * frontier_size);
+					Minimax::utility_type * utility;
+					cudaMalloc(&utility, sizeof(utility_type) * frontier_size);
 
 					for (int i = 0; i < frontier_size; ++i)
 					{
 						utility[i] = utilities[tx];
-						black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[i], alpha, t_beta, depth - 1, turns - 1);
+						black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[tx][i], alpha, t_beta, depth - 1, turns - 1);
+						cudaDeviceSynchronize();
 					}
 
-					__syncthreads();
-					cudaDeviceSynchronize();
 					__syncthreads();
 
 					for (int i = 0; i < frontier_size; ++i)
@@ -78,7 +77,7 @@ namespace Checkers
 						}
 					}
 
-					free(utility);
+					cudaFree(utility);
 				}
 
 				__syncthreads();
@@ -114,24 +113,20 @@ namespace Checkers
 		{
 			int tx = threadIdx.x;
 			int t_alpha = alpha;
-			int t_v = -Minimax::Infinity;
+			utility_type t_v = -Minimax::Infinity;
 			__shared__ bool terminated;
 			__shared__ Minimax::utility_type utilities[32];
 			__shared__ bool valid[32];
-			GPUBitBoard new_boards[32];
+			__shared__ GPUBitBoard new_boards[32][32];
 
 			if (tx == 0)
 			{
-				Minimax::utility_type terminal_value = 0;
-				if (src.valid)
+				utility_type terminal_value = 0;
+				terminated = GetBlackUtility(src, terminal_value, depth, turns);
+				if (terminated)
 				{
-					terminated = GetBlackUtility(src, terminal_value, depth, turns);
-					if (terminated)
-						*v = terminal_value;
+					*v = terminal_value;
 				}
-				else
-					terminated = true;
-
 			}
 
 			__syncthreads();
@@ -145,32 +140,35 @@ namespace Checkers
 				if (tx < 32)
 				{
 					utilities[tx] = -Minimax::Infinity;
+					for (int i = 0; i < 32; ++i)
+					{
+						new_boards[tx][i] = GPUBitBoard();
+					}
 				}
 				__syncthreads();
 
 				// in the max kernel, use gen_black_move_type instead
-				int gen_black_move_type = (int)(GPUBitBoard::GetBlackJumps(src) != 0);
-				GPUBitBoard *end = new_boards;
-				gen_black_move[gen_black_move_type](1u << tx, end, src);
+				int gen_white_move_type = (int)(GPUBitBoard::GetWhiteJumps(src) != 0);
+				GPUBitBoard *end = new_boards[tx];
+				gen_white_move[gen_white_move_type](1u << tx, end, src);
 
-				int frontier_size = end - new_boards;
+				int frontier_size = end - new_boards[tx];
 				valid[tx] = (frontier_size != 0);
 
 				if (frontier_size > 0)
 				{
-					Minimax::utility_type * utility = (utility_type *)malloc(sizeof(utility_type) * frontier_size);
+					Minimax::utility_type * utility;
+					cudaMalloc(&utility, sizeof(utility_type) * frontier_size);
 
 					for (int i = 0; i < frontier_size; ++i)
 					{
 						utility[i] = utilities[tx];
-						black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[i], t_alpha, beta, depth - 1, turns - 1);
-						
+						black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[tx][i], t_alpha, beta, depth - 1, turns - 1);
+						cudaDeviceSynchronize();
 					}
 
 					__syncthreads();
-					cudaDeviceSynchronize();
-					__syncthreads();
-
+					
 					for (int i = 0; i < frontier_size; ++i)
 					{
 						utilities[tx] = max(utility[i], utilities[tx]);
@@ -184,7 +182,7 @@ namespace Checkers
 						}
 					}
 
-					free(utility);
+					cudaFree(utility);
 				}
 
 				__syncthreads();
