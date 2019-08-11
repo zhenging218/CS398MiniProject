@@ -11,6 +11,54 @@
 // for non-atomic version of gen_move, can just perform frontier[f_size++] = /* new board */.
 // for atomic version of gen_move, must perform frontier[atomicAdd(f_size, 1)] = /* new board */.
 
+// node_type enum (put in GPUMinimax.cu/.cuh)
+
+namespace GPUMinimax
+{
+	// place these in GPUMinimax.cuh
+	enum NodeType
+	{
+		Max,
+		Min
+	};
+	
+	__host__ __device__ NodeType &operator++(NodeType &src);
+	__host__ __device__ NodeType &operator++(NodeType &src, int);
+	__host__ __device__ NodeType operator+(NodeType const &src, int i)
+	
+	NodeType &operator--(NodeType &src) = delete;
+	NodeType operator--(NodeType &src, int) = delete;
+	NodeType operator-(NodeType const &src, int i) = delete;
+	
+	// place these in GPUMinimax.cu
+	__host__ __device__ NodeType &operator++(NodeType &src)
+	{
+		src = (src == NodeType::Max) ? NodeType::Min : NodeType::Max;
+		return src;
+	}
+	
+	__host__ device__ NodeType operator++(NodeType &src, int)
+	{
+		NodeType ret = src;
+		++src;
+		return ret;
+	}
+	
+	
+	
+	__host__ __device__ NodeType operator+(NodeType const &src, int i)
+	{
+		NodeType ret = src;
+		while(i > 0)
+		{
+			++ret;
+		}
+		return ret;
+	}
+	
+	
+}
+
 __device__ utility_type explore_black_frontier(GPUBitBoard const &board, utility_type alpha, utility_type beta, /*minimax node enum */ node_type, int depth, int turns)
 {
 	GPUBitBoard frontier[32];
