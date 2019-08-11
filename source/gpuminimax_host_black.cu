@@ -17,6 +17,9 @@ namespace Checkers
 			if (GetBlackUtility(b, terminal_value, depth, turns_left))
 				return terminal_value;
 
+			if (depth <= 0)
+				throw("terminal test returned false when depth <= 0!");
+
 			BitBoard frontier[32];
 			BitBoard *end = frontier;
 			BitBoard::GetPossibleBlackMoves(b, end);
@@ -47,12 +50,10 @@ namespace Checkers
 						cudaMalloc((void**)&GPUv, sizeof(utility_type) * (size - 1));
 						CHECK_ERRORS();
 
-						std::cout << "reached black move max" << std::endl;
 						// launch kernel
 						black_kernel << <dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUv, v, GPUFrontier, size - 1, alpha, beta, NodeType::MAX, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 						CHECK_ERRORS();
-						std::wcout << "finished black move max" << std::endl;
 						// copy GPUv[0] to v
 						cudaMemcpy(&v, GPUv, sizeof(utility_type), cudaMemcpyDeviceToHost);
 						CHECK_ERRORS();
@@ -105,12 +106,10 @@ namespace Checkers
 						cudaMalloc((void**)&GPUv, sizeof(utility_type) * (size - 1));
 						CHECK_ERRORS();
 
-						std::cout << "reached black move min" << std::endl;
 						// launch kernel
 						black_kernel << <dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUv, v, GPUFrontier, size - 1, alpha, beta, NodeType::MIN, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 						CHECK_ERRORS();
-						std::wcout << "finished black move min" << std::endl;
 						// copy GPUv[0] to v
 						cudaMemcpy(&v, GPUv, sizeof(utility_type), cudaMemcpyDeviceToHost);
 						CHECK_ERRORS();

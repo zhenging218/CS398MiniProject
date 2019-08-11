@@ -6,9 +6,9 @@ namespace Checkers
 {
 	namespace GPUMinimax
 	{
-		__device__ utility_type explore_white_frontier(GPUBitBoard const &board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns)
+		__device__ utility_type explore_white_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns)
 		{
-			GPUBitBoard frontier[32];
+			GPUBitBoard *frontier;
 			int frontier_size = 0;
 			int v = (node_type == NodeType::MAX) ? -Infinity : Infinity;
 
@@ -19,6 +19,8 @@ namespace Checkers
 			{
 				return terminal_value;
 			}
+
+			cudaMalloc(&frontier, sizeof(GPUBitBoard) * 32);
 
 			if (node_type == NodeType::MAX)
 			{
@@ -66,6 +68,7 @@ namespace Checkers
 				}
 			}
 
+			cudaFree(frontier);
 			return v;
 		}
 
@@ -78,10 +81,17 @@ namespace Checkers
 			__shared__ int gen_board_type;
 			__shared__ GPUBitBoard frontier[32];
 			__shared__ utility_type t_v[32];
+			__shared__ bool terminated;
 
-			if (tx < 32)
+			if (tx == 0)
 			{
-				if (tx == 0)
+				utility_type terminal_value = 0;
+				if (terminated = GetWhiteUtility(boards[tx], terminal_value, depth, turns))
+				{
+					v[bx] = terminal_value;
+				}
+
+				if (!terminated)
 				{
 					frontier_size = 0;
 					if (node_type == NodeType::MAX)
@@ -94,17 +104,19 @@ namespace Checkers
 					}
 				}
 			}
-
 			__syncthreads();
 
-			if ((node_type + 1) == NodeType::MAX)
+			if (!terminated)
 			{
+				if ((node_type + 1) == NodeType::MAX)
+				{
 
-				gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
-			}
-			else
-			{
-				gen_black_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
+					gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
+				}
+				else
+				{
+					gen_black_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
+				}
 			}
 
 			__syncthreads();
@@ -157,10 +169,10 @@ namespace Checkers
 				// ab-prune v and send the last value to v[0].
 				if (node_type == NodeType::MAX)
 				{
-					for (int i = 1; i < num_boards; ++i)
+					for (int i = 0; i < num_boards; ++i)
 					{
 						X = max(v[i], X);
-						if (v[0] > beta)
+						if (X > beta)
 						{
 							break;
 						}
@@ -172,7 +184,7 @@ namespace Checkers
 					for (int i = 1; i < num_boards; ++i)
 					{
 						X = min(v[i], X);
-						if (v[0] < alpha)
+						if (X < alpha)
 						{
 							break;
 						}

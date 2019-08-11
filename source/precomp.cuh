@@ -1,5 +1,7 @@
 #pragma once
 
+#include <exception>
+#include <string>
 #include <helper_cuda.h>
 
 #include "gpubitwise_helpers.cuh"
@@ -12,7 +14,8 @@ do\
 	cudaError err = cudaThreadSynchronize();\
 	if (cudaSuccess != err)\
 	{\
-		std::cout << cudaGetErrorString(err) << "at " << __FILE__ << " (Line " << __LINE__ << ")" << std::endl;\
-		throw;\
+		char const *msg = cudaGetErrorString(err);\
+		std::cout << msg << "at " << __FILE__ << " (Line " << __LINE__ << ")" << std::endl;\
+		throw std::exception(msg);\
 	}\
 } while(0)

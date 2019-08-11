@@ -20,39 +20,50 @@ namespace Checkers
 
 			if (tx == 0)
 			{
+				frontier_size = 0;
 				alpha = -Infinity;
 				beta = Infinity;
 				gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;
+
+				for (int i = 0; i < 32; ++i)
+				{
+					gen_white_move[gen_board_type](1u << tx, boards[bx], frontier, frontier_size);
+				}
 			}
 
 			__syncthreads();
 
-			gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
-
-			__syncthreads();
-
+			
 			if (tx < frontier_size)
 			{
+
 				t_v[tx] = explore_white_frontier(frontier[tx], alpha, beta, NodeType::MAX, depth - 1, turns - 1);
 			}
 
 			__syncthreads();
-
+			
 			// min
 			if (tx == 0)
 			{
-				utility_type t_x = Infinity;
-				while (frontier_size > 0)
+				if (frontier_size > 0)
 				{
-					t_x = min(t_v[--frontier_size], t_x);
-					if (t_x < alpha)
+					utility_type t_x = Infinity;
+					while (frontier_size > 0)
 					{
-						break;
+						t_x = min(t_v[--frontier_size], t_x);
+						if (t_x < alpha)
+						{
+							break;
+						}
+						beta = min(beta, t_x);
 					}
-					beta = min(beta, t_x);
-				}
 
-				v[bx] = t_x;
+					v[bx] = t_x;
+				}
+				else
+				{
+					v[bx] = MaxUtility;
+				}
 			}
 
 			__syncthreads();
@@ -90,39 +101,47 @@ namespace Checkers
 
 			if (tx == 0)
 			{
+				frontier_size = 0;
 				alpha = -Infinity;
 				beta = Infinity;
 				gen_board_type = (GPUBitBoard::GetWhiteJumps(boards[bx]) != 0) ? 1 : 0;
+				gen_black_move[gen_board_type](1u << tx, boards[bx], frontier, frontier_size);
 			}
 
 			__syncthreads();
 
-			gen_black_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
-
-			__syncthreads();
-
+			
 			if (tx < frontier_size)
 			{
 				t_v[tx] = explore_black_frontier(frontier[tx], alpha, beta, NodeType::MAX, depth - 1, turns - 1);
 			}
 
 			__syncthreads();
+			
 
 			// min
 			if (tx == 0)
 			{
-				utility_type t_x = Infinity;
-				while (frontier_size > 0)
+				if (frontier_size > 0)
 				{
-					t_x = min(t_v[--frontier_size], t_x);
-					if (X < alpha)
+					utility_type t_x = Infinity;
+					while (frontier_size > 0)
 					{
-						break;
+						t_x = min(t_v[--frontier_size], t_x);
+						if (X < alpha)
+						{
+							break;
+						}
+						beta = min(beta, t_x);
 					}
-					beta = min(beta, t_x);
-				}
+					
 
-				v[bx] = t_x;
+					v[bx] = t_x;
+				}
+				else
+				{
+					v[bx] = MaxUtility;
+				}
 			}
 
 			__syncthreads();

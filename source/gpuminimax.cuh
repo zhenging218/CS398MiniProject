@@ -39,8 +39,8 @@ namespace Checkers
 		__global__ void white_next_kernel(int *placement, utility_type *v, utility_type X, GPUBitBoard const *boards, int num_boards, int depth, int turns);
 		__global__ void black_next_kernel(int *placement, utility_type *v, utility_type X, GPUBitBoard const *boards, int num_boards, int depth, int turns);
 
-		__device__ utility_type explore_black_frontier(GPUBitBoard const &board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
-		__device__ utility_type explore_white_frontier(GPUBitBoard const &board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
+		__device__ utility_type explore_black_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
+		__device__ utility_type explore_white_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
 
 		__global__ void black_kernel(utility_type *v, utility_type X, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
 		__global__ void white_kernel(utility_type *v, utility_type X, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);

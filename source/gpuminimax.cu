@@ -14,8 +14,8 @@ namespace Checkers
 		__device__ GPUBitBoard::gen_move_func gen_white_move[2] = { GPUBitBoard::GenWhiteMove, GPUBitBoard::GenWhiteJump };
 		__device__ GPUBitBoard::gen_move_func gen_black_move[2] = { GPUBitBoard::GenBlackMove, GPUBitBoard::GenBlackJump };
 
-		__device__ extern GPUBitBoard::gen_move_atomic_func gen_black_move_atomic[2] = { GPUBitBoard::GenWhiteMoveAtomic, GPUBitBoard::GenWhiteJumpAtomic };
-		__device__ extern GPUBitBoard::gen_move_atomic_func gen_white_move_atomic[2] = { GPUBitBoard::GenBlackMoveAtomic, GPUBitBoard::GenBlackJumpAtomic };
+		__device__ extern GPUBitBoard::gen_move_atomic_func gen_white_move_atomic[2] = { GPUBitBoard::GenWhiteMoveAtomic, GPUBitBoard::GenWhiteJumpAtomic };
+		__device__ extern GPUBitBoard::gen_move_atomic_func gen_black_move_atomic[2] = { GPUBitBoard::GenBlackMoveAtomic, GPUBitBoard::GenBlackJumpAtomic };
 
 		__host__ __device__ NodeType &operator++(NodeType &src)
 		{
@@ -29,6 +29,7 @@ namespace Checkers
 			while (i > 0)
 			{
 				++ret;
+				--i;
 			}
 			return ret;
 		}
@@ -93,7 +94,6 @@ namespace Checkers
 					cudaMemcpy(GPUPlacement, &placement, sizeof(int), cudaMemcpyHostToDevice);
 					CHECK_ERRORS();
 
-					std::cout << "reached here" << std::endl;
 					// launch kernel
 					white_next_kernel << < dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, GPUUtility, X, GPUFrontier, size - 1, depth, turns_left);
 					cudaDeviceSynchronize();
@@ -165,7 +165,6 @@ namespace Checkers
 					cudaMemcpy(GPUPlacement, &placement, sizeof(int), cudaMemcpyHostToDevice);
 					CHECK_ERRORS();
 
-					std::cout << "reached here" << std::endl;
 					// launch kernel
 					black_next_kernel << < dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, GPUUtility, X, GPUFrontier, size - 1, depth, turns_left);
 					cudaDeviceSynchronize();
@@ -192,8 +191,6 @@ namespace Checkers
 			{
 				--turns_left;
 			}
-
-			getLastCudaError("");
 
 			return Minimax::INPROGRESS;
 		}

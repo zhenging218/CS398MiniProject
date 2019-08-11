@@ -6,19 +6,21 @@ namespace Checkers
 {
 	namespace GPUMinimax
 	{
-		__device__ utility_type explore_black_frontier(GPUBitBoard const &board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns)
+		__device__ utility_type explore_black_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns)
 		{
-			GPUBitBoard frontier[32];
+			GPUBitBoard *frontier;
 			int frontier_size = 0;
 			int v = (node_type == NodeType::MAX) ? -Infinity : Infinity;
 
 			int gen_board_type;
 
 			utility_type terminal_value = 0;
-			if (GetWhiteUtility(board, terminal_value, depth, turns))
+			if (GetBlackUtility(board, terminal_value, depth, turns))
 			{
 				return terminal_value;
 			}
+
+			cudaMalloc(&frontier, sizeof(GPUBitBoard) * 32);
 
 			if (node_type == NodeType::MAX)
 			{
@@ -36,6 +38,7 @@ namespace Checkers
 				{
 					gen_black_move[gen_board_type](1u << i, board, frontier, frontier_size);
 				}
+				// printf("explore_black_frontier new frontier_size is %d\n", frontier_size);
 
 				while (frontier_size > 0)
 				{
@@ -66,6 +69,8 @@ namespace Checkers
 				}
 			}
 
+			cudaFree(frontier);
+
 			return v;
 		}
 
@@ -76,14 +81,23 @@ namespace Checkers
 
 			__shared__ int frontier_size;
 			__shared__ int gen_board_type;
-			__shared__ GPUBitBoard frontier[32];
+			__shared__ GPUBitBoard *frontier;
 			__shared__ utility_type t_v[32];
+			__shared__ bool terminated;
 
-			if (tx < 32)
+			if (tx == 0)
 			{
-				if (tx == 0)
+				frontier_size = 0;
+				utility_type terminal_value = 0;
+				if (terminated = GetBlackUtility(boards[bx], terminal_value, depth, turns))
 				{
-					frontier_size = 0;
+					v[bx] = terminal_value;
+				}
+
+				if (!terminated)
+				{
+					cudaMalloc(&frontier, sizeof(GPUBitBoard) * 32);
+					
 					if ((node_type + 1) == NodeType::MAX)
 					{
 						gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;
@@ -97,70 +111,72 @@ namespace Checkers
 
 			__syncthreads();
 
-			if ((node_type + 1) == NodeType::MAX)
+			if (!terminated)
 			{
-
-				gen_black_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
-			}
-			else
-			{
-				gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
-			}
-
-			__syncthreads();
-
-
-			if (tx < frontier_size)
-			{
-				t_v[tx] = explore_black_frontier(frontier[tx], alpha, beta, node_type + 1, depth - 1, turns - 1);
-			}
-
-			__syncthreads();
-
-			if (tx == 0)
-			{
-				utility_type t_x;
-				// ab-prune t_v and send the last value to v[bx].
 				if ((node_type + 1) == NodeType::MAX)
 				{
-					t_x = -Infinity;
-					while (frontier_size > 0)
-					{
-						t_x = max(t_v[--frontier_size], t_x);
-						if (t_x > beta)
-						{
-							break;
-						}
-						alpha = max(alpha, t_x);
-					}
+					gen_black_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
 				}
 				else
 				{
-					t_x = Infinity;
-					while (frontier_size > 0)
-					{
-						t_x = min(t_v[--frontier_size], t_x);
-						if (t_x < alpha)
-						{
-							break;
-						}
-						beta = min(beta, t_x);
-					}
+					gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
 				}
 
-				v[bx] = t_x;
+				__syncthreads();
+
+				if (tx < frontier_size)
+				{
+					t_v[tx] = explore_black_frontier(frontier[tx], alpha, beta, node_type + 1, depth - 1, turns - 1);
+				}
+
+				__syncthreads();
+
+				if (tx == 0)
+				{
+					utility_type t_x;
+					// ab-prune t_v and send the last value to v[bx].
+					if ((node_type + 1) == NodeType::MAX)
+					{
+						t_x = -Infinity;
+						while (frontier_size > 0)
+						{
+							t_x = max(t_v[--frontier_size], t_x);
+							if (t_x > beta)
+							{
+								break;
+							}
+							alpha = max(alpha, t_x);
+						}
+					}
+					else
+					{
+						t_x = Infinity;
+						while (frontier_size > 0)
+						{
+							t_x = min(t_v[--frontier_size], t_x);
+							if (t_x < alpha)
+							{
+								break;
+							}
+							beta = min(beta, t_x);
+						}
+					}
+
+					v[bx] = t_x;
+				}
 			}
 
 			__syncthreads();
+
 			if (bx == 0 && tx == 0)
 			{
 				// ab-prune v and send the last value to v[0].
 				if (node_type == NodeType::MAX)
 				{
-					for (int i = 1; i < num_boards; ++i)
+					for (int i = 0; i < num_boards; ++i)
 					{
 						X = max(v[i], X);
-						if (v[0] > beta)
+						if (X > beta)
 						{
 							break;
 						}
@@ -169,10 +185,10 @@ namespace Checkers
 				}
 				else
 				{
-					for (int i = 1; i < num_boards; ++i)
+					for (int i = 0; i < num_boards; ++i)
 					{
 						X = min(v[i], X);
-						if (v[0] < alpha)
+						if (X < alpha)
 						{
 							break;
 						}
