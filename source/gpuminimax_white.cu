@@ -85,6 +85,7 @@ namespace Checkers
 
 			if (tx == 0)
 			{
+				frontier_size = 0;
 				utility_type terminal_value = 0;
 				if (terminated = GetWhiteUtility(boards[tx], terminal_value, depth, turns))
 				{
@@ -94,7 +95,7 @@ namespace Checkers
 				if (!terminated)
 				{
 					frontier_size = 0;
-					if (node_type == NodeType::MAX)
+					if ((node_type + 1) == NodeType::MAX)
 					{
 						gen_board_type = (GPUBitBoard::GetWhiteJumps(boards[bx]) != 0) ? 1 : 0;
 					}

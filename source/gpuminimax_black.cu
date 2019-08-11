@@ -138,6 +138,7 @@ namespace Checkers
 						while (frontier_size > 0)
 						{
 							t_x = max(t_v[--frontier_size], t_x);
+							
 							if (t_x > beta)
 							{
 								break;
@@ -173,6 +174,7 @@ namespace Checkers
 					for (int i = 0; i < num_boards; ++i)
 					{
 						X = max(v[i], X);
+						
 						if (X > beta)
 						{
 							break;

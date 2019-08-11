@@ -43,20 +43,13 @@ namespace Checkers
 			{
 				utility = MinUtility;
 			}
+			else if (turns_left == 0)
+			{
+				utility = 0;
+			}
 			else if (depth == 0)
 			{
-				if (black_pieces < white_pieces)
-				{
-					utility = MinUtility;
-				}
-				else if (white_pieces < black_pieces)
-				{
-					utility = MaxUtility;
-				}
-				else
-				{
-					utility = (black_pieces - white_pieces) + (black_kings - white_kings);
-				}
+				utility = (black_pieces - white_pieces) + (black_kings - white_kings);
 			}
 			else
 			{
@@ -82,20 +75,13 @@ namespace Checkers
 			{
 				utility = MinUtility;
 			}
+			else if (turns_left == 0)
+			{
+				utility = 0;
+			}
 			else if (depth == 0)
 			{
-				if (black_pieces < white_pieces)
-				{
-					utility = MaxUtility;
-				}
-				else if (white_pieces < black_pieces)
-				{
-					utility = MinUtility;
-				}
-				else
-				{
-					utility = (white_pieces - black_pieces) + (white_kings - black_kings);
-				}
+				utility = (white_pieces - black_pieces) + (white_kings - black_kings);
 			}
 			else
 			{
