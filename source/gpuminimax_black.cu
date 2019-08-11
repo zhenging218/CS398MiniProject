@@ -20,7 +20,7 @@ namespace Checkers
 				return terminal_value;
 			}
 
-			cudaMalloc(&frontier, sizeof(GPUBitBoard) * 32);
+			cudaMalloc(&frontier, sizeof(GPUBitBoard) * 16);
 
 			if (node_type == NodeType::MAX)
 			{
@@ -38,7 +38,6 @@ namespace Checkers
 				{
 					gen_black_move[gen_board_type](1u << i, board, frontier, frontier_size);
 				}
-				// printf("explore_black_frontier new frontier_size is %d\n", frontier_size);
 
 				while (frontier_size > 0)
 				{
@@ -81,8 +80,8 @@ namespace Checkers
 
 			__shared__ int frontier_size;
 			__shared__ int gen_board_type;
-			__shared__ GPUBitBoard *frontier;
-			__shared__ utility_type t_v[32];
+			__shared__ GPUBitBoard frontier[16];
+			__shared__ utility_type t_v[16];
 			__shared__ bool terminated;
 
 			if (tx == 0)
@@ -96,8 +95,6 @@ namespace Checkers
 
 				if (!terminated)
 				{
-					cudaMalloc(&frontier, sizeof(GPUBitBoard) * 32);
-					
 					if ((node_type + 1) == NodeType::MAX)
 					{
 						gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;

@@ -20,7 +20,7 @@ namespace Checkers
 				return terminal_value;
 			}
 
-			cudaMalloc(&frontier, sizeof(GPUBitBoard) * 32);
+			cudaMalloc(&frontier, sizeof(GPUBitBoard) * 16);
 
 			if (node_type == NodeType::MAX)
 			{
@@ -79,8 +79,8 @@ namespace Checkers
 
 			__shared__ int frontier_size;
 			__shared__ int gen_board_type;
-			__shared__ GPUBitBoard frontier[32];
-			__shared__ utility_type t_v[32];
+			__shared__ GPUBitBoard frontier[16];
+			__shared__ utility_type t_v[16];
 			__shared__ bool terminated;
 
 			if (tx == 0)
