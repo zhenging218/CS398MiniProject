@@ -14,6 +14,25 @@ namespace Checkers
 		__device__ GPUBitBoard::gen_move_func gen_white_move[2] = { GPUBitBoard::GenWhiteMove, GPUBitBoard::GenWhiteJump };
 		__device__ GPUBitBoard::gen_move_func gen_black_move[2] = { GPUBitBoard::GenBlackMove, GPUBitBoard::GenBlackJump };
 
+		__device__ extern GPUBitBoard::gen_move_atomic_func gen_black_move_atomic[2] = { GPUBitBoard::GenWhiteMoveAtomic, GPUBitBoard::GenWhiteJumpAtomic };
+		__device__ extern GPUBitBoard::gen_move_atomic_func gen_white_move_atomic[2] = { GPUBitBoard::GenBlackMoveAtomic, GPUBitBoard::GenBlackJumpAtomic };
+
+		__host__ __device__ NodeType &operator++(NodeType &src)
+		{
+			src = (src == NodeType::MAX) ? NodeType::MIN : NodeType::MAX;
+			return src;
+		}
+
+		__host__ __device__ NodeType operator+(NodeType const &src, int i)
+		{
+			NodeType ret = src;
+			while (i > 0)
+			{
+				++ret;
+			}
+			return ret;
+		}
+
 		Checkers::Minimax::Result Next(BitBoard &board, Checkers::Minimax::Turn &turn, int depth, int &turns_left)
 		{
 			if (turns_left == 0)
@@ -49,6 +68,7 @@ namespace Checkers
 				{
 					// GPU tree-split the rest of the branches
 					GPUBitBoard * GPUFrontier;
+					utility_type *GPUUtility;
 					int * GPUPlacement;
 
 					GPUBitBoard *copy = (GPUBitBoard*)malloc(sizeof(GPUBitBoard) * (size - 1));
@@ -64,20 +84,26 @@ namespace Checkers
 
 					free(copy);
 
+					cudaMalloc((void**)&GPUUtility, sizeof(utility_type) * (size - 1));
+					CHECK_ERRORS();
+
 					cudaMalloc((void**)&GPUPlacement, sizeof(int));
 					CHECK_ERRORS();
 
 					cudaMemcpy(GPUPlacement, &placement, sizeof(int), cudaMemcpyHostToDevice);
 					CHECK_ERRORS();
 
+					std::cout << "reached here" << std::endl;
 					// launch kernel
-					master_white_next_kernel << < dim3(((size - 1) / 32) + 1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, X, GPUFrontier, size - 1, depth, turns_left);
+					white_next_kernel << < dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, GPUUtility, X, GPUFrontier, size - 1, depth, turns_left);
 					cudaDeviceSynchronize();
 					CHECK_ERRORS();
 
 					cudaMemcpy(&placement, GPUPlacement, sizeof(int), cudaMemcpyDeviceToHost);
 					CHECK_ERRORS();
 					cudaFree(GPUFrontier);
+					CHECK_ERRORS();
+					cudaFree(GPUUtility);
 					CHECK_ERRORS();
 					cudaFree(GPUPlacement);
 					CHECK_ERRORS();
@@ -114,6 +140,7 @@ namespace Checkers
 				{
 					// GPU tree-split the rest of the branches
 					GPUBitBoard * GPUFrontier;
+					utility_type *GPUUtility;
 					int * GPUPlacement;
 
 					GPUBitBoard *copy = (GPUBitBoard*)malloc(sizeof(GPUBitBoard) * (size - 1));
@@ -123,28 +150,35 @@ namespace Checkers
 					}
 					cudaMalloc((void**)&GPUFrontier, sizeof(GPUBitBoard) * (size - 1));
 					CHECK_ERRORS();
+
 					cudaMemcpy(GPUFrontier, copy, sizeof(GPUBitBoard) * (size - 1), cudaMemcpyHostToDevice);
 					CHECK_ERRORS();
+
 					free(copy);
+
+					cudaMalloc((void**)&GPUUtility, sizeof(utility_type) * (size - 1));
+					CHECK_ERRORS();
 
 					cudaMalloc((void**)&GPUPlacement, sizeof(int));
 					CHECK_ERRORS();
+
 					cudaMemcpy(GPUPlacement, &placement, sizeof(int), cudaMemcpyHostToDevice);
 					CHECK_ERRORS();
 
+					std::cout << "reached here" << std::endl;
 					// launch kernel
-					master_black_next_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, X, GPUFrontier, size - 1, depth, turns_left);
+					black_next_kernel << < dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUPlacement, GPUUtility, X, GPUFrontier, size - 1, depth, turns_left);
 					cudaDeviceSynchronize();
 					CHECK_ERRORS();
 
-					int temp = 0;
 					cudaMemcpy(&placement, GPUPlacement, sizeof(int), cudaMemcpyDeviceToHost);
 					CHECK_ERRORS();
 					cudaFree(GPUFrontier);
 					CHECK_ERRORS();
+					cudaFree(GPUUtility);
+					CHECK_ERRORS();
 					cudaFree(GPUPlacement);
 					CHECK_ERRORS();
-
 				}
 
 				if (placement >= 0)

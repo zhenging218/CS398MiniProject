@@ -2,12 +2,12 @@
 
 namespace Checkers
 {
-	__host__ __device__ GPUBitBoard::GPUBitBoard() : white(0xFFF00000u), black(0x00000FFFu), kings(0u), valid(false)
+	__host__ __device__ GPUBitBoard::GPUBitBoard() : white(0xFFF00000u), black(0x00000FFFu), kings(0u)
 	{
 
 	}
 
-	__host__ __device__ GPUBitBoard::GPUBitBoard(board_type w, board_type b, board_type k) : white(w), black(b), kings(k), valid(true)
+	__host__ __device__ GPUBitBoard::GPUBitBoard(board_type w, board_type b, board_type k) : white(w), black(b), kings(k)
 	{
 
 	}
@@ -17,11 +17,10 @@ namespace Checkers
 		white = src.white;
 		black = src.black;
 		kings = src.kings;
-		valid = src.valid;
 		return *this;
 	}
 
-	__host__ GPUBitBoard::GPUBitBoard(BitBoard const &src) : white(src.white), black(src.black), kings(src.kings), valid(true)
+	__host__ GPUBitBoard::GPUBitBoard(BitBoard const &src) : white(src.white), black(src.black), kings(src.kings)
 	{
 
 	}
@@ -31,7 +30,6 @@ namespace Checkers
 		white = src.white;
 		black = src.black;
 		kings = src.kings;
-		valid = true;
 		return *this;
 	}
 
@@ -122,160 +120,487 @@ namespace Checkers
 		return GPUSWAR32(b.white & b.kings);
 	}
 
-	__host__ __device__ void GPUBitBoard::GenMoreWhiteJumps(GPUBitBoard::board_type cell, GPUBitBoard *&out, GPUBitBoard const &board)
+	__host__ __device__ void GPUBitBoard::GenMoreWhiteJumps(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int & frontier_size)
 	{
-		GPUBitBoard::board_type jumps = GPUBitBoard::GetWhiteJumps(board);
-		GPUBitBoard::board_type empty = ~(board.white | board.black);
+		GPUBitBoard j_f[32];
+		GPUBitBoard::board_type c_f[32];
+		int f_size = 1;
 
-		if (jumps & cell)
+		while (f_size > 0)
 		{
-			if (OddRows & cell)
+			GPUBitBoard curr_j = j_f[f_size - 1];
+			GPUBitBoard::board_type curr_c = c_f[f_size - 1];
+			--f_size;
+			GPUBitBoard::board_type jumps = GPUBitBoard::GetWhiteJumps(curr_j);
+			GPUBitBoard::board_type empty = ~(curr_j.white | curr_j.black);
+
+			if (jumps && (jumps & curr_c))
 			{
-				//UL
-				if (((cell & board.kings) << 4) & board.black)
+				if (OddRows & curr_c)
 				{
-					GPUBitBoard::board_type j = cell << 4;
-					if (((j & GPUBitBoard::L3Mask) << 3) & empty)
-						GenMoreWhiteJumps(j << 3, out, GPUBitBoard((board.white & ~cell) | (j << 3), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 3)));
+					//UL
+					if (((curr_c & curr_j.kings) << 4) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c << 4;
+						if (((j & GPUBitBoard::L3Mask) << 3) & empty)
+						{
+							c_f[f_size] = j << 3;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j << 3), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | (j << 3));
+							++f_size;
+						}
+					}
+					//UR
+					if ((((curr_c & curr_j.kings) & GPUBitBoard::L5Mask) << 5) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c << 5;
+						if ((j << 4) & empty)
+						{
+							c_f[f_size] = j << 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j << 4), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | (j << 4));
+							++f_size;
+						}
+					}
+					//LL
+					if ((curr_c >> 4) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c >> 4;
+						if (((j & GPUBitBoard::R5Mask) >> 5) & empty)
+						{
+							c_f[f_size] = j >> 5;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j >> 5), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) >> 4) >> 5) | ((j >> 5) & GPUBitBoard::WhiteKingMask)));
+							++f_size;
+						}
+					}
+					//LR
+					if (((curr_c & GPUBitBoard::R3Mask) >> 3)& curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c >> 3;
+						if ((j >> 4) & empty)
+						{
+							c_f[f_size] = j >> 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j >> 4), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) >> 3) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask)));
+							++f_size;
+						}
+					}
 				}
-				//UR
-				if ((((cell & board.kings) & GPUBitBoard::L5Mask) << 5) & board.black)
+				else
 				{
-					GPUBitBoard::board_type j = cell << 5;
-					if ((j << 4) & empty)
-						GenMoreWhiteJumps(j << 4, out, GPUBitBoard((board.white & ~cell) | (j << 4), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 4)));
-				}
-				//LL
-				if ((cell >> 4) & board.black)
-				{
-					GPUBitBoard::board_type j = cell >> 4;
-					if (((j & GPUBitBoard::R5Mask) >> 5) & empty)
-						GenMoreWhiteJumps(j >> 5, out, GPUBitBoard((board.white & ~cell) | (j >> 5), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 4) >> 5) | ((j >> 5) & GPUBitBoard::WhiteKingMask))));
-				}
-				//LR
-				if (((cell & GPUBitBoard::R3Mask) >> 3)& board.black)
-				{
-					GPUBitBoard::board_type j = cell >> 3;
-					if ((j >> 4) & empty)
-						GenMoreWhiteJumps(j >> 4, out, GPUBitBoard((board.white & ~cell) | (j >> 4), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 3) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask))));
+					//UL
+					if ((((curr_c & GPUBitBoard::L3Mask) & curr_j.kings) << 3) & curr_j.black)
+					{
+
+						GPUBitBoard::board_type j = curr_c << 3;
+						if ((j << 4) & empty)
+						{
+							c_f[f_size] = j << 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j << 4), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | (j << 4));
+							++f_size;
+						}
+					}
+					//UR
+					if (((curr_c & curr_j.kings) << 4) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c << 4;
+						if (((j & GPUBitBoard::L5Mask) << 5) & empty)
+						{
+							c_f[f_size] = j << 5;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j << 5), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | (j << 5));
+							++f_size;
+						}
+					}
+					//LL
+					if (((curr_c & GPUBitBoard::R5Mask) >> 5) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c >> 5;
+						if ((j >> 4) & empty)
+						{
+							c_f[f_size] = j >> 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j >> 4), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) >> 5) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask)));
+							++f_size;
+						}
+					}
+					//LR
+					if ((curr_c >> 4) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c >> 4;
+						if (((j & GPUBitBoard::R3Mask) >> 3) & empty)
+						{
+							c_f[f_size] = j >> 3;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j >> 3), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) >> 4) >> 3) | ((j >> 3) & GPUBitBoard::WhiteKingMask)));
+							++f_size;
+						}
+					}
 				}
 			}
 			else
 			{
-				//UL
-				if ((((cell & GPUBitBoard::L3Mask) & board.kings) << 3) & board.black)
-				{
-
-					GPUBitBoard::board_type j = cell << 3;
-					if ((j << 4) & empty)
-						GenMoreWhiteJumps(j << 4, out, GPUBitBoard((board.white & ~cell) | (j << 4), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 4)));
-				}
-				//UR
-				if (((cell & board.kings) << 4) & board.black)
-				{
-					GPUBitBoard::board_type j = cell << 4;
-					if (((j & GPUBitBoard::L5Mask) << 5) & empty)
-						GenMoreWhiteJumps(j << 5, out, GPUBitBoard((board.white & ~cell) | (j << 5), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 5)));
-				}
-				//LL
-				if (((cell & GPUBitBoard::R5Mask) >> 5) & board.black)
-				{
-					GPUBitBoard::board_type j = cell >> 5;
-					if ((j >> 4) & empty)
-						GenMoreWhiteJumps(j >> 4, out, GPUBitBoard((board.white & ~cell) | (j >> 4), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 5) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask))));
-				}
-				//LR
-				if ((cell >> 4) & board.black)
-				{
-					GPUBitBoard::board_type j = cell >> 4;
-					if (((j & GPUBitBoard::R3Mask) >> 3) & empty)
-						GenMoreWhiteJumps(j >> 3, out, GPUBitBoard((board.white & ~cell) | (j >> 3), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 4) >> 3) | ((j >> 3) & GPUBitBoard::WhiteKingMask))));
-				}
+				frontier[frontier_size++] = curr_j;
 			}
-		}
-		else
-		{
-			*(out++) = board;
 		}
 	}
 
-	__host__ __device__ void GPUBitBoard::GenMoreBlackJumps(GPUBitBoard::board_type cell, GPUBitBoard *&out, GPUBitBoard const &board)
+	__device__ void GPUBitBoard::GenMoreWhiteJumpsAtomic(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int * frontier_size)
 	{
-		GPUBitBoard::board_type jumps = GPUBitBoard::GetBlackJumps(board);
-		GPUBitBoard::board_type empty = ~(board.white | board.black);
+		GPUBitBoard j_f[32];
+		GPUBitBoard::board_type c_f[32];
+		int f_size = 1;
 
-		if (jumps & cell)
+		while (f_size > 0)
 		{
-			if (OddRows & cell)
+			GPUBitBoard curr_j = j_f[f_size - 1];
+			GPUBitBoard::board_type curr_c = c_f[f_size - 1];
+			--f_size;
+			GPUBitBoard::board_type jumps = GPUBitBoard::GetWhiteJumps(curr_j);
+			GPUBitBoard::board_type empty = ~(curr_j.white | curr_j.black);
+
+			if (jumps && (jumps & curr_c))
 			{
-				//UL
-				if ((cell << 4) & board.white)
+				if (OddRows & curr_c)
 				{
-					GPUBitBoard::board_type j = cell << 4;
-					if (((j & GPUBitBoard::L3Mask) << 3) & empty)
-						GenMoreBlackJumps(j << 3, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 3), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 4) << 3) | ((j << 3) & GPUBitBoard::BlackKingMask))));
+					//UL
+					if (((curr_c & curr_j.kings) << 4) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c << 4;
+						if (((j & GPUBitBoard::L3Mask) << 3) & empty)
+						{
+							c_f[f_size] = j << 3;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j << 3), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | (j << 3));
+							++f_size;
+						}
+					}
+					//UR
+					if ((((curr_c & curr_j.kings) & GPUBitBoard::L5Mask) << 5) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c << 5;
+						if ((j << 4) & empty)
+						{
+							c_f[f_size] = j << 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j << 4), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | (j << 4));
+							++f_size;
+						}
+					}
+					//LL
+					if ((curr_c >> 4) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c >> 4;
+						if (((j & GPUBitBoard::R5Mask) >> 5) & empty)
+						{
+							c_f[f_size] = j >> 5;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j >> 5), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) >> 4) >> 5) | ((j >> 5) & GPUBitBoard::WhiteKingMask)));
+							++f_size;
+						}
+					}
+					//LR
+					if (((curr_c & GPUBitBoard::R3Mask) >> 3)& curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c >> 3;
+						if ((j >> 4) & empty)
+						{
+							c_f[f_size] = j >> 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j >> 4), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) >> 3) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask)));
+							++f_size;
+						}
+					}
 				}
-				//UR
-				if (((cell & GPUBitBoard::L5Mask) << 5) & board.white)
+				else
 				{
-					GPUBitBoard::board_type j = cell << 5;
-					if ((j << 4) & empty)
-						GenMoreBlackJumps(j << 4, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 4), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 5) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask))));
-				}
-				//LL
-				if (((cell & board.kings) >> 4) & board.white)
-				{
-					GPUBitBoard::board_type j = cell >> 4;
-					if (((j & GPUBitBoard::R5Mask) >> 5) & empty)
-						GenMoreBlackJumps(j >> 5, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 5), (board.kings & (~cell ^ j)) | (j >> 5)));
-				}
-				//LR
-				if ((((cell & GPUBitBoard::R3Mask) & board.kings) >> 3) & board.white)
-				{
-					GPUBitBoard::board_type j = cell >> 3;
-					if ((j >> 4) & empty)
-						GenMoreBlackJumps(j >> 4, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 4), (board.kings & (~cell ^ j)) | (j >> 4)));
+					//UL
+					if ((((curr_c & GPUBitBoard::L3Mask) & curr_j.kings) << 3) & curr_j.black)
+					{
+
+						GPUBitBoard::board_type j = curr_c << 3;
+						if ((j << 4) & empty)
+						{
+							c_f[f_size] = j << 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j << 4), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | (j << 4));
+							++f_size;
+						}
+					}
+					//UR
+					if (((curr_c & curr_j.kings) << 4) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c << 4;
+						if (((j & GPUBitBoard::L5Mask) << 5) & empty)
+						{
+							c_f[f_size] = j << 5;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j << 5), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | (j << 5));
+							++f_size;
+						}
+					}
+					//LL
+					if (((curr_c & GPUBitBoard::R5Mask) >> 5) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c >> 5;
+						if ((j >> 4) & empty)
+						{
+							c_f[f_size] = j >> 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j >> 4), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) >> 5) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask)));
+							++f_size;
+						}
+					}
+					//LR
+					if ((curr_c >> 4) & curr_j.black)
+					{
+						GPUBitBoard::board_type j = curr_c >> 4;
+						if (((j & GPUBitBoard::R3Mask) >> 3) & empty)
+						{
+							c_f[f_size] = j >> 3;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~curr_c) | (j >> 3), (curr_j.black & ~j), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) >> 4) >> 3) | ((j >> 3) & GPUBitBoard::WhiteKingMask)));
+							++f_size;
+						}
+					}
 				}
 			}
 			else
 			{
-				//UL
-				if (((cell & GPUBitBoard::L3Mask) << 3) & board.white)
-				{
-					GPUBitBoard::board_type j = cell << 3;
-					if ((j << 4) & empty)
-						GenMoreBlackJumps(j << 4, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 4), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 3) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask))));
-				}
-				//UR
-				if ((cell << 4) & board.white)
-				{
-					GPUBitBoard::board_type j = cell << 4;
-					if (((j & GPUBitBoard::L5Mask) << 5) & empty)
-						GenMoreBlackJumps(j << 5, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 5), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 4) << 5) | ((j << 5) & GPUBitBoard::BlackKingMask))));
-				}
-				//LL
-				if ((((cell & board.kings) & GPUBitBoard::R5Mask) >> 5) & board.white)
-				{
-					GPUBitBoard::board_type j = cell >> 5;
-					if ((j >> 4) & empty)
-						GenMoreBlackJumps(j >> 4, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 4), (board.kings & (~cell ^ j)) | (j >> 4)));
-				}
-				//LR
-				if (((cell & board.kings) >> 4) & board.white)
-				{
-					GPUBitBoard::board_type j = cell >> 4;
-					if (((j & GPUBitBoard::R3Mask) >> 3) & empty)
-						GenMoreBlackJumps(j >> 3, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 3), (board.kings & (~cell ^ j)) | (j >> 3)));
-				}
+				frontier[atomicAdd(frontier_size, 1)] = curr_j;
 			}
-		}
-		else
-		{
-			*(out++) = board;
 		}
 	}
 
-	__host__ __device__ void GPUBitBoard::GenWhiteMove(GPUBitBoard::board_type cell, GPUBitBoard *&out, GPUBitBoard const &board)
+	__host__ __device__ void GPUBitBoard::GenMoreBlackJumps(GPUBitBoard::board_type cell, GPUBitBoard const & board, GPUBitBoard *frontier, int & frontier_size)
+	{
+		GPUBitBoard j_f[32];
+		GPUBitBoard::board_type c_f[32];
+		int f_size = 1;
+
+		j_f[0] = board;
+		c_f[0] = cell;
+
+		while (f_size > 0)
+		{
+			GPUBitBoard curr_j = j_f[f_size - 1];
+			GPUBitBoard::board_type curr_c = c_f[f_size - 1];
+			--f_size;
+			GPUBitBoard::board_type jumps = GPUBitBoard::GetBlackJumps(curr_j);
+			GPUBitBoard::board_type empty = ~(curr_j.white | curr_j.black);
+
+			if (jumps && (jumps & curr_c))
+			{
+				if (OddRows & curr_c)
+				{
+					//UL
+					if ((curr_c << 4) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c << 4;
+						if (((j & GPUBitBoard::L3Mask) << 3) & empty)
+						{
+							c_f[f_size] = j << 3;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j << 3), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) << 4) << 3) | ((j << 3) & GPUBitBoard::BlackKingMask)));
+							++f_size;
+						}
+					}
+					//UR
+					if (((curr_c & GPUBitBoard::L5Mask) << 5) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c << 5;
+						if ((j << 4) & empty)
+						{
+							c_f[f_size] = j << 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j << 4), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) << 5) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask)));
+							++f_size;
+						}
+					}
+					//LL
+					if (((curr_c & curr_j.kings) >> 4) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c >> 4;
+						if (((j & GPUBitBoard::R5Mask) >> 5) & empty)
+						{
+							c_f[f_size] = j >> 5;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j >> 5), (curr_j.kings & (~curr_c ^ j)) | (j >> 5));
+							++f_size;
+						}
+					}
+					//LR
+					if ((((curr_c & GPUBitBoard::R3Mask) & curr_j.kings) >> 3) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c >> 3;
+						if ((j >> 4) & empty)
+						{
+							c_f[f_size] = j >> 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j >> 4), (curr_j.kings & (~curr_c ^ j)) | (j >> 4));
+							++f_size;
+						}
+					}
+				}
+				else
+				{
+					//UL
+					if (((curr_c & GPUBitBoard::L3Mask) << 3) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c << 3;
+						if ((j << 4) & empty)
+						{
+							c_f[f_size] = j << 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j << 4), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) << 3) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask)));
+							++f_size;
+						}
+					}
+					//UR
+					if ((curr_c << 4) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c << 4;
+						if (((j & GPUBitBoard::L5Mask) << 5) & empty)
+						{
+							c_f[f_size] = j << 5;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j << 5), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) << 4) << 5) | ((j << 5) & GPUBitBoard::BlackKingMask)));
+							++f_size;
+						}
+					}
+					//LL
+					if ((((curr_c & curr_j.kings) & GPUBitBoard::R5Mask) >> 5) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c >> 5;
+						if ((j >> 4) & empty)
+						{
+							c_f[f_size] = j >> 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j >> 4), (curr_j.kings & (~curr_c ^ j)) | (j >> 4));
+							++f_size;
+						}
+					}
+					//LR
+					if (((curr_c & curr_j.kings) >> 4) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c >> 4;
+						if (((j & GPUBitBoard::R3Mask) >> 3) & empty)
+						{
+							c_f[f_size] = j >> 3;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j >> 3), (curr_j.kings & (~curr_c ^ j)) | (j >> 3));
+							++f_size;
+						}
+					}
+				}
+			}
+			else
+			{
+				frontier[frontier_size++] = curr_j;
+			}
+		}
+	}
+
+	__device__ void GPUBitBoard::GenMoreBlackJumpsAtomic(GPUBitBoard::board_type cell, GPUBitBoard const & board, GPUBitBoard *frontier, int * frontier_size)
+	{
+		GPUBitBoard j_f[32];
+		GPUBitBoard::board_type c_f[32];
+		int f_size = 1;
+
+		j_f[0] = board;
+		c_f[0] = cell;
+
+		while (f_size > 0)
+		{
+			GPUBitBoard curr_j = j_f[f_size - 1];
+			GPUBitBoard::board_type curr_c = c_f[f_size - 1];
+			--f_size;
+			GPUBitBoard::board_type jumps = GPUBitBoard::GetBlackJumps(curr_j);
+			GPUBitBoard::board_type empty = ~(curr_j.white | curr_j.black);
+
+			if (jumps && (jumps & curr_c))
+			{
+				if (OddRows & curr_c)
+				{
+					//UL
+					if ((curr_c << 4) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c << 4;
+						if (((j & GPUBitBoard::L3Mask) << 3) & empty)
+						{
+							c_f[f_size] = j << 3;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j << 3), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) << 4) << 3) | ((j << 3) & GPUBitBoard::BlackKingMask)));
+							++f_size;
+						}
+					}
+					//UR
+					if (((curr_c & GPUBitBoard::L5Mask) << 5) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c << 5;
+						if ((j << 4) & empty)
+						{
+							c_f[f_size] = j << 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j << 4), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) << 5) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask)));
+							++f_size;
+						}
+					}
+					//LL
+					if (((curr_c & curr_j.kings) >> 4) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c >> 4;
+						if (((j & GPUBitBoard::R5Mask) >> 5) & empty)
+						{
+							c_f[f_size] = j >> 5;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j >> 5), (curr_j.kings & (~curr_c ^ j)) | (j >> 5));
+							++f_size;
+						}
+					}
+					//LR
+					if ((((curr_c & GPUBitBoard::R3Mask) & curr_j.kings) >> 3) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c >> 3;
+						if ((j >> 4) & empty)
+						{
+							c_f[f_size] = j >> 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j >> 4), (curr_j.kings & (~curr_c ^ j)) | (j >> 4));
+							++f_size;
+						}
+					}
+				}
+				else
+				{
+					//UL
+					if (((curr_c & GPUBitBoard::L3Mask) << 3) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c << 3;
+						if ((j << 4) & empty)
+						{
+							c_f[f_size] = j << 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j << 4), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) << 3) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask)));
+							++f_size;
+						}
+					}
+					//UR
+					if ((curr_c << 4) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c << 4;
+						if (((j & GPUBitBoard::L5Mask) << 5) & empty)
+						{
+							c_f[f_size] = j << 5;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j << 5), (curr_j.kings & (~curr_c ^ j)) | ((((curr_j.kings & curr_c) << 4) << 5) | ((j << 5) & GPUBitBoard::BlackKingMask)));
+							++f_size;
+						}
+					}
+					//LL
+					if ((((curr_c & curr_j.kings) & GPUBitBoard::R5Mask) >> 5) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c >> 5;
+						if ((j >> 4) & empty)
+						{
+							c_f[f_size] = j >> 4;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j >> 4), (curr_j.kings & (~curr_c ^ j)) | (j >> 4));
+							++f_size;
+						}
+					}
+					//LR
+					if (((curr_c & curr_j.kings) >> 4) & curr_j.white)
+					{
+						GPUBitBoard::board_type j = curr_c >> 4;
+						if (((j & GPUBitBoard::R3Mask) >> 3) & empty)
+						{
+							c_f[f_size] = j >> 3;
+							j_f[f_size] = GPUBitBoard((curr_j.white & ~j), (curr_j.black & ~curr_c) | (j >> 3), (curr_j.kings & (~curr_c ^ j)) | (j >> 3));
+							++f_size;
+						}
+					}
+				}
+			}
+			else
+			{
+				frontier[atomicAdd(frontier_size, 1)] = curr_j;
+			}
+		}
+	}
+
+	__host__ __device__ void GPUBitBoard::GenWhiteMove(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int & frontier_size)
 	{
 		// GPUBitBoard must have a validity boolean.
 		//normal move (UL, UR)
@@ -287,22 +612,22 @@ namespace Checkers
 			//UL
 			if (((cell & board.kings) << 4) & empty)
 			{
-				(*out++) = GPUBitBoard((board.white & ~cell) | (cell << 4), board.black, (board.kings & ~cell) | (cell << 4));
+				frontier[frontier_size++] = GPUBitBoard((board.white & ~cell) | (cell << 4), board.black, (board.kings & ~cell) | (cell << 4));
 			}
 			//UR
 			if ((((cell & board.kings) & GPUBitBoard::L5Mask) << 5) & empty)
 			{
-				*(out++) = GPUBitBoard((board.white & ~cell) | (cell << 5), board.black, (board.kings & ~cell) | (cell << 5));
+				frontier[frontier_size++] = GPUBitBoard((board.white & ~cell) | (cell << 5), board.black, (board.kings & ~cell) | (cell << 5));
 			}
 			//LL
 			if ((cell >> 4) & empty)
 			{
-				*(out++) = GPUBitBoard((board.white & ~cell) | (cell >> 4), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 4) | ((cell >> 4) & GPUBitBoard::WhiteKingMask)));
+				frontier[frontier_size++] = GPUBitBoard((board.white & ~cell) | (cell >> 4), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 4) | ((cell >> 4) & GPUBitBoard::WhiteKingMask)));
 			}
 			//LR
 			if (((cell & GPUBitBoard::R3Mask) >> 3)& empty)
 			{
-				*(out++) = GPUBitBoard((board.white & ~cell) | (cell >> 3), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 3) | ((cell >> 3) & GPUBitBoard::WhiteKingMask)));
+				frontier[frontier_size++] = GPUBitBoard((board.white & ~cell) | (cell >> 3), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 3) | ((cell >> 3) & GPUBitBoard::WhiteKingMask)));
 			}
 		}
 		else
@@ -310,27 +635,82 @@ namespace Checkers
 			//UL
 			if ((((cell & GPUBitBoard::L3Mask) & board.kings) << 3) & empty)
 			{
-				*(out++) = GPUBitBoard((board.white & ~cell) | (cell << 3), board.black, (board.kings & ~cell) | (cell << 3));
+				frontier[frontier_size++] = GPUBitBoard((board.white & ~cell) | (cell << 3), board.black, (board.kings & ~cell) | (cell << 3));
 			}
 			//UR
 			if (((cell & board.kings) << 4) & empty)
 			{
-				*(out++) = GPUBitBoard((board.white & ~cell) | (cell << 4), board.black, (board.kings & ~cell) | (cell << 4));
+				frontier[frontier_size++] = GPUBitBoard((board.white & ~cell) | (cell << 4), board.black, (board.kings & ~cell) | (cell << 4));
 			}
 			//LL
 			if (((cell & GPUBitBoard::R5Mask) >> 5) & empty)
 			{
-				*(out++) = GPUBitBoard((board.white & ~cell) | (cell >> 5), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 5) | ((cell >> 5) & GPUBitBoard::WhiteKingMask)));
+				frontier[frontier_size++] = GPUBitBoard((board.white & ~cell) | (cell >> 5), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 5) | ((cell >> 5) & GPUBitBoard::WhiteKingMask)));
 			}
 			//LR
 			if ((cell >> 4) & empty)
 			{
-				*(out++) = GPUBitBoard((board.white & ~cell) | (cell >> 4), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 4) | ((cell >> 4) & GPUBitBoard::WhiteKingMask)));
+				frontier[frontier_size++] = GPUBitBoard((board.white & ~cell) | (cell >> 4), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 4) | ((cell >> 4) & GPUBitBoard::WhiteKingMask)));
 			}
 		}
 	}
 
-	__host__ __device__ void GPUBitBoard::GenWhiteJump(GPUBitBoard::board_type cell, GPUBitBoard *&out, GPUBitBoard const &board)
+	__device__ void GPUBitBoard::GenWhiteMoveAtomic(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int * frontier_size)
+	{
+		// GPUBitBoard must have a validity boolean.
+		//normal move (UL, UR)
+		//king extra moves (LL, LR)
+		GPUBitBoard::board_type empty = ~(board.white | board.black);
+
+		if (GPUBitBoard::OddRows & cell)
+		{
+			//UL
+			if (((cell & board.kings) << 4) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard((board.white & ~cell) | (cell << 4), board.black, (board.kings & ~cell) | (cell << 4));
+			}
+			//UR
+			if ((((cell & board.kings) & GPUBitBoard::L5Mask) << 5) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard((board.white & ~cell) | (cell << 5), board.black, (board.kings & ~cell) | (cell << 5));
+			}
+			//LL
+			if ((cell >> 4) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard((board.white & ~cell) | (cell >> 4), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 4) | ((cell >> 4) & GPUBitBoard::WhiteKingMask)));
+			}
+			//LR
+			if (((cell & GPUBitBoard::R3Mask) >> 3)& empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard((board.white & ~cell) | (cell >> 3), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 3) | ((cell >> 3) & GPUBitBoard::WhiteKingMask)));
+			}
+		}
+		else
+		{
+			//UL
+			if ((((cell & GPUBitBoard::L3Mask) & board.kings) << 3) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard((board.white & ~cell) | (cell << 3), board.black, (board.kings & ~cell) | (cell << 3));
+			}
+			//UR
+			if (((cell & board.kings) << 4) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard((board.white & ~cell) | (cell << 4), board.black, (board.kings & ~cell) | (cell << 4));
+			}
+			//LL
+			if (((cell & GPUBitBoard::R5Mask) >> 5) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard((board.white & ~cell) | (cell >> 5), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 5) | ((cell >> 5) & GPUBitBoard::WhiteKingMask)));
+			}
+			//LR
+			if ((cell >> 4) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard((board.white & ~cell) | (cell >> 4), board.black, (board.kings & ~cell) | (((board.kings & cell) >> 4) | ((cell >> 4) & GPUBitBoard::WhiteKingMask)));
+			}
+		}
+	}
+
+	__host__ __device__ void GPUBitBoard::GenWhiteJump(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int & frontier_size)
 	{
 		GPUBitBoard::board_type empty = ~(board.white | board.black);
 		if (OddRows & cell)
@@ -340,28 +720,28 @@ namespace Checkers
 			{
 				GPUBitBoard::board_type j = cell << 4;
 				if (((j & GPUBitBoard::L3Mask) << 3) & empty)
-					GenMoreWhiteJumps(j << 3, out, GPUBitBoard((board.white & ~cell) | (j << 3), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 3)));
+					GenMoreWhiteJumps(j << 3, GPUBitBoard((board.white & ~cell) | (j << 3), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 3)), frontier, frontier_size);
 			}
 			//UR
 			if ((((cell & board.kings) & GPUBitBoard::L5Mask) << 5) & board.black)
 			{
 				GPUBitBoard::board_type j = cell << 5;
 				if ((j << 4) & empty)
-					GenMoreWhiteJumps(j << 4, out, GPUBitBoard((board.white & ~cell) | (j << 4), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 4)));
+					GenMoreWhiteJumps(j << 4,  GPUBitBoard((board.white & ~cell) | (j << 4), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 4)), frontier, frontier_size);
 			}
 			//LL
 			if ((cell >> 4) & board.black)
 			{
 				GPUBitBoard::board_type j = cell >> 4;
 				if (((j & GPUBitBoard::R5Mask) >> 5) & empty)
-					GenMoreWhiteJumps(j >> 5, out, GPUBitBoard((board.white & ~cell) | (j >> 5), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 4) >> 5) | ((j >> 5) & GPUBitBoard::WhiteKingMask))));
+					GenMoreWhiteJumps(j >> 5, GPUBitBoard((board.white & ~cell) | (j >> 5), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 4) >> 5) | ((j >> 5) & GPUBitBoard::WhiteKingMask))),frontier, frontier_size);
 			}
 			//LR
 			if (((cell & GPUBitBoard::R3Mask) >> 3)& board.black)
 			{
 				GPUBitBoard::board_type j = cell >> 3;
 				if ((j >> 4) & empty)
-					GenMoreWhiteJumps(j >> 4, out, GPUBitBoard((board.white & ~cell) | (j >> 4), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 3) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask))));
+					GenMoreWhiteJumps(j >> 4, GPUBitBoard((board.white & ~cell) | (j >> 4), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 3) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask))),frontier, frontier_size);
 			}
 		}
 		else
@@ -372,33 +752,101 @@ namespace Checkers
 
 				GPUBitBoard::board_type j = cell << 3;
 				if ((j << 4) & empty)
-					GenMoreWhiteJumps(j << 4, out, GPUBitBoard((board.white & ~cell) | (j << 4), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 4)));
+					GenMoreWhiteJumps(j << 4, GPUBitBoard((board.white & ~cell) | (j << 4), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 4)),frontier, frontier_size);
 			}
 			//UR
 			if (((cell & board.kings) << 4) & board.black)
 			{
 				GPUBitBoard::board_type j = cell << 4;
 				if (((j & GPUBitBoard::L5Mask) << 5) & empty)
-					GenMoreWhiteJumps(j << 5, out, GPUBitBoard((board.white & ~cell) | (j << 5), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 5)));
+					GenMoreWhiteJumps(j << 5, GPUBitBoard((board.white & ~cell) | (j << 5), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 5)),frontier, frontier_size);
 			}
 			//LL
 			if (((cell & GPUBitBoard::R5Mask) >> 5) & board.black)
 			{
 				GPUBitBoard::board_type j = cell >> 5;
 				if ((j >> 4) & empty)
-					GenMoreWhiteJumps(j >> 4, out, GPUBitBoard((board.white & ~cell) | (j >> 4), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 5) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask))));
+					GenMoreWhiteJumps(j >> 4, GPUBitBoard((board.white & ~cell) | (j >> 4), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 5) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask))),frontier, frontier_size);
 			}
 			//LR
 			if ((cell >> 4) & board.black)
 			{
 				GPUBitBoard::board_type j = cell >> 4;
 				if (((j & GPUBitBoard::R3Mask) >> 3) & empty)
-					GenMoreWhiteJumps(j >> 3, out, GPUBitBoard((board.white & ~cell) | (j >> 3), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 4) >> 3) | ((j >> 3) & GPUBitBoard::WhiteKingMask))));
+					GenMoreWhiteJumps(j >> 3, GPUBitBoard((board.white & ~cell) | (j >> 3), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 4) >> 3) | ((j >> 3) & GPUBitBoard::WhiteKingMask))),frontier, frontier_size);
 			}
 		}
 	}
 
-	__host__ __device__ void GPUBitBoard::GenBlackMove(GPUBitBoard::board_type cell, GPUBitBoard *&out, GPUBitBoard const &board)
+	__device__ void GPUBitBoard::GenWhiteJumpAtomic(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int * frontier_size)
+	{
+		GPUBitBoard::board_type empty = ~(board.white | board.black);
+		if (OddRows & cell)
+		{
+			//UL
+			if (((cell & board.kings) << 4) & board.black)
+			{
+				GPUBitBoard::board_type j = cell << 4;
+				if (((j & GPUBitBoard::L3Mask) << 3) & empty)
+					GenMoreWhiteJumpsAtomic(j << 3, GPUBitBoard((board.white & ~cell) | (j << 3), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 3)),frontier, frontier_size);
+			}
+			//UR
+			if ((((cell & board.kings) & GPUBitBoard::L5Mask) << 5) & board.black)
+			{
+				GPUBitBoard::board_type j = cell << 5;
+				if ((j << 4) & empty)
+					GenMoreWhiteJumpsAtomic(j << 4, GPUBitBoard((board.white & ~cell) | (j << 4), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 4)),frontier, frontier_size);
+			}
+			//LL
+			if ((cell >> 4) & board.black)
+			{
+				GPUBitBoard::board_type j = cell >> 4;
+				if (((j & GPUBitBoard::R5Mask) >> 5) & empty)
+					GenMoreWhiteJumpsAtomic(j >> 5, GPUBitBoard((board.white & ~cell) | (j >> 5), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 4) >> 5) | ((j >> 5) & GPUBitBoard::WhiteKingMask))),frontier, frontier_size);
+			}
+			//LR
+			if (((cell & GPUBitBoard::R3Mask) >> 3)& board.black)
+			{
+				GPUBitBoard::board_type j = cell >> 3;
+				if ((j >> 4) & empty)
+					GenMoreWhiteJumpsAtomic(j >> 4, GPUBitBoard((board.white & ~cell) | (j >> 4), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 3) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask))),frontier, frontier_size);
+			}
+		}
+		else
+		{
+			//UL
+			if ((((cell & GPUBitBoard::L3Mask) & board.kings) << 3) & board.black)
+			{
+
+				GPUBitBoard::board_type j = cell << 3;
+				if ((j << 4) & empty)
+					GenMoreWhiteJumpsAtomic(j << 4, GPUBitBoard((board.white & ~cell) | (j << 4), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 4)),frontier, frontier_size);
+			}
+			//UR
+			if (((cell & board.kings) << 4) & board.black)
+			{
+				GPUBitBoard::board_type j = cell << 4;
+				if (((j & GPUBitBoard::L5Mask) << 5) & empty)
+					GenMoreWhiteJumpsAtomic(j << 5, GPUBitBoard((board.white & ~cell) | (j << 5), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 5)),frontier, frontier_size);
+			}
+			//LL
+			if (((cell & GPUBitBoard::R5Mask) >> 5) & board.black)
+			{
+				GPUBitBoard::board_type j = cell >> 5;
+				if ((j >> 4) & empty)
+					GenMoreWhiteJumpsAtomic(j >> 4, GPUBitBoard((board.white & ~cell) | (j >> 4), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 5) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask))),frontier, frontier_size);
+			}
+			//LR
+			if ((cell >> 4) & board.black)
+			{
+				GPUBitBoard::board_type j = cell >> 4;
+				if (((j & GPUBitBoard::R3Mask) >> 3) & empty)
+					GenMoreWhiteJumpsAtomic(j >> 3, GPUBitBoard((board.white & ~cell) | (j >> 3), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 4) >> 3) | ((j >> 3) & GPUBitBoard::WhiteKingMask))),frontier, frontier_size);
+			}
+		}
+	}
+
+	__host__ __device__ void GPUBitBoard::GenBlackMove(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int & frontier_size)
 	{
 		// GPUBitBoard must have a validity boolean.
 
@@ -408,22 +856,22 @@ namespace Checkers
 			//UL
 			if ((cell << 4) & empty)
 			{
-				*(out++) = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 4), (board.kings & ~cell) | (((board.kings & cell) << 4) | ((cell << 4) & GPUBitBoard::BlackKingMask)));
+				frontier[frontier_size++] = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 4), (board.kings & ~cell) | (((board.kings & cell) << 4) | ((cell << 4) & GPUBitBoard::BlackKingMask)));
 			}
 			//UR
 			if (((cell & GPUBitBoard::L5Mask) << 5) & empty)
 			{
-				*(out++) = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 5), (board.kings & ~cell) | (((board.kings & cell) << 5) | ((cell << 5) & GPUBitBoard::BlackKingMask)));
+				frontier[frontier_size++] = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 5), (board.kings & ~cell) | (((board.kings & cell) << 5) | ((cell << 5) & GPUBitBoard::BlackKingMask)));
 			}
 			//LL
 			if (((cell & board.kings) >> 4) & empty)
 			{
-				*(out++) = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 4), (board.kings & ~cell) | (cell >> 4));
+				frontier[frontier_size++] = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 4), (board.kings & ~cell) | (cell >> 4));
 			}
 			//LR
 			if ((((cell & GPUBitBoard::R3Mask)& board.kings) >> 3)& empty)
 			{
-				*(out++) = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 3), (board.kings & ~cell) | (cell >> 3));
+				frontier[frontier_size++] = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 3), (board.kings & ~cell) | (cell >> 3));
 			}
 		}
 		else
@@ -431,27 +879,80 @@ namespace Checkers
 			//UL
 			if (((cell & GPUBitBoard::L3Mask) << 3) & empty)
 			{
-				*(out++) = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 3), (board.kings & ~cell) | (((board.kings & cell) << 3) | ((cell << 3) & GPUBitBoard::BlackKingMask)));
+				frontier[frontier_size++] = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 3), (board.kings & ~cell) | (((board.kings & cell) << 3) | ((cell << 3) & GPUBitBoard::BlackKingMask)));
 			}
 			//UR
 			if ((cell << 4) & empty)
 			{
-				*(out++) = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 4), (board.kings & ~cell) | (((board.kings & cell) << 4) | ((cell << 4) & GPUBitBoard::BlackKingMask)));
+				frontier[frontier_size++] = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 4), (board.kings & ~cell) | (((board.kings & cell) << 4) | ((cell << 4) & GPUBitBoard::BlackKingMask)));
 			}
 			//LL
 			if ((((cell & board.kings) & GPUBitBoard::R5Mask) >> 5) & empty)
 			{
-				*(out++) = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 5), (board.kings & ~cell) | (cell >> 5));
+				frontier[frontier_size++] = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 5), (board.kings & ~cell) | (cell >> 5));
 			}
 			//LR
 			if (((cell & board.kings) >> 4) & empty)
 			{
-				*(out++) = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 4), (board.kings & ~cell) | (cell >> 4));
+				frontier[frontier_size++] = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 4), (board.kings & ~cell) | (cell >> 4));
 			}
 		}
 	}
 
-	__host__ __device__ void GPUBitBoard::GenBlackJump(GPUBitBoard::board_type cell, GPUBitBoard *&out, GPUBitBoard const &board)
+	__device__ void GPUBitBoard::GenBlackMoveAtomic(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int * frontier_size)
+	{
+		// GPUBitBoard must have a validity boolean.
+
+		GPUBitBoard::board_type empty = ~(board.white | board.black);
+		if (OddRows & cell)
+		{
+			//UL
+			if ((cell << 4) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 4), (board.kings & ~cell) | (((board.kings & cell) << 4) | ((cell << 4) & GPUBitBoard::BlackKingMask)));
+			}
+			//UR
+			if (((cell & GPUBitBoard::L5Mask) << 5) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 5), (board.kings & ~cell) | (((board.kings & cell) << 5) | ((cell << 5) & GPUBitBoard::BlackKingMask)));
+			}
+			//LL
+			if (((cell & board.kings) >> 4) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 4), (board.kings & ~cell) | (cell >> 4));
+			}
+			//LR
+			if ((((cell & GPUBitBoard::R3Mask)& board.kings) >> 3)& empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 3), (board.kings & ~cell) | (cell >> 3));
+			}
+		}
+		else
+		{
+			//UL
+			if (((cell & GPUBitBoard::L3Mask) << 3) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 3), (board.kings & ~cell) | (((board.kings & cell) << 3) | ((cell << 3) & GPUBitBoard::BlackKingMask)));
+			}
+			//UR
+			if ((cell << 4) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard(board.white, (board.black & ~cell) | (cell << 4), (board.kings & ~cell) | (((board.kings & cell) << 4) | ((cell << 4) & GPUBitBoard::BlackKingMask)));
+			}
+			//LL
+			if ((((cell & board.kings) & GPUBitBoard::R5Mask) >> 5) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 5), (board.kings & ~cell) | (cell >> 5));
+			}
+			//LR
+			if (((cell & board.kings) >> 4) & empty)
+			{
+				frontier[atomicAdd(frontier_size, 1)] = GPUBitBoard(board.white, (board.black & ~cell) | (cell >> 4), (board.kings & ~cell) | (cell >> 4));
+			}
+		}
+	}
+
+	__host__ __device__ void GPUBitBoard::GenBlackJump(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int & frontier_size)
 	{
 		// GPUBitBoard must have a validity boolean.
 
@@ -464,28 +965,28 @@ namespace Checkers
 			{
 				GPUBitBoard::board_type j = cell << 4;
 				if (((j & GPUBitBoard::L3Mask) << 3) & empty)
-					GenMoreBlackJumps(j << 3, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 3), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 4) << 3) | ((j << 3) & GPUBitBoard::BlackKingMask))));
+					GenMoreBlackJumps(j << 3, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 3), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 4) << 3) | ((j << 3) & GPUBitBoard::BlackKingMask))),frontier, frontier_size);
 			}
 			//UR
 			if (((cell & GPUBitBoard::L5Mask) << 5) & board.white)
 			{
 				GPUBitBoard::board_type j = cell << 5;
 				if ((j << 4) & empty)
-					GenMoreBlackJumps(j << 4, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 4), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 5) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask))));
+					GenMoreBlackJumps(j << 4, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 4), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 5) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask))),frontier, frontier_size);
 			}
 			//LL
 			if (((cell & board.kings) >> 4) & board.white)
 			{
 				GPUBitBoard::board_type j = cell >> 4;
 				if (((j & GPUBitBoard::R5Mask) >> 5) & empty)
-					GenMoreBlackJumps(j >> 5, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 5), (board.kings & (~cell ^ j)) | (j >> 5)));
+					GenMoreBlackJumps(j >> 5, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 5), (board.kings & (~cell ^ j)) | (j >> 5)),frontier, frontier_size);
 			}
 			//LR
 			if ((((cell & GPUBitBoard::R3Mask) & board.kings) >> 3) & board.white)
 			{
 				GPUBitBoard::board_type j = cell >> 3;
 				if ((j >> 4) & empty)
-					GenMoreBlackJumps(j >> 4, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 4), (board.kings & (~cell ^ j)) | (j >> 4)));
+					GenMoreBlackJumps(j >> 4, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 4), (board.kings & (~cell ^ j)) | (j >> 4)),frontier, frontier_size);
 			}
 		}
 		else
@@ -495,28 +996,98 @@ namespace Checkers
 			{
 				GPUBitBoard::board_type j = cell << 3;
 				if ((j << 4) & empty)
-					GenMoreBlackJumps(j << 4, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 4), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 3) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask))));
+					GenMoreBlackJumps(j << 4, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 4), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 3) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask))),frontier, frontier_size);
 			}
 			//UR
 			if ((cell << 4) & board.white)
 			{
 				GPUBitBoard::board_type j = cell << 4;
 				if (((j & GPUBitBoard::L5Mask) << 5) & empty)
-					GenMoreBlackJumps(j << 5, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 5), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 4) << 5) | ((j << 5) & GPUBitBoard::BlackKingMask))));
+					GenMoreBlackJumps(j << 5, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 5), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 4) << 5) | ((j << 5) & GPUBitBoard::BlackKingMask))),frontier, frontier_size);
 			}
 			//LL
 			if ((((cell & board.kings) & GPUBitBoard::R5Mask) >> 5) & board.white)
 			{
 				GPUBitBoard::board_type j = cell >> 5;
 				if ((j >> 4) & empty)
-					GenMoreBlackJumps(j >> 4, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 4), (board.kings & (~cell ^ j)) | (j >> 4)));
+					GenMoreBlackJumps(j >> 4, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 4), (board.kings & (~cell ^ j)) | (j >> 4)),frontier, frontier_size);
 			}
 			//LR
 			if (((cell & board.kings) >> 4) & board.white)
 			{
 				GPUBitBoard::board_type j = cell >> 4;
 				if (((j & GPUBitBoard::R3Mask) >> 3) & empty)
-					GenMoreBlackJumps(j >> 3, out, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 3), (board.kings & (~cell ^ j)) | (j >> 3)));
+					GenMoreBlackJumps(j >> 3, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 3), (board.kings & (~cell ^ j)) | (j >> 3)),frontier, frontier_size);
+			}
+		}
+	}
+
+	__device__ void GPUBitBoard::GenBlackJumpAtomic(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int * frontier_size)
+	{
+		// GPUBitBoard must have a validity boolean.
+
+		GPUBitBoard::board_type empty = ~(board.white | board.black);
+
+		if (OddRows & cell)
+		{
+			//UL
+			if ((cell << 4) & board.white)
+			{
+				GPUBitBoard::board_type j = cell << 4;
+				if (((j & GPUBitBoard::L3Mask) << 3) & empty)
+					GenMoreBlackJumpsAtomic(j << 3, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 3), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 4) << 3) | ((j << 3) & GPUBitBoard::BlackKingMask))),frontier, frontier_size);
+			}
+			//UR
+			if (((cell & GPUBitBoard::L5Mask) << 5) & board.white)
+			{
+				GPUBitBoard::board_type j = cell << 5;
+				if ((j << 4) & empty)
+					GenMoreBlackJumpsAtomic(j << 4, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 4), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 5) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask))),frontier, frontier_size);
+			}
+			//LL
+			if (((cell & board.kings) >> 4) & board.white)
+			{
+				GPUBitBoard::board_type j = cell >> 4;
+				if (((j & GPUBitBoard::R5Mask) >> 5) & empty)
+					GenMoreBlackJumpsAtomic(j >> 5, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 5), (board.kings & (~cell ^ j)) | (j >> 5)),frontier, frontier_size);
+			}
+			//LR
+			if ((((cell & GPUBitBoard::R3Mask) & board.kings) >> 3) & board.white)
+			{
+				GPUBitBoard::board_type j = cell >> 3;
+				if ((j >> 4) & empty)
+					GenMoreBlackJumpsAtomic(j >> 4, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 4), (board.kings & (~cell ^ j)) | (j >> 4)),frontier, frontier_size);
+			}
+		}
+		else
+		{
+			//UL
+			if (((cell & GPUBitBoard::L3Mask) << 3) & board.white)
+			{
+				GPUBitBoard::board_type j = cell << 3;
+				if ((j << 4) & empty)
+					GenMoreBlackJumpsAtomic(j << 4, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 4), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 3) << 4) | ((j << 4) & GPUBitBoard::BlackKingMask))),frontier, frontier_size);
+			}
+			//UR
+			if ((cell << 4) & board.white)
+			{
+				GPUBitBoard::board_type j = cell << 4;
+				if (((j & GPUBitBoard::L5Mask) << 5) & empty)
+					GenMoreBlackJumpsAtomic(j << 5, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j << 5), (board.kings & (~cell ^ j)) | ((((board.kings & cell) << 4) << 5) | ((j << 5) & GPUBitBoard::BlackKingMask))),frontier, frontier_size);
+			}
+			//LL
+			if ((((cell & board.kings) & GPUBitBoard::R5Mask) >> 5) & board.white)
+			{
+				GPUBitBoard::board_type j = cell >> 5;
+				if ((j >> 4) & empty)
+					GenMoreBlackJumpsAtomic(j >> 4, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 4), (board.kings & (~cell ^ j)) | (j >> 4)),frontier, frontier_size);
+			}
+			//LR
+			if (((cell & board.kings) >> 4) & board.white)
+			{
+				GPUBitBoard::board_type j = cell >> 4;
+				if (((j & GPUBitBoard::R3Mask) >> 3) & empty)
+					GenMoreBlackJumpsAtomic(j >> 3, GPUBitBoard((board.white & ~j), (board.black & ~cell) | (j >> 3), (board.kings & (~cell ^ j)) | (j >> 3)),frontier, frontier_size);
 			}
 		}
 	}

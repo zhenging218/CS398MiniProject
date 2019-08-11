@@ -230,7 +230,7 @@ namespace
 
 		while (gpu_result == Checkers::Minimax::INPROGRESS)
 		{
-			// std::cout << "GPU Version: Turn " << gpu_turns << "...\r";
+			std::cout << "GPU Version: Turn " << gpu_turns << "...\r";
 			auto start = std::chrono::high_resolution_clock::now();
 			gpu_result = Checkers::GPUMinimax::Next(gpu_board, gpu_turn, gpu_depth, turns_left);
 			std::chrono::duration<double, std::milli> time = std::chrono::high_resolution_clock::now() - start;

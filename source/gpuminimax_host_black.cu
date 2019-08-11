@@ -44,23 +44,22 @@ namespace Checkers
 						CHECK_ERRORS();
 						free(copy);
 
-						cudaMalloc((void**)&GPUv, sizeof(utility_type));
-						CHECK_ERRORS();
-						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
+						cudaMalloc((void**)&GPUv, sizeof(utility_type) * (size - 1));
 						CHECK_ERRORS();
 
+						std::cout << "reached black move max" << std::endl;
 						// launch kernel
-						master_black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
+						black_kernel << <dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUv, v, GPUFrontier, size - 1, alpha, beta, NodeType::MAX, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 						CHECK_ERRORS();
-
-						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
+						std::wcout << "finished black move max" << std::endl;
+						// copy GPUv[0] to v
+						cudaMemcpy(&v, GPUv, sizeof(utility_type), cudaMemcpyDeviceToHost);
 						CHECK_ERRORS();
 						cudaFree(GPUFrontier);
 						CHECK_ERRORS();
 						cudaFree(GPUv);
 						CHECK_ERRORS();
-
 					}
 				}
 			}
@@ -103,23 +102,22 @@ namespace Checkers
 						CHECK_ERRORS();
 						free(copy);
 
-						cudaMalloc((void**)&GPUv, sizeof(utility_type));
-						CHECK_ERRORS();
-						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
+						cudaMalloc((void**)&GPUv, sizeof(utility_type) * (size - 1));
 						CHECK_ERRORS();
 
+						std::cout << "reached black move min" << std::endl;
 						// launch kernel
-						master_black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
+						black_kernel << <dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUv, v, GPUFrontier, size - 1, alpha, beta, NodeType::MIN, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 						CHECK_ERRORS();
-
-						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
+						std::wcout << "finished black move min" << std::endl;
+						// copy GPUv[0] to v
+						cudaMemcpy(&v, GPUv, sizeof(utility_type), cudaMemcpyDeviceToHost);
 						CHECK_ERRORS();
 						cudaFree(GPUFrontier);
 						CHECK_ERRORS();
 						cudaFree(GPUv);
 						CHECK_ERRORS();
-
 					}
 				}
 			}
