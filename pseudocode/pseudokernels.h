@@ -5,7 +5,7 @@
 
 // atomic version should be device only, and non-atomic version should be both host and device capable.
 
-// __host__ __device__ void GPUBitBoard::GenWhiteMove(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int *frontier_size);
+// __host__ __device__ void GPUBitBoard::GenWhiteMove(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int &frontier_size);
 // __device__ void GPUBitBoard::GenWhiteMoveAtomic(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int *frontier_size);
 
 // for non-atomic version of gen_move, can just perform frontier[f_size++] = /* new board */.
