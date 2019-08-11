@@ -78,6 +78,7 @@ __device__ utility_type explore_black_frontier(GPUBitBoard const &board, utility
 }
 
 // v -> num_board * sizeof(utility_type), host takes v[0].
+// host will launch kernel by doing black_kernel<<<dim3(num_boards, 1, 1), dim3(32, 1, 1)>>>(...);
 
 __global__ void black_kernel(utility_type *v, utility_type X, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, /* minimax node enum */ node_type, int depth, int turns)
 {
