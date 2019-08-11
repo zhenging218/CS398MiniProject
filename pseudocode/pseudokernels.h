@@ -59,6 +59,8 @@ namespace GPUMinimax
 	
 }
 
+// need explore_white_frontier and white_kernel as well.
+
 __device__ utility_type explore_black_frontier(GPUBitBoard const &board, utility_type alpha, utility_type beta, /*minimax node enum */ node_type, int depth, int turns)
 {
 	GPUBitBoard frontier[32];
