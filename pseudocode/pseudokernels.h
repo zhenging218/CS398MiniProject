@@ -140,11 +140,8 @@ __global__ void black_kernel(utility_type *v, utility_type X, GPUBitBoard const 
 	__shared__ GPUBitBoard frontier[32];
 	__shared__ utility_type t_v[32];
 	
-	utility_type cell = 1u << tx;
-	
 	if(tx < 32)
 	{
-		t_v[tx] = *v;
 		if(tx == 0)
 		{
 			f_size = 0;
@@ -183,9 +180,11 @@ __global__ void black_kernel(utility_type *v, utility_type X, GPUBitBoard const 
 	
 	if(tx == 0)
 	{
+		utlity_type t_x;
 		// ab-prune t_v and send the last value to v[bx].
 		if(node_type == max)
 		{
+			t_x = -Infinity;
 			while(f_size > 0)
 			{
 				X = max(t_v[--f_size], X);
@@ -198,6 +197,7 @@ __global__ void black_kernel(utility_type *v, utility_type X, GPUBitBoard const 
 		}
 		else
 		{
+			t_x = Infinity;
 			while(f_size > 0)
 			{
 				X = min(t_v[--f_size], X);
@@ -209,20 +209,19 @@ __global__ void black_kernel(utility_type *v, utility_type X, GPUBitBoard const 
 			}
 		}
 		
-		v[bx] = X;
+		v[bx] = t_x;
 	}
 	
 	__syncthreads();
 	if(bx == 0 && tx == 0)
 	{
-		X = v[0];
 		// ab-prune v and send the last value to v[0].
 		if(node_type == max)
 		{
-			for(int i = 1; i < num_boards; ++i)
+			for(int i = 0; i < num_boards; ++i)
 			{
 				X = max(v[i], X);
-				if(v[0] > beta)
+				if(X > beta)
 				{
 					break;
 				}
@@ -231,10 +230,10 @@ __global__ void black_kernel(utility_type *v, utility_type X, GPUBitBoard const 
 		}
 		else
 		{
-			for(int i = 1; i < num_boards; ++i)
+			for(int i = 0; i < num_boards; ++i)
 			{
 				X = min(v[i], X);
-				if(v[0] < alpha)
+				if(X < alpha)
 				{
 					break;
 				}
@@ -243,6 +242,75 @@ __global__ void black_kernel(utility_type *v, utility_type X, GPUBitBoard const 
 		}
 		
 		v[0] = X;
+	}
+	
+	__syncthreads();
+}
+
+__global__ void black_next_kernel(int *placement, utility_type *v, utility_type X, GPUBitBoard const *boards, int num_boards, int depth, int turns)
+{
+	int tx = threadIdx.x;
+	int bx = blockidx.x;
+	
+	__shared__ int f_size;
+	__shared__ GPUBitBoard frontier[32];
+	__shared__ utility_type t_v[32];
+	__shared__ int gen_board_type;
+	__shared__ utility_type alpha;
+	__shared__ utility_type beta;
+	
+	if(tx == 0)
+	{
+		alpha = -Infinity;
+		beta = Infinity;
+		gen_board_type = (GPUBitBoard::GetWhiteJumps(board[bx]) != 0) ? 1 : 0;
+	}
+	
+	__syncthreads();
+	
+	if(tx < f_size)
+	{
+		if(tx < f_size)
+		{
+			t_v[tx] = explore_black_frontier(frontier[tx], alpha, beta, NodeType::MAX, depth - 1, turns - 1);
+		}
+	}
+	
+	__syncthreads();
+	
+	// min
+	if(tx == 0)
+	{
+		utility_type t_x = Infinity;
+		while(f_size > 0)
+		{
+			t_x = min(t_v[--f_size], t_x);
+			if(X < alpha)
+			{
+				break;
+			}
+			beta = min(beta, t_x);
+		}
+		
+		v[bx] = t_x;
+	}
+	
+	__syncthreads();
+	
+	// max
+	if(bx == 0 && tx == 0)
+	{
+		int t_placement = *placement;
+		for(int i = 0; i < num_boards; ++i)
+		{
+			X = min(v[i], X);
+			if(X < v)
+			{
+				t_placement = i + 1;
+			}
+		}
+		
+		*placement = t_placement;
 	}
 	
 	__syncthreads();
