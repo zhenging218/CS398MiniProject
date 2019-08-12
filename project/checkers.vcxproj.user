@@ -8,6 +8,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerWorkingDirectory>$(SolutionDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>4 8 100</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>4 5 100</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>

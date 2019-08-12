@@ -42,11 +42,13 @@ namespace Checkers
 				while (frontier_size > 0)
 				{
 					v = max(explore_black_frontier(frontier[--frontier_size], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
+
 					if (v > beta)
 					{
 						break;
 					}
 					alpha = max(alpha, v);
+					
 				}
 			}
 			else
@@ -60,6 +62,7 @@ namespace Checkers
 				while (frontier_size > 0)
 				{
 					v = min(explore_black_frontier(frontier[--frontier_size], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
+					
 					if (v < alpha)
 					{
 						break;
@@ -138,12 +141,13 @@ namespace Checkers
 						while (frontier_size > 0)
 						{
 							t_x = max(t_v[--frontier_size], t_x);
-							
+	
 							if (t_x > beta)
 							{
 								break;
 							}
 							alpha = max(alpha, t_x);
+							
 						}
 					}
 					else
@@ -152,11 +156,13 @@ namespace Checkers
 						while (frontier_size > 0)
 						{
 							t_x = min(t_v[--frontier_size], t_x);
+						
 							if (t_x < alpha)
 							{
 								break;
 							}
 							beta = min(beta, t_x);
+
 						}
 					}
 
@@ -180,6 +186,7 @@ namespace Checkers
 							break;
 						}
 						alpha = max(alpha, X);
+				
 					}
 				}
 				else
@@ -187,11 +194,13 @@ namespace Checkers
 					for (int i = 0; i < num_boards; ++i)
 					{
 						X = min(v[i], X);
+						
 						if (X < alpha)
 						{
 							break;
 						}
 						beta = min(beta, X);
+
 					}
 				}
 
