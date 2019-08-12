@@ -27,6 +27,14 @@ namespace
 		int dev = findCudaDevice(argc, (const char **)argv);
 		checkCudaErrors(cudaGetDeviceProperties(&deviceProp, dev));
 		std::cout << "CUDA device " << deviceProp.name << " has " << deviceProp.multiProcessorCount << " multi-processors, Compute capability " << deviceProp.major << "." << deviceProp.minor << "\n";
+		
+		size_t limit = 0;
+		cudaDeviceGetLimit(&limit, cudaLimitStackSize);
+		std::cout << "CUDA default stack limit is " << limit << " bytes, changing it to ";
+		cudaDeviceSetLimit(cudaLimitStackSize, limit * Checkers::Minimax::GetDefaultSearchDepth());
+		cudaDeviceGetLimit(&limit, cudaLimitStackSize);
+		std::cout << limit << " bytes" << std::endl;
+		CHECK_ERRORS();
 	}
 
 	void EndCUDA()
@@ -198,7 +206,7 @@ namespace
 
 		while (cpu_result == Checkers::Minimax::INPROGRESS && cpu_turns < Checkers::Minimax::GetMaxTurns())
 		{
-			std::cout << "CPU Version: Turn " << cpu_turns << "...\r";
+			// std::cout << "CPU Version: Turn " << cpu_turns << "...\r";
 			Checkers::Minimax::Turn cpu_turn = minimax.GetTurn();
 			auto start = std::chrono::high_resolution_clock::now();
 			cpu_result = minimax.Next();
@@ -234,7 +242,7 @@ namespace
 
 		while (gpu_result == Checkers::Minimax::INPROGRESS && gpu_turns < Checkers::Minimax::GetMaxTurns())
 		{
-			std::cout << "GPU Version: Turn " << gpu_turns << "...\r";
+			// std::cout << "GPU Version: Turn " << gpu_turns << "...\r";
 			auto start = std::chrono::high_resolution_clock::now();
 			gpu_result = Checkers::GPUMinimax::Next(gpu_board, gpu_turn, gpu_depth, turns_left);
 			std::chrono::duration<double, std::milli> time = std::chrono::high_resolution_clock::now() - start;

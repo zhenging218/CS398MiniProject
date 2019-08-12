@@ -6,10 +6,10 @@ namespace Checkers
 {
 	namespace GPUMinimax
 	{
-		enum NodeType
+		enum class NodeType
 		{
-			MAX,
-			MIN
+			MAX = 1,
+			MIN = 2
 		};
 
 		__host__ __device__ NodeType &operator++(NodeType &src);

@@ -184,6 +184,8 @@ namespace Checkers
 				}
 			}
 
+			std::cout << "GPU placement is " << placement << std::endl;
+
 			++turn;
 			if (turns_left)
 			{

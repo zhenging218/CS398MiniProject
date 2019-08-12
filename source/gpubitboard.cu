@@ -126,6 +126,9 @@ namespace Checkers
 		GPUBitBoard::board_type c_f[32];
 		int f_size = 1;
 
+		j_f[0] = board;
+		c_f[0] = cell;
+
 		while (f_size > 0)
 		{
 			GPUBitBoard curr_j = j_f[f_size - 1];
@@ -188,7 +191,6 @@ namespace Checkers
 					//UL
 					if ((((curr_c & GPUBitBoard::L3Mask) & curr_j.kings) << 3) & curr_j.black)
 					{
-
 						GPUBitBoard::board_type j = curr_c << 3;
 						if ((j << 4) & empty)
 						{
@@ -212,6 +214,7 @@ namespace Checkers
 					if (((curr_c & GPUBitBoard::R5Mask) >> 5) & curr_j.black)
 					{
 						GPUBitBoard::board_type j = curr_c >> 5;
+						printf("entered LL");
 						if ((j >> 4) & empty)
 						{
 							c_f[f_size] = j >> 4;
@@ -237,6 +240,7 @@ namespace Checkers
 				frontier[frontier_size++] = curr_j;
 			}
 		}
+
 	}
 
 	__device__ void GPUBitBoard::GenMoreWhiteJumpsAtomic(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int * frontier_size)
@@ -359,6 +363,7 @@ namespace Checkers
 				frontier[atomicAdd(frontier_size, 1)] = curr_j;
 			}
 		}
+
 	}
 
 	__host__ __device__ void GPUBitBoard::GenMoreBlackJumps(GPUBitBoard::board_type cell, GPUBitBoard const & board, GPUBitBoard *frontier, int & frontier_size)
@@ -488,9 +493,6 @@ namespace Checkers
 		GPUBitBoard::board_type c_f[32];
 		int f_size = 1;
 
-		j_f[0] = board;
-		c_f[0] = cell;
-
 		while (f_size > 0)
 		{
 			GPUBitBoard curr_j = j_f[f_size - 1];
@@ -601,6 +603,7 @@ namespace Checkers
 				frontier[atomicAdd(frontier_size, 1)] = curr_j;
 			}
 		}
+
 	}
 
 	__host__ __device__ void GPUBitBoard::GenWhiteMove(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int & frontier_size)
@@ -756,7 +759,10 @@ namespace Checkers
 				{
 					GPUBitBoard::board_type j = cell >> 3;
 					if ((j >> 4) & empty)
+					{
 						GenMoreWhiteJumps(j >> 4, GPUBitBoard((board.white & ~cell) | (j >> 4), (board.black & ~j), (board.kings & (~cell ^ j)) | ((((board.kings & cell) >> 3) >> 4) | ((j >> 4) & GPUBitBoard::WhiteKingMask))), frontier, frontier_size);
+					}
+						
 				}
 			}
 			else
@@ -769,7 +775,7 @@ namespace Checkers
 					if ((j << 4) & empty)
 						GenMoreWhiteJumps(j << 4, GPUBitBoard((board.white & ~cell) | (j << 4), (board.black & ~j), (board.kings & (~cell ^ j)) | (j << 4)), frontier, frontier_size);
 				}
-				//UR
+				//UR- clear
 				if (((cell & board.kings) << 4) & board.black)
 				{
 					GPUBitBoard::board_type j = cell << 4;

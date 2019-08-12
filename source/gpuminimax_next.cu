@@ -12,8 +12,8 @@ namespace Checkers
 			int bx = blockIdx.x;
 
 			__shared__ int frontier_size;
-			__shared__ GPUBitBoard frontier[16];
-			__shared__ utility_type t_v[16];
+			__shared__ GPUBitBoard frontier[32];
+			__shared__ utility_type t_v[32];
 			__shared__ utility_type alpha;
 			__shared__ utility_type beta;
 			__shared__ int gen_board_type;
@@ -23,7 +23,7 @@ namespace Checkers
 				frontier_size = 0;
 				alpha = -Infinity;
 				beta = Infinity;
-				gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;
+				gen_board_type = (GPUBitBoard::GetWhiteJumps(boards[bx]) != 0) ? 1 : 0;
 			}
 
 			__syncthreads();
@@ -102,7 +102,7 @@ namespace Checkers
 				frontier_size = 0;
 				alpha = -Infinity;
 				beta = Infinity;
-				gen_board_type = (GPUBitBoard::GetWhiteJumps(boards[bx]) != 0) ? 1 : 0;
+				gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;
 				
 			}
 

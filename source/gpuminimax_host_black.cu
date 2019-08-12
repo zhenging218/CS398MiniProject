@@ -51,7 +51,7 @@ namespace Checkers
 						CHECK_ERRORS();
 
 						// launch kernel
-						black_kernel << <dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, NodeType::MIN, depth - 1, turns_left - 1);
+						black_kernel << <dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, NodeType::MAX, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 						CHECK_ERRORS();
 						// copy GPUv[0] to v
@@ -110,7 +110,7 @@ namespace Checkers
 						CHECK_ERRORS();
 
 						// launch kernel
-						black_kernel << <dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, NodeType::MAX, depth - 1, turns_left - 1);
+						black_kernel << <dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, NodeType::MIN, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 						CHECK_ERRORS();
 						// copy GPUv[0] to v

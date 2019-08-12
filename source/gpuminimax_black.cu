@@ -8,7 +8,7 @@ namespace Checkers
 	{
 		__device__ utility_type explore_black_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns)
 		{
-			GPUBitBoard frontier[16];
+			GPUBitBoard frontier[32];
 			int frontier_size = 0;
 			int v = (node_type == NodeType::MAX) ? -Infinity : Infinity;
 
@@ -79,8 +79,8 @@ namespace Checkers
 
 			__shared__ int frontier_size;
 			__shared__ int gen_board_type;
-			__shared__ GPUBitBoard frontier[16];
-			__shared__ utility_type t_v[16];
+			__shared__ GPUBitBoard frontier[32];
+			__shared__ utility_type t_v[32];
 			__shared__ bool terminated;
 
 			if (tx == 0)
@@ -121,7 +121,7 @@ namespace Checkers
 
 				if (tx < frontier_size)
 				{
-					t_v[tx] = explore_black_frontier(frontier[tx], alpha, beta, node_type + 1, depth - 1, turns - 1);
+					t_v[tx] = explore_black_frontier(frontier[tx], alpha, beta, node_type + 2, depth - 1, turns - 1);
 				}
 
 				__syncthreads();

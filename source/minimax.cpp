@@ -213,6 +213,8 @@ namespace Checkers
 			}
 		}
 
+		std::cout << "CPU placement is " << placement << std::endl;
+
 		++turn;
 		if (turn_count)
 		{

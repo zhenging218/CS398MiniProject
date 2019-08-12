@@ -8,7 +8,7 @@ namespace Checkers
 	{
 		__device__ utility_type explore_white_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns)
 		{
-			GPUBitBoard *frontier;
+			GPUBitBoard frontier[32];
 			int frontier_size = 0;
 			int v = (node_type == NodeType::MAX) ? -Infinity : Infinity;
 
@@ -19,9 +19,6 @@ namespace Checkers
 			{
 				return terminal_value;
 			}
-
-			cudaMalloc(&frontier, sizeof(GPUBitBoard) * 16);
-
 			if (node_type == NodeType::MAX)
 			{
 				gen_board_type = (GPUBitBoard::GetWhiteJumps(board) != 0) ? 1 : 0;
@@ -67,8 +64,6 @@ namespace Checkers
 					beta = min(beta, v);
 				}
 			}
-
-			cudaFree(frontier);
 			return v;
 		}
 
@@ -79,8 +74,8 @@ namespace Checkers
 
 			__shared__ int frontier_size;
 			__shared__ int gen_board_type;
-			__shared__ GPUBitBoard frontier[16];
-			__shared__ utility_type t_v[16];
+			__shared__ GPUBitBoard frontier[32];
+			__shared__ utility_type t_v[32];
 			__shared__ bool terminated;
 
 			if (tx == 0)
@@ -97,10 +92,12 @@ namespace Checkers
 					frontier_size = 0;
 					if ((node_type + 1) == NodeType::MAX)
 					{
+						
 						gen_board_type = (GPUBitBoard::GetWhiteJumps(boards[bx]) != 0) ? 1 : 0;
 					}
 					else
 					{
+						
 						gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;
 					}
 				}
@@ -111,7 +108,6 @@ namespace Checkers
 			{
 				if ((node_type + 1) == NodeType::MAX)
 				{
-
 					gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
 				}
 				else
@@ -125,7 +121,7 @@ namespace Checkers
 
 			if (tx < frontier_size)
 			{
-				t_v[tx] = explore_white_frontier(frontier[tx], alpha, beta, node_type + 1, depth - 1, turns - 1);
+				t_v[tx] = explore_white_frontier(frontier[tx], alpha, beta, node_type + 2, depth - 1, turns - 1);
 			}
 
 			__syncthreads();

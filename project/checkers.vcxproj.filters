@@ -68,6 +68,9 @@
     <ClInclude Include="..\source\gpuminimax.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\checkerrors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\source\gpubitboard.cu">

@@ -20,6 +20,7 @@
   <ItemGroup>
     <ClInclude Include="..\source\bitboard.h" />
     <ClInclude Include="..\source\bitwise_helpers.h" />
+    <ClInclude Include="..\source\checkerrors.h" />
     <ClInclude Include="..\source\gpubitboard.cuh" />
     <ClInclude Include="..\source\gpubitwise_helpers.cuh" />
     <ClInclude Include="..\source\gpuminimax.cuh" />
