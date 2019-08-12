@@ -245,6 +245,9 @@ namespace Checkers
 		GPUBitBoard::board_type c_f[32];
 		int f_size = 1;
 
+		j_f[0] = board;
+		c_f[0] = cell;
+
 		while (f_size > 0)
 		{
 			GPUBitBoard curr_j = j_f[f_size - 1];

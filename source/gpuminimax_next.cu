@@ -12,8 +12,8 @@ namespace Checkers
 			int bx = blockIdx.x;
 
 			__shared__ int frontier_size;
-			__shared__ GPUBitBoard frontier[32];
-			__shared__ utility_type t_v[32];
+			__shared__ GPUBitBoard frontier[16];
+			__shared__ utility_type t_v[16];
 			__shared__ utility_type alpha;
 			__shared__ utility_type beta;
 			__shared__ int gen_board_type;
@@ -24,16 +24,14 @@ namespace Checkers
 				alpha = -Infinity;
 				beta = Infinity;
 				gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;
-
-				for (int i = 0; i < 32; ++i)
-				{
-					gen_white_move[gen_board_type](1u << tx, boards[bx], frontier, frontier_size);
-				}
 			}
 
 			__syncthreads();
 
-			
+			gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
+
+			__syncthreads();
+
 			if (tx < frontier_size)
 			{
 
@@ -80,8 +78,8 @@ namespace Checkers
 						t_placement = i + 1;
 					}
 				}
-
 				*placement = t_placement;
+
 			}
 
 			__syncthreads();
@@ -105,11 +103,14 @@ namespace Checkers
 				alpha = -Infinity;
 				beta = Infinity;
 				gen_board_type = (GPUBitBoard::GetWhiteJumps(boards[bx]) != 0) ? 1 : 0;
-				gen_black_move[gen_board_type](1u << tx, boards[bx], frontier, frontier_size);
+				
 			}
 
 			__syncthreads();
 
+			gen_black_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
+
+			__syncthreads();
 			
 			if (tx < frontier_size)
 			{
@@ -128,7 +129,7 @@ namespace Checkers
 					while (frontier_size > 0)
 					{
 						t_x = min(t_v[--frontier_size], t_x);
-						if (X < alpha)
+						if (t_x < alpha)
 						{
 							break;
 						}

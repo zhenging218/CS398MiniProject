@@ -8,7 +8,7 @@ namespace Checkers
 	{
 		__device__ utility_type explore_black_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns)
 		{
-			GPUBitBoard *frontier;
+			GPUBitBoard frontier[16];
 			int frontier_size = 0;
 			int v = (node_type == NodeType::MAX) ? -Infinity : Infinity;
 
@@ -19,8 +19,6 @@ namespace Checkers
 			{
 				return terminal_value;
 			}
-
-			cudaMalloc(&frontier, sizeof(GPUBitBoard) * 16);
 
 			if (node_type == NodeType::MAX)
 			{
@@ -71,12 +69,10 @@ namespace Checkers
 				}
 			}
 
-			cudaFree(frontier);
-
 			return v;
 		}
 
-		__global__ void black_kernel(utility_type *v, utility_type X, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns)
+		__global__ void black_kernel(utility_type *v, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns)
 		{
 			int tx = threadIdx.x;
 			int bx = blockIdx.x;
@@ -95,8 +91,7 @@ namespace Checkers
 				{
 					v[bx] = terminal_value;
 				}
-
-				if (!terminated)
+				else
 				{
 					if ((node_type + 1) == NodeType::MAX)
 					{
@@ -162,7 +157,6 @@ namespace Checkers
 								break;
 							}
 							beta = min(beta, t_x);
-
 						}
 					}
 
@@ -174,9 +168,11 @@ namespace Checkers
 
 			if (bx == 0 && tx == 0)
 			{
+				utility_type X;
 				// ab-prune v and send the last value to v[0].
 				if (node_type == NodeType::MAX)
 				{
+					X = -Infinity;
 					for (int i = 0; i < num_boards; ++i)
 					{
 						X = max(v[i], X);
@@ -191,6 +187,7 @@ namespace Checkers
 				}
 				else
 				{
+					X = Infinity;
 					for (int i = 0; i < num_boards; ++i)
 					{
 						X = min(v[i], X);

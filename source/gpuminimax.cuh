@@ -42,8 +42,8 @@ namespace Checkers
 		__device__ utility_type explore_black_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
 		__device__ utility_type explore_white_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
 
-		__global__ void black_kernel(utility_type *v, utility_type X, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
-		__global__ void white_kernel(utility_type *v, utility_type X, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
+		__global__ void black_kernel(utility_type *v, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
+		__global__ void white_kernel(utility_type *v, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
 
 		__host__ __device__ bool GetWhiteUtility(GPUBitBoard const &src, Minimax::utility_type &terminal_value, int depth, int turns);
 		__host__ __device__ bool GetBlackUtility(GPUBitBoard const &src, Minimax::utility_type &terminal_value, int depth, int turns);

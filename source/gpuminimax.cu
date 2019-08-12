@@ -42,6 +42,7 @@ namespace Checkers
 			}
 
 			int placement = -1;
+			utility_type X = -Infinity;
 			BitBoard frontier[32];
 
 			if (turn == Minimax::WHITE)
@@ -52,10 +53,7 @@ namespace Checkers
 				if (size == 0)
 				{
 					return Minimax::LOSE;
-				}
-
-				
-				Minimax::utility_type X = -Minimax::Infinity;
+				}		
 
 				// CPU left-most branch
 				Minimax::utility_type v = WhiteMoveMin(frontier[0], depth, turns_left, -Infinity, Infinity);
@@ -125,7 +123,6 @@ namespace Checkers
 					return Minimax::Result::LOSE;
 				}
 
-				int placement = -1;
 				Minimax::utility_type X = -Minimax::Infinity;
 
 				// CPU left-most branch
@@ -172,6 +169,7 @@ namespace Checkers
 
 					cudaMemcpy(&placement, GPUPlacement, sizeof(int), cudaMemcpyDeviceToHost);
 					CHECK_ERRORS();
+
 					cudaFree(GPUFrontier);
 					CHECK_ERRORS();
 					cudaFree(GPUUtility);

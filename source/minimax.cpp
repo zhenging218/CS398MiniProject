@@ -157,6 +157,8 @@ namespace Checkers
 			return Result::DRAW;
 		}
 
+		int placement = -1;
+
 		if (turn == Turn::WHITE)
 		{
 			auto frontier = GenerateWhiteFrontier(board);
@@ -164,7 +166,7 @@ namespace Checkers
 			{
 				return Result::LOSE;
 			}
-			int placement = -1;
+			
 			int size = (int)frontier.size();
 			utility_type X = -Infinity;
 			utility_type terminal_value = 0;
@@ -191,7 +193,6 @@ namespace Checkers
 			{
 				return Result::LOSE;
 			}
-			int placement = -1;
 			int size = (int)frontier.size();
 			utility_type X = -Infinity;
 			utility_type terminal_value = 0;
