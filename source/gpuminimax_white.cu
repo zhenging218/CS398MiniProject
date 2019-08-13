@@ -38,7 +38,7 @@ namespace Checkers
 
 				while (frontier_size > 0)
 				{
-					v = max(explore_black_frontier(frontier[--frontier_size], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
+					v = max(explore_white_frontier(frontier[--frontier_size], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
 					if (v > beta)
 					{
 						break;

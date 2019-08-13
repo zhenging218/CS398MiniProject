@@ -23,12 +23,12 @@ namespace Checkers
 				frontier_size = 0;
 				alpha = -Infinity;
 				beta = Infinity;
-				gen_board_type = (GPUBitBoard::GetWhiteJumps(boards[bx]) != 0) ? 1 : 0;
+				gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;
 			}
 
 			__syncthreads();
 
-			gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
+			gen_black_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
 
 			__syncthreads();
 
@@ -102,13 +102,13 @@ namespace Checkers
 				frontier_size = 0;
 				alpha = -Infinity;
 				beta = Infinity;
-				gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;
+				gen_board_type = (GPUBitBoard::GetWhiteJumps(boards[bx]) != 0) ? 1 : 0;
 				
 			}
 
 			__syncthreads();
 
-			gen_black_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
+			gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
 
 			__syncthreads();
 			

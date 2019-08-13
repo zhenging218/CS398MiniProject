@@ -176,10 +176,8 @@ namespace
 		
 	}
 
-	void BenchBoth(Checkers::BitBoard const &src_board, Checkers::Minimax::Turn start_turn)
+	void BenchBoth(Checkers::BitBoard const &src_board, Checkers::Minimax::Turn start_turn, bool show_game)
 	{
-		int progress = 0;
-
 		double cpu_totalTime = 0.0;
 		double cpu_shortestTime = std::numeric_limits<double>::max();
 		double cpu_longestTime = std::numeric_limits<double>::min();
@@ -203,72 +201,79 @@ namespace
 		std::vector<Checkers::BitBoard> cpu_out, gpu_out;
 
 		auto minimax = Checkers::CreateMinimaxBoard(src_board, start_turn);
+		Checkers::BitBoard gpu_board = src_board;
+		int turns_left = Checkers::Minimax::GetMaxTurns();
+		const int gpu_depth = Checkers::Minimax::GetSearchDepth();
 
-		while (cpu_result == Checkers::Minimax::INPROGRESS && cpu_turns < Checkers::Minimax::GetMaxTurns())
+		while (cpu_result == Checkers::Minimax::INPROGRESS && gpu_result == Checkers::Minimax::INPROGRESS && cpu_turns < Checkers::Minimax::GetMaxTurns() && gpu_turns < Checkers::Minimax::GetMaxTurns())
 		{
-			// std::cout << "CPU Version: Turn " << cpu_turns << "...\r";
-			Checkers::Minimax::Turn cpu_turn = minimax.GetTurn();
-			auto start = std::chrono::high_resolution_clock::now();
-			cpu_result = minimax.Next();
-			std::chrono::duration<double, std::milli> time = std::chrono::high_resolution_clock::now() - start;
-			double dAvgSecs = time.count();
-			if(cpu_result != Checkers::Minimax::LOSE && cpu_result != Checkers::Minimax::DRAW)
+			// std::cout << "processing turn " << cpu_turns << "...\r";
+			Checkers::BitBoard curr_cpu_board, curr_gpu_board;
 			{
-				cpu_out.emplace_back(minimax.GetBoard());
-				cpu_totalTime += dAvgSecs;
-				if (dAvgSecs > cpu_longestTime)
+				Checkers::Minimax::Turn cpu_turn = minimax.GetTurn();
+				auto start = std::chrono::high_resolution_clock::now();
+				cpu_result = minimax.Next();
+				std::chrono::duration<double, std::milli> time = std::chrono::high_resolution_clock::now() - start;
+				double dAvgSecs = time.count();
+				if (cpu_result != Checkers::Minimax::LOSE && cpu_result != Checkers::Minimax::DRAW)
 				{
-					cpu_longestTime = dAvgSecs;
-					slowest_cpu_turn = cpu_turns;
+					cpu_out.emplace_back(curr_cpu_board = minimax.GetBoard());
+					cpu_totalTime += dAvgSecs;
+					if (dAvgSecs > cpu_longestTime)
+					{
+						cpu_longestTime = dAvgSecs;
+						slowest_cpu_turn = cpu_turns;
+					}
+					else if (dAvgSecs < cpu_shortestTime)
+					{
+						cpu_shortestTime = dAvgSecs;
+						fastest_cpu_turn = cpu_turns;
+					}
+					++cpu_turns;
 				}
-				else if (dAvgSecs < cpu_shortestTime)
+			}
+
+			{
+				auto start = std::chrono::high_resolution_clock::now();
+				gpu_result = Checkers::GPUMinimax::Next(gpu_board, gpu_turn, gpu_depth, turns_left);
+				std::chrono::duration<double, std::milli> time = std::chrono::high_resolution_clock::now() - start;
+				double dAvgSecs = time.count();
+
+				if (gpu_result != Checkers::Minimax::LOSE && gpu_result != Checkers::Minimax::DRAW)
 				{
-					cpu_shortestTime = dAvgSecs;
-					fastest_cpu_turn = cpu_turns;
+					gpu_out.emplace_back(curr_gpu_board = gpu_board);
+					gpu_totalTime += dAvgSecs;
+					if (dAvgSecs > gpu_longestTime)
+					{
+						gpu_longestTime = dAvgSecs;
+						slowest_gpu_turn = gpu_turns;
+					}
+					else if (dAvgSecs < gpu_shortestTime)
+					{
+						gpu_shortestTime = dAvgSecs;
+						fastest_gpu_turn = gpu_turns;
+					}
+					++gpu_turns;
 				}
-				++cpu_turns;
+			}
+
+			if (show_game)
+			{
+				std::cout << "this turn:\n";
+				std::cout << "CPU:\n" << curr_cpu_board << "\nGPU:\n" << curr_gpu_board << "\n";
+			}
+
+			if (curr_cpu_board != curr_gpu_board)
+			{
+				std::cout << "CPU and GPU ran different moves this turn!\n";
+				return;
 			}
 		}
 
 		cpu_average = cpu_totalTime / (double)cpu_turns;
-
-		std::cout << "CPU version run complete\n";
-
-		Checkers::BitBoard gpu_board = src_board;
-		
-		int turns_left = Checkers::Minimax::GetMaxTurns();
-		const int gpu_depth = Checkers::Minimax::GetSearchDepth();
-		progress = 0;
-
-		while (gpu_result == Checkers::Minimax::INPROGRESS && gpu_turns < Checkers::Minimax::GetMaxTurns())
-		{
-			// std::cout << "GPU Version: Turn " << gpu_turns << "...\r";
-			auto start = std::chrono::high_resolution_clock::now();
-			gpu_result = Checkers::GPUMinimax::Next(gpu_board, gpu_turn, gpu_depth, turns_left);
-			std::chrono::duration<double, std::milli> time = std::chrono::high_resolution_clock::now() - start;
-			double dAvgSecs = time.count();
-
-			if (gpu_result != Checkers::Minimax::LOSE && gpu_result != Checkers::Minimax::DRAW)
-			{
-				gpu_out.emplace_back(gpu_board);
-				gpu_totalTime += dAvgSecs;
-				if (dAvgSecs > gpu_longestTime)
-				{
-					gpu_longestTime = dAvgSecs;
-					slowest_gpu_turn = gpu_turns;
-				}
-				else if (dAvgSecs < gpu_shortestTime)
-				{
-					gpu_shortestTime = dAvgSecs;
-					fastest_gpu_turn = gpu_turns;
-				}
-				++gpu_turns;
-			}
-		}
-
 		gpu_average = gpu_totalTime / (gpu_turns);
 
-		std::cout << "GPU version run complete\n";
+		std::cout << "Benchmark complete!\n";
 		
 		std::cout << "\n\n";
 
@@ -287,33 +292,6 @@ namespace
 		std::cout << "Average time taken for each decision: " << gpu_average << " milliseconds\n";
 		std::cout << "Slowest decision took " << gpu_longestTime << " milliseconds at turn " << slowest_gpu_turn << "\n";
 		std::cout << "Fastest decision took " << gpu_shortestTime << " milliseconds at turn " << fastest_gpu_turn << "\n";
-
-		std::cout << "\n\n";
-
-		std::cout << "Testing correctness...\n";
-		bool decisions_ok = cpu_turns == gpu_turns && cpu_out.size() == gpu_out.size();
-		if (decisions_ok)
-		{
-			bool board_ok = true;
-			auto size = cpu_out.size();
-			for (decltype(size) i = 0; i < size && board_ok; ++i)
-			{
-				board_ok = cpu_out[i] == gpu_out[i];
-			}
-
-			if (board_ok)
-			{
-				std::cout << "CPU and GPU ran the same game!\n";
-			}
-			else
-			{
-				std::cout << "CPU and GPU games had same amount of turns but moves did not match!\n";
-			}
-		}
-		else
-		{
-			std::cout << "CPU and GPU games did not have the same amount of turns!\n";
-		}
 	}
 }
 
@@ -325,7 +303,7 @@ int main(int argc, char **argv)
 
 	if (argc > 4)
 	{
-		std::cout << "usage: " << argv[0] << "[cpu:0, cpu_benchmark:1, gpu:2, gpu_benchmark:3, benchmark:4] [max_depth] [max_turns]\n";
+		std::cout << "usage: " << argv[0] << "[cpu:0, cpu_benchmark:1, gpu:2, gpu_benchmark:3, benchmark:4, lean_benchmark:5] [max_depth] [max_turns]\n";
 		return 0;
 	}
 
@@ -392,9 +370,13 @@ int main(int argc, char **argv)
 			break;
 		case 4:
 			StartCUDA(argc, argv);
-			BenchBoth(board, Checkers::Minimax::BLACK);
+			BenchBoth(board, Checkers::Minimax::BLACK, true);
 			EndCUDA();
 			break;
+		case 5:
+			StartCUDA(argc, argv);
+			BenchBoth(board, Checkers::Minimax::BLACK, false);
+			EndCUDA();
 		default:
 			ASSERT(0, "run_which value is wrong (%d)!", run_which);
 			break;

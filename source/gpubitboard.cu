@@ -214,7 +214,6 @@ namespace Checkers
 					if (((curr_c & GPUBitBoard::R5Mask) >> 5) & curr_j.black)
 					{
 						GPUBitBoard::board_type j = curr_c >> 5;
-						printf("entered LL");
 						if ((j >> 4) & empty)
 						{
 							c_f[f_size] = j >> 4;
