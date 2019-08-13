@@ -51,7 +51,7 @@ namespace
 		rng.seed(ss);
 		std::uniform_int_distribution<int> unif(16, 19);
 		std::uniform_int_distribution<int> unif2(3, 4);
-		/*
+
 		int pos = unif(rng);
 		int del = unif2(rng);
 		if (pos == 16)
@@ -59,10 +59,6 @@ namespace
 			del = 4;
 		}
 		return Checkers::BitBoard((0xFFF00000u & ~((1u << pos) << del)) | (1u << pos), 0x00000FFFu, 0u);
-		*/
-
-		return Checkers::BitBoard((0xFFF00000u & ~((1u << 16) << 4)) | (1u << 16), 0x00000FFFu, 0u);
-		//return Checkers::BitBoard(0x10000000u, 0x00000001u, 0u);
 	}
 
 	void RunCPUVersion(Checkers::BitBoard const &board, Checkers::Minimax::Turn start_turn, double &shortestTime, double &longestTime, double &average, int &turns, bool show_game)
@@ -261,15 +257,33 @@ namespace
 				}
 			}
 
-			if (show_game)
+			if (cpu_result == gpu_result)
 			{
-				std::cout << "CPU took " << cpuAvgSecs << " milliseconds, GPU took " << gpuAvgSecs << " milliseconds\n";
-				std::cout << "CPU:\n" << curr_cpu_board << "\nGPU:\n" << curr_gpu_board << "\n";
-
-				if (curr_cpu_board != curr_gpu_board)
+				if (show_game)
 				{
-					std::cout << "CPU and GPU ran different moves this turn!\n";
-					return;
+					if (cpu_result == Checkers::Minimax::INPROGRESS)
+					{
+						std::cout << "CPU took " << cpuAvgSecs << " milliseconds, GPU took " << gpuAvgSecs << " milliseconds\n";
+						std::cout << "CPU:\n" << curr_cpu_board << "\nGPU:\n" << curr_cpu_board << "\n";
+					}
+
+					if (curr_cpu_board != curr_gpu_board)
+					{
+						std::cout << "CPU and GPU ran different moves this turn!\n";
+						return;
+					}
+				}
+				else
+				{
+					if (curr_cpu_board != curr_gpu_board)
+					{
+						std::cout << "\nCPU and GPU ran different moves this turn!\n";
+						return;
+					}
+					else
+					{
+						std::cout << "\r";
+					}
 				}
 			}
 			else
@@ -284,8 +298,6 @@ namespace
 					std::cout << "\r";
 				}
 			}
-
-			
 		}
 
 		cpu_average = cpu_totalTime / (double)cpu_turns;
@@ -348,7 +360,7 @@ int main(int argc, char **argv)
 
 	auto board = CreateRandomWhiteBitBoard();
 	// auto board = Checkers::BitBoard(0xFFD10000u, 0x00000FFFu, 0u);
-
+	// auto board = Checkers::BitBoard(0x80000000u, 0x00000001, 0u);
 	double longestTime;
 	double shortestTime;
 	double average;
