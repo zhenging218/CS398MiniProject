@@ -257,33 +257,18 @@ namespace
 				}
 			}
 
-			if (cpu_result == gpu_result)
+			if (show_game)
 			{
-				if (show_game)
+				if (cpu_result == Checkers::Minimax::INPROGRESS)
 				{
-					if (cpu_result == Checkers::Minimax::INPROGRESS)
-					{
-						std::cout << "CPU took " << cpuAvgSecs << " milliseconds, GPU took " << gpuAvgSecs << " milliseconds\n";
-						std::cout << "CPU:\n" << curr_cpu_board << "\nGPU:\n" << curr_cpu_board << "\n";
-					}
-
-					if (curr_cpu_board != curr_gpu_board)
-					{
-						std::cout << "CPU and GPU ran different moves this turn!\n";
-						return;
-					}
+					std::cout << "CPU took " << cpuAvgSecs << " milliseconds, GPU took " << gpuAvgSecs << " milliseconds\n";
+					std::cout << "CPU:\n" << curr_cpu_board << "\nGPU:\n" << curr_gpu_board << "\n";
 				}
-				else
+
+				if (curr_cpu_board != curr_gpu_board)
 				{
-					if (curr_cpu_board != curr_gpu_board)
-					{
-						std::cout << "\nCPU and GPU ran different moves this turn!\n";
-						return;
-					}
-					else
-					{
-						std::cout << "\r";
-					}
+					std::cout << "CPU and GPU ran different moves this turn!\n";
+					return;
 				}
 			}
 			else
