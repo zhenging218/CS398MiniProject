@@ -102,4 +102,9 @@ namespace Checkers
 
 	Minimax::Turn &operator--(Minimax::Turn &turn) = delete;
 	Minimax::Turn operator--(Minimax::Turn &turn, int) = delete;
+
+	constexpr char const *TurnToString(Minimax::Turn const &turn) noexcept
+	{
+		return turn == Minimax::Turn::BLACK ? "BLACK" : "WHITE";
+	}
 }

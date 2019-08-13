@@ -75,7 +75,6 @@ namespace Checkers
 		{
 			return false;
 		}
-
 		return true;
 	}
 
@@ -117,6 +116,7 @@ namespace Checkers
 		{
 			return false;
 		}
+
 		return true;
 	}
 
@@ -212,8 +212,6 @@ namespace Checkers
 				board = frontier[placement];
 			}
 		}
-
-		std::cout << "CPU placement is " << placement << std::endl;
 
 		++turn;
 		if (turn_count)

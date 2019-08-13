@@ -55,7 +55,6 @@ namespace Checkers
 			{
 				return false;
 			}
-
 			return true;
 		}
 

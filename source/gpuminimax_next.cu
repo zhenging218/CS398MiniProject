@@ -17,33 +17,42 @@ namespace Checkers
 			__shared__ utility_type alpha;
 			__shared__ utility_type beta;
 			__shared__ int gen_board_type;
+			__shared__ bool terminated;
 
 			if (tx == 0)
 			{
 				frontier_size = 0;
 				alpha = -Infinity;
 				beta = Infinity;
-				gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;
+				utility_type terminal_value = 0;
+				if (terminated = GetWhiteUtility(boards[bx], terminal_value, depth, turns))
+				{
+					v[bx] = terminal_value;
+				}
+				else
+				{
+					gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;
+				}
 			}
 
 			__syncthreads();
 
-			gen_black_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
-
-			__syncthreads();
-
-			if (tx < frontier_size)
+			if (!terminated)
 			{
+				gen_black_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
 
-				t_v[tx] = explore_white_frontier(frontier[tx], alpha, beta, NodeType::MAX, depth - 1, turns - 1);
-			}
+				__syncthreads();
 
-			__syncthreads();
-			
-			// min
-			if (tx == 0)
-			{
-				if (frontier_size > 0)
+				if (tx < frontier_size)
+				{
+
+					t_v[tx] = explore_white_frontier(frontier[tx], alpha, beta, NodeType::MAX, depth - 1, turns - 1);
+				}
+
+				__syncthreads();
+
+				// min
+				if (tx == 0)
 				{
 					utility_type t_x = Infinity;
 					while (frontier_size > 0)
@@ -57,10 +66,6 @@ namespace Checkers
 					}
 
 					v[bx] = t_x;
-				}
-				else
-				{
-					v[bx] = MaxUtility;
 				}
 			}
 
@@ -96,34 +101,43 @@ namespace Checkers
 			__shared__ utility_type alpha;
 			__shared__ utility_type beta;
 			__shared__ int gen_board_type;
+			__shared__ bool terminated;
 
 			if (tx == 0)
 			{
 				frontier_size = 0;
 				alpha = -Infinity;
 				beta = Infinity;
-				gen_board_type = (GPUBitBoard::GetWhiteJumps(boards[bx]) != 0) ? 1 : 0;
-				
+				utility_type terminal_value = 0;
+				if (terminated = GetBlackUtility(boards[bx], terminal_value, depth, turns))
+				{
+					v[bx] = terminal_value;
+				}
+				else
+				{
+					gen_board_type = (GPUBitBoard::GetWhiteJumps(boards[bx]) != 0) ? 1 : 0;
+				}
+
 			}
 
 			__syncthreads();
 
-			gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
-
-			__syncthreads();
-			
-			if (tx < frontier_size)
+			if (!terminated)
 			{
-				t_v[tx] = explore_black_frontier(frontier[tx], alpha, beta, NodeType::MAX, depth - 1, turns - 1);
-			}
+				gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);   
 
-			__syncthreads();
-			
+				__syncthreads();
 
-			// min
-			if (tx == 0)
-			{
-				if (frontier_size > 0)
+				if (tx < frontier_size)
+				{
+					t_v[tx] = explore_black_frontier(frontier[tx], alpha, beta, NodeType::MAX, depth - 1, turns - 1);
+				}
+
+				__syncthreads();
+
+
+				// min
+				if (tx == 0)
 				{
 					utility_type t_x = Infinity;
 					while (frontier_size > 0)
@@ -135,13 +149,8 @@ namespace Checkers
 						}
 						beta = min(beta, t_x);
 					}
-					
 
 					v[bx] = t_x;
-				}
-				else
-				{
-					v[bx] = MaxUtility;
 				}
 			}
 

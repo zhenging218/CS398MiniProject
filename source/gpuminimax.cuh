@@ -14,6 +14,7 @@ namespace Checkers
 
 		__host__ __device__ NodeType &operator++(NodeType &src);
 		__host__ __device__ NodeType operator+(NodeType const &src, int i);
+		__host__ __device__ char const *NodeTypeToString(NodeType const &src);
 
 		NodeType &operator--(NodeType &src) = delete;
 		NodeType operator-(NodeType const &src, int i) = delete;

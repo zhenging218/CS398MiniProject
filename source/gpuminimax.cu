@@ -34,6 +34,7 @@ namespace Checkers
 			return ret;
 		}
 
+
 		Checkers::Minimax::Result Next(BitBoard &board, Checkers::Minimax::Turn &turn, int depth, int &turns_left)
 		{
 			if (turns_left == 0)
@@ -183,8 +184,6 @@ namespace Checkers
 					board = frontier[placement];
 				}
 			}
-
-			std::cout << "GPU placement is " << placement << std::endl;
 
 			++turn;
 			if (turns_left)
