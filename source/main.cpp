@@ -402,6 +402,6 @@ int main(int argc, char **argv)
 		std::cout << "exception message is " << e.what() << std::endl;
 	}
 
-	// system("PAUSE");
+	 system("PAUSE");
 	return 0;
 }

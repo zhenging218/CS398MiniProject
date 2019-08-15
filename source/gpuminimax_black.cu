@@ -37,9 +37,9 @@ namespace Checkers
 					gen_black_move[gen_board_type](1u << i, board, frontier, frontier_size);
 				}
 
-				while (frontier_size > 0)
+				for (int j = 0; j < frontier_size; ++j)
 				{
-					v = max(explore_black_frontier(frontier[--frontier_size], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
+					v = max(explore_black_frontier(frontier[j], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
 					if (v > beta)
 					{
 						break;
@@ -56,9 +56,9 @@ namespace Checkers
 					gen_white_move[gen_board_type](1u << i, board, frontier, frontier_size);
 				}
 
-				while (frontier_size > 0)
+				for (int j = 0; j < frontier_size; ++j)
 				{
-					v = min(explore_black_frontier(frontier[--frontier_size], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
+					v = min(explore_black_frontier(frontier[j], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
 					
 					if (v < alpha)
 					{
@@ -120,6 +120,7 @@ namespace Checkers
 				if (tx < frontier_size)
 				{
 					t_v[tx] = explore_black_frontier(frontier[tx], alpha, beta, node_type + 2, depth - 1, turns - 1);
+				
 				}
 
 				__syncthreads();
@@ -131,24 +132,23 @@ namespace Checkers
 					if ((node_type + 1) == NodeType::MAX)
 					{
 						t_x = -Infinity;
-						while (frontier_size > 0)
+						for (int j = 0; j < frontier_size; ++j)
 						{
-							t_x = max(t_v[--frontier_size], t_x);
+							t_x = max(t_v[j], t_x);
 	
 							if (t_x > beta)
 							{
 								break;
 							}
 							alpha = max(alpha, t_x);
-							
 						}
 					}
 					else
 					{
 						t_x = Infinity;
-						while (frontier_size > 0)
+						for (int j = 0; j < frontier_size; ++j)
 						{
-							t_x = min(t_v[--frontier_size], t_x);
+							t_x = min(t_v[j], t_x);
 						
 							if (t_x < alpha)
 							{

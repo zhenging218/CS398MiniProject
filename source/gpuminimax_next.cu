@@ -45,7 +45,6 @@ namespace Checkers
 
 				if (tx < frontier_size)
 				{
-
 					t_v[tx] = explore_white_frontier(frontier[tx], alpha, beta, NodeType::MAX, depth - 1, turns - 1);
 				}
 
@@ -55,14 +54,14 @@ namespace Checkers
 				if (tx == 0)
 				{
 					utility_type t_x = Infinity;
-					while (frontier_size > 0)
+					for(int i = 0; i < frontier_size; ++i)
 					{
-						t_x = min(t_v[--frontier_size], t_x);
+						t_x = MIN(t_v[i], t_x);
 						if (t_x < alpha)
 						{
 							break;
 						}
-						beta = min(beta, t_x);
+						beta = MIN(beta, t_x);
 					}
 
 					v[bx] = t_x;
@@ -85,6 +84,7 @@ namespace Checkers
 				}
 				*placement = t_placement;
 
+				
 			}
 
 			__syncthreads();
@@ -140,14 +140,14 @@ namespace Checkers
 				if (tx == 0)
 				{
 					utility_type t_x = Infinity;
-					while (frontier_size > 0)
+					for (int i = 0; i < frontier_size; ++i)
 					{
-						t_x = min(t_v[--frontier_size], t_x);
+						t_x = MIN(t_v[i], t_x);
 						if (t_x < alpha)
 						{
 							break;
 						}
-						beta = min(beta, t_x);
+						beta = MIN(beta, t_x);
 					}
 
 					v[bx] = t_x;

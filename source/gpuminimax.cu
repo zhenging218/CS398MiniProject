@@ -55,7 +55,7 @@ namespace Checkers
 				{
 					return Minimax::LOSE;
 				}		
-
+				//Minimax::utility_type X = -Minimax::Infinity;
 				// CPU left-most branch
 				Minimax::utility_type v = WhiteMoveMin(frontier[0], depth, turns_left, -Infinity, Infinity);
 				if (X < v)
@@ -123,9 +123,6 @@ namespace Checkers
 				{
 					return Minimax::Result::LOSE;
 				}
-
-				Minimax::utility_type X = -Minimax::Infinity;
-
 				// CPU left-most branch
 				Minimax::utility_type v = BlackMoveMin(frontier[0], depth, turns_left, -Infinity, Infinity);
 				if (X < v)
@@ -133,7 +130,6 @@ namespace Checkers
 					X = v;
 					placement = 0;
 				}
-
 				if (size > 1)
 				{
 					// GPU tree-split the rest of the branches

@@ -162,6 +162,7 @@ namespace Checkers
 		if (turn == Turn::WHITE)
 		{
 			auto frontier = GenerateWhiteFrontier(board);
+			
 			if (frontier.empty())
 			{
 				return Result::LOSE;
@@ -204,6 +205,7 @@ namespace Checkers
 				{
 					X = v;
 					placement = i;
+					
 				}
 			}
 
@@ -241,12 +243,11 @@ namespace Checkers
 			v = std::max(WhiteMoveMin(move, depth - 1, turns_left - 1, alpha, beta), v);
 			if (v > beta)
 			{
-				// prune
+				// prune				
 				break;
 			}
 			alpha = std::max(alpha, v);
 		}
-
 		return v;
 	}
 
@@ -270,7 +271,6 @@ namespace Checkers
 			}
 			beta = std::min(beta, v);
 		}
-
 		return v;
 	}
 																								  
@@ -294,7 +294,6 @@ namespace Checkers
 			}
 			alpha = std::max(alpha, v);
 		}
-
 		return v;
 	}
 																								  
@@ -317,7 +316,6 @@ namespace Checkers
 			}
 			beta = std::min(beta, v);
 		}
-
 		return v;
 	}
 

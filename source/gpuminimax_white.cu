@@ -36,14 +36,14 @@ namespace Checkers
 					gen_white_move[gen_board_type](1u << i, board, frontier, frontier_size);
 				}
 
-				while (frontier_size > 0)
+				for (int j = 0; j < frontier_size; ++j)
 				{
-					v = max(explore_white_frontier(frontier[--frontier_size], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
+					v = MAX(explore_white_frontier(frontier[j], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
 					if (v > beta)
 					{
 						break;
 					}
-					alpha = max(alpha, v);
+					alpha = MAX(alpha, v);
 				}
 			}
 			else
@@ -54,14 +54,14 @@ namespace Checkers
 					gen_black_move[gen_board_type](1u << i, board, frontier, frontier_size);
 				}
 
-				while (frontier_size > 0)
+				for (int j = 0; j < frontier_size; ++j)
 				{
-					v = min(explore_white_frontier(frontier[--frontier_size], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
+					v = MIN(explore_white_frontier(frontier[j], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
 					if (v < alpha)
 					{
 						break;
 					}
-					beta = min(beta, v);
+					beta = MIN(beta, v);
 				}
 			}
 			return v;
@@ -82,7 +82,7 @@ namespace Checkers
 			{
 				frontier_size = 0;
 				utility_type terminal_value = 0;
-				if (terminated = GetWhiteUtility(boards[tx], terminal_value, depth, turns))
+				if (terminated = GetWhiteUtility(boards[bx], terminal_value, depth, turns))
 				{
 					v[bx] = terminal_value;
 				}
@@ -127,27 +127,27 @@ namespace Checkers
 					if ((node_type + 1) == NodeType::MAX)
 					{
 						t_x = -Infinity;
-						while (frontier_size > 0)
+						for (int i = 0; i < frontier_size; ++i)
 						{
-							t_x = max(t_v[--frontier_size], t_x);
+							t_x = MAX(t_v[i], t_x);
 							if (t_x > beta)
 							{
 								break;
 							}
-							alpha = max(alpha, t_x);
+							alpha = MAX(alpha, t_x);
 						}
 					}
 					else
 					{
 						t_x = Infinity;
-						while (frontier_size > 0)
+						for (int i = 0; i < frontier_size; ++i)
 						{
-							t_x = min(t_v[--frontier_size], t_x);
+							t_x = MIN(t_v[i], t_x);
 							if (t_x < alpha)
 							{
 								break;
 							}
-							beta = min(beta, t_x);
+							beta = MIN(beta, t_x);
 						}
 					}
 
@@ -165,25 +165,25 @@ namespace Checkers
 					X = -Infinity;
 					for (int i = 0; i < num_boards; ++i)
 					{
-						X = max(v[i], X);
+						X = MAX(v[i], X);
 						if (X > beta)
 						{
 							break;
 						}
-						alpha = max(alpha, X);
+						alpha = MAX(alpha, X);
 					}
 				}
 				else
 				{
 					X = Infinity;
-					for (int i = 1; i < num_boards; ++i)
+					for (int i = 0; i < num_boards; ++i)
 					{
-						X = min(v[i], X);
+						X = MIN(v[i], X);
 						if (X < alpha)
 						{
 							break;
 						}
-						beta = min(beta, X);
+						beta = MIN(beta, X);
 					}
 				}
 
