@@ -202,7 +202,7 @@ namespace
 		int turns_left = Checkers::Minimax::GetMaxTurns();
 		const int gpu_depth = Checkers::Minimax::GetSearchDepth();
 
-		while (cpu_result == Checkers::Minimax::INPROGRESS && gpu_result == Checkers::Minimax::INPROGRESS && cpu_turns < Checkers::Minimax::GetMaxTurns() && gpu_turns < Checkers::Minimax::GetMaxTurns())
+		while ((cpu_result == Checkers::Minimax::INPROGRESS || gpu_result == Checkers::Minimax::INPROGRESS) && cpu_turns < Checkers::Minimax::GetMaxTurns() && gpu_turns < Checkers::Minimax::GetMaxTurns())
 		{
 			Checkers::BitBoard curr_cpu_board, curr_gpu_board;
 			double cpuAvgSecs, gpuAvgSecs;
@@ -231,6 +231,8 @@ namespace
 					}
 					++cpu_turns;
 				}
+				else
+					curr_cpu_board = minimax.GetBoard();
 			}
 
 			{
@@ -255,6 +257,8 @@ namespace
 					}
 					++gpu_turns;
 				}
+				else
+					curr_gpu_board = gpu_board;
 			}
 
 			if (show_game)
@@ -265,23 +269,6 @@ namespace
 					std::cout << "CPU:\n" << curr_cpu_board << "\nGPU:\n" << curr_gpu_board << "\n";
 				}
 
-				if (curr_cpu_board != curr_gpu_board)
-				{
-					std::cout << "CPU and GPU ran different moves this turn!\n";
-					return;
-				}
-			}
-			else
-			{
-				if (curr_cpu_board != curr_gpu_board)
-				{
-					std::cout << "\nCPU and GPU ran different moves this turn!\n";
-					return;
-				}
-				else
-				{
-					std::cout << "\r";
-				}
 			}
 		}
 
@@ -448,6 +435,6 @@ int main(int argc, char **argv)
 		std::cout << "exception message is " << e.what() << std::endl;
 	}
 
-	 system("PAUSE");
+	//system("PAUSE");
 	return 0;
 }
