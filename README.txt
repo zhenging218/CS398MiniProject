@@ -18,14 +18,43 @@ prior written consent of DigiPen Institute of Technology is prohibited.
 4) Navigate to the release directory (..\CS398MiniProject\build\x64\Release) once compile is finished.
 5) Usage is as of following ./checkers.exe [Option 1] [Option 2] [Option 3]
    [Option 1]
-   cpu:0 = Display movements using CPU minimax 
-   cpu_benchmark:1 = Display only time taken in CPU
-   gpu:2 = Display movements using GPU minimax 
-   gpu_benchmark:3 = Display only time taken in GPU, 
-   benchmark:4 = Display both GPU and CPU movements, 
-   lean_benchmark:5 = Display both GPU and CPU timing 
-   fight:6 = GPU as black vs CPU as white
+   0 = Display movements using CPU minimax 
+   1 = Display only time taken in CPU
+   2 = Display movements using GPU minimax 
+   3 = Display only time taken in GPU, 
+   4 = Display both GPU and CPU movements, 
+   5 = Display both GPU and CPU timing 
+   6 = GPU as black vs CPU as white
    [Option 2: Depth]
    Depth to cut off
    [Option 3: Turns]
    Turns to cut off
+
+How to read board on the screen:
+|  | W|  | W|  | W|  | W|
+| W|  | W|  | W|  | W|  |
+|  |  |  | W|  | W|  | W|
+| W|  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |
+| B|  | B|  | B|  | B|  |
+|  | B|  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+W - white player piece
+B - black player piece
+WW - white player king piece
+BB - black player king piece
+
+New boards will be printed on screen after each move:
+|  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  | B|  |
+| W|  |  |  |  |  |  |  |
+|  |  |  |  |BB|  |  |  |
+|  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |
+|  |  |  |  |  |  |WW|  |
+
+Submission structure:
+docs - Contains presentation slides and report
+ref - source used to implement
+source - all the .cu,.cpp,.h are at 

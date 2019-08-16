@@ -99,7 +99,6 @@ namespace
 					shortestTime = std::min(shortestTime, dAvgSecs);
 					++turns;
 				}
-				system("pause");
 			}
 			else
 			{
@@ -158,7 +157,6 @@ namespace
 					shortestTime = std::min(shortestTime, dAvgSecs);
 					++turns;
 				}
-				system("pause");
 			}
 			else
 			{
@@ -202,12 +200,12 @@ namespace
 		int turns_left = Checkers::Minimax::GetMaxTurns();
 		const int gpu_depth = Checkers::Minimax::GetSearchDepth();
 
-		while ((cpu_result == Checkers::Minimax::INPROGRESS || gpu_result == Checkers::Minimax::INPROGRESS) && cpu_turns < Checkers::Minimax::GetMaxTurns() && gpu_turns < Checkers::Minimax::GetMaxTurns())
+		while ((cpu_result == Checkers::Minimax::INPROGRESS || gpu_result == Checkers::Minimax::INPROGRESS) && (cpu_turns < Checkers::Minimax::GetMaxTurns() || gpu_turns < Checkers::Minimax::GetMaxTurns()))
 		{
 			Checkers::BitBoard curr_cpu_board, curr_gpu_board;
 			double cpuAvgSecs, gpuAvgSecs;
 
-			std::cout << "Processing turn " << cpu_turns << " for " << Checkers::TurnToString(gpu_turn) << "...";
+			std::cout << "Processing turn " << cpu_turns << " for " << Checkers::TurnToString(gpu_turn) << "...\n";
 
 			{
 				Checkers::Minimax::Turn cpu_turn = minimax.GetTurn();
@@ -331,8 +329,6 @@ namespace
 			{
 				std::cout << " LOST!\n";
 			}
-
-			system("PAUSE");
 		}
 	}
 }
