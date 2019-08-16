@@ -405,9 +405,6 @@ C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xfacet
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\system_error
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\cerrno
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\share.h
-C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc\helper_cuda.h
-C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc\helper_string.h
-C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\fstream
 c:\users\c.fangqi\desktop\cs398\cs398miniproject\source\checkerrors.h
 c:\users\c.fangqi\desktop\cs398\cs398miniproject\source\gpubitwise_helpers.cuh
 c:\users\c.fangqi\desktop\cs398\cs398miniproject\source\gpubitboard.cuh
@@ -423,4 +420,7 @@ c:\users\c.fangqi\desktop\cs398\cs398miniproject\source\macros.h
 c:\users\c.fangqi\desktop\cs398\cs398miniproject\source\bitwise_helpers.h
 c:\users\c.fangqi\desktop\cs398\cs398miniproject\source\gpuminimax.cuh
 c:\users\c.fangqi\desktop\cs398\cs398miniproject\source\gpuminimax.h
+C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc\helper_cuda.h
+C:\ProgramData\NVIDIA Corporation\CUDA Samples\v9.2\common\inc\helper_string.h
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\fstream
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\algorithm

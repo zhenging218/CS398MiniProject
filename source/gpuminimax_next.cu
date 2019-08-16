@@ -51,20 +51,18 @@ namespace Checkers
 				__syncthreads();
 
 				// min
+				for (int i = 1; i < 32; i *= 2)
+				{
+					if (tx + i < 32)
+					{
+						t_v[tx] = GET_MIN(t_v[tx], t_v[tx + i]);
+					}
+				}
+				__syncthreads();
+
 				if (tx == 0)
 				{
-					utility_type t_x = Infinity;
-					for(int i = 0; i < frontier_size; ++i)
-					{
-						t_x = GET_MIN(t_v[i], t_x);
-						if (t_x < alpha)
-						{
-							break;
-						}
-						beta = GET_MIN(beta, t_x);
-					}
-
-					v[bx] = t_x;
+					v[tx] = t_v[tx];
 				}
 			}
 
@@ -137,20 +135,19 @@ namespace Checkers
 
 
 				// min
+				// min
+				for (int i = 1; i < 32; i *= 2)
+				{
+					if (tx + i < 32)
+					{
+						t_v[tx] = GET_MIN(t_v[tx], t_v[tx + i]);
+					}
+				}
+				__syncthreads();
+
 				if (tx == 0)
 				{
-					utility_type t_x = Infinity;
-					for (int i = 0; i < frontier_size; ++i)
-					{
-						t_x = GET_MIN(t_v[i], t_x);
-						if (t_x < alpha)
-						{
-							break;
-						}
-						beta = GET_MIN(beta, t_x);
-					}
-
-					v[bx] = t_x;
+					v[tx] = t_v[tx];
 				}
 			}
 
