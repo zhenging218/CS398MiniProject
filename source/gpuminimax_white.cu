@@ -117,77 +117,84 @@ namespace Checkers
 				{
 					t_v[tx] = explore_white_frontier(frontier[tx], alpha, beta, node_type + 2, depth - 1, turns - 1);
 				}
+				else
+				{
+					t_v[tx] = node_type == NodeType::MAX ? Infinity : -Infinity;
+				}
+
+				__syncthreads();
+
+				if ((node_type + 1) == NodeType::MAX)
+				{
+					for (int i = 1; i < 32; i *= 2)
+					{
+						if (tx + i < 32)
+						{
+							t_v[tx] = GET_MAX(t_v[tx], t_v[tx + i]);
+						}
+					}
+				}
+				else
+				{
+					for (int i = 1; i < 32; i *= 2)
+					{
+						if (tx + i < 32)
+						{
+							t_v[tx] = GET_MIN(t_v[tx], t_v[tx + i]);
+						}
+					}
+				}
 
 				__syncthreads();
 
 				if (tx == 0)
 				{
-					utility_type t_x;
-					// ab-prune t_v and send the last value to v[bx].
-					if ((node_type + 1) == NodeType::MAX)
-					{
-						t_x = -Infinity;
-						for (int i = 0; i < frontier_size; ++i)
-						{
-							t_x = GET_MAX(t_v[i], t_x);
-							if (t_x > beta)
-							{
-								break;
-							}
-							alpha = GET_MAX(alpha, t_x);
-						}
-					}
-					else
-					{
-						t_x = Infinity;
-						for (int i = 0; i < frontier_size; ++i)
-						{
-							t_x = GET_MIN(t_v[i], t_x);
-							if (t_x < alpha)
-							{
-								break;
-							}
-							beta = GET_MIN(beta, t_x);
-						}
-					}
-
-					v[bx] = t_x;
+					v[bx] = t_v[0];
 				}
 			}
 
 			__syncthreads();
-			if (bx == 0 && tx == 0)
+
+			if (bx == 0)
 			{
-				// ab-prune v and send the last value to v[0].
-				utility_type X;
-				if (node_type == NodeType::MAX)
+				if (tx < num_boards)
 				{
-					X = -Infinity;
-					for (int i = 0; i < num_boards; ++i)
+					t_v[tx] = v[tx];
+				}
+				else
+				{
+					t_v[tx] = node_type == NodeType::MAX ? Infinity : -Infinity;
+				}
+
+				__syncthreads();
+
+				if ((node_type) == NodeType::MAX)
+				{
+					for (int i = 1; i < 32; i *= 2)
 					{
-						X = GET_MAX(v[i], X);
-						if (X > beta)
+						if (tx + i < 32)
 						{
-							break;
+							t_v[tx] = GET_MAX(t_v[tx], t_v[tx + i]);
 						}
-						alpha = GET_MAX(alpha, X);
 					}
 				}
 				else
 				{
-					X = Infinity;
-					for (int i = 0; i < num_boards; ++i)
+					for (int i = 1; i < 32; i *= 2)
 					{
-						X = GET_MIN(v[i], X);
-						if (X < alpha)
+						if (tx + i < 32)
 						{
-							break;
+							t_v[tx] = GET_MIN(t_v[tx], t_v[tx + i]);
 						}
-						beta = GET_MIN(beta, X);
 					}
 				}
 
-				v[0] = X;
+				__syncthreads();
+
+				if (tx < num_boards)
+				{
+					v[tx] = t_v[tx];
+				}
 			}
 
 			__syncthreads();
