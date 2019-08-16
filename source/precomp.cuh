@@ -3,7 +3,7 @@
 
 #include <exception>
 #include <string>
-#include <helper_cuda.h>
+//#include <helper_cuda.h>
 
 #include "checkerrors.h"
 #include "gpubitwise_helpers.cuh"
@@ -11,7 +11,7 @@
 #include "gpuminimax.cuh"
 #include <stdio.h>
 
-#define GET_MAX(x,y) (((x) > (y)) ? (x) : (y))
+#define GET_MAX(x,y) (((x) < (y)) ? (y) : (x))
 #define GET_MIN(x,y) (((x) < (y)) ? (x) : (y))
 
 #endif

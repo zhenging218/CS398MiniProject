@@ -149,7 +149,7 @@ namespace Checkers
 
 				if (tx == 0)
 				{
-					v[bx] = t_v[0];
+					v[bx] = t_v[tx];
 				}
 			}
 
@@ -163,7 +163,7 @@ namespace Checkers
 				}
 				else
 				{
-					t_v[tx] = node_type == NodeType::MAX ? Infinity : -Infinity;
+					t_v[tx] = node_type == NodeType::MAX ? -Infinity : Infinity;
 				}
 
 				__syncthreads();
