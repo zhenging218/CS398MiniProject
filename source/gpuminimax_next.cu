@@ -56,12 +56,12 @@ namespace Checkers
 					utility_type t_x = Infinity;
 					for(int i = 0; i < frontier_size; ++i)
 					{
-						t_x = MIN(t_v[i], t_x);
+						t_x = GET_MIN(t_v[i], t_x);
 						if (t_x < alpha)
 						{
 							break;
 						}
-						beta = MIN(beta, t_x);
+						beta = GET_MIN(beta, t_x);
 					}
 
 					v[bx] = t_x;
@@ -142,12 +142,12 @@ namespace Checkers
 					utility_type t_x = Infinity;
 					for (int i = 0; i < frontier_size; ++i)
 					{
-						t_x = MIN(t_v[i], t_x);
+						t_x = GET_MIN(t_v[i], t_x);
 						if (t_x < alpha)
 						{
 							break;
 						}
-						beta = MIN(beta, t_x);
+						beta = GET_MIN(beta, t_x);
 					}
 
 					v[bx] = t_x;

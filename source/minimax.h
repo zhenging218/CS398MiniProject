@@ -50,6 +50,7 @@ namespace Checkers
 		};
 
 		friend Minimax CreateMinimaxBoard(BitBoard const &src, Turn turn = Turn::WHITE);
+		friend Minimax CreateMinimaxBoard(BitBoard const &src, Turn turn, int t_left);
 
 		static void SetSearchDepth(int d);
 		static int GetSearchDepth();
@@ -72,7 +73,7 @@ namespace Checkers
 		Result Next();
 		Turn GetTurn() const;
 
-		
+		int GetTurnsLeft() const;
 
 	private:
 
@@ -81,6 +82,7 @@ namespace Checkers
 		int turn_count;
 
 		Minimax(BitBoard const &src, Turn t);
+		Minimax(BitBoard const &src, Turn t, int t_left);
 
 		static bool WhiteWinTest(BitBoard const &b);
 		static bool WhiteLoseTest(BitBoard const &b);

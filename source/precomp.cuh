@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GPU_PRECOMP_H
+#define GPU_PRECOMP_H
 
 #include <exception>
 #include <string>
@@ -10,5 +11,7 @@
 #include "gpuminimax.cuh"
 #include <stdio.h>
 
-#define MAX(x,y) (((x) > (y)) ? (x) : (y))
-#define MIN(x,y) (((x) < (y)) ? (x) : (y))
+#define GET_MAX(x,y) (((x) > (y)) ? (x) : (y))
+#define GET_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
+#endif

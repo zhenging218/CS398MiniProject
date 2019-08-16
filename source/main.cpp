@@ -308,6 +308,46 @@ namespace
 		std::cout << "Slowest decision took " << gpu_longestTime << " milliseconds at turn " << slowest_gpu_turn << "\n";
 		std::cout << "Fastest decision took " << gpu_shortestTime << " milliseconds at turn " << fastest_gpu_turn << "\n";
 	}
+
+	void Fight()
+	{
+		Checkers::BitBoard board;
+		Checkers::Minimax::Result result = Checkers::Minimax::INPROGRESS;
+		Checkers::Minimax::Turn turn = Checkers::Minimax::WHITE;
+		int turns = Checkers::Minimax::GetMaxTurns();
+
+		while (result == Checkers::Minimax::INPROGRESS && turns > 0)
+		{
+			char const *player_name[2] = { "WHITE", "BLACK" };
+			char const *impl_name[2] = { "CPU", "GPU" };
+			int which = 0;
+			if (turn == Checkers::Minimax::WHITE)
+			{
+				which = 0;
+				auto player = Checkers::CreateMinimaxBoard(board, Checkers::Minimax::WHITE, turns);
+				result = player.Next();
+				board = player.GetBoard();
+				turn = player.GetTurn();
+			}
+			else
+			{
+				which = 1;
+				result = Checkers::GPUMinimax::Next(board, turn, Checkers::Minimax::GetSearchDepth(), turns);
+			}
+
+			std::cout << player_name[which] << "'S TURN (" << impl_name[which] << " PLAYER):";
+			if (result != Checkers::Minimax::LOSE)
+			{
+				std::cout << "\n" << board << "\n";
+			}
+			else
+			{
+				std::cout << " LOST!\n";
+			}
+
+			system("PAUSE");
+		}
+	}
 }
 
 int main(int argc, char **argv)
@@ -318,14 +358,14 @@ int main(int argc, char **argv)
 
 	if (argc > 5)
 	{
-		std::cout << "usage: " << argv[0] << "[cpu:0, cpu_benchmark:1, gpu:2, gpu_benchmark:3, benchmark:4, lean_benchmark:5] [max_depth] [max_turns]\n";
+		std::cout << "usage: " << argv[0] << "[cpu:0, cpu_benchmark:1, gpu:2, gpu_benchmark:3, benchmark:4, lean_benchmark:5, fight:6] [max_depth] [max_turns]\n";
 		return 0;
 	}
 
 	run_which = atoi(argv[1]);
-	if (run_which < 0 || run_which > 5)
+	if (run_which < 0 || run_which > 6)
 	{
-		std::cout << "usage: " << argv[0] << "[cpu:0, cpu_benchmark:1, gpu:2, gpu_benchmark:3, benchmark:4, lean_benchmark:5] [max_depth] [max_turns]\n";
+		std::cout << "usage: " << argv[0] << "[cpu:0, cpu_benchmark:1, gpu:2, gpu_benchmark:3, benchmark:4, lean_benchmark:5, fight:6] [max_depth] [max_turns]\n";
 		return 0;
 	}
 
@@ -392,6 +432,12 @@ int main(int argc, char **argv)
 			StartCUDA(argc, argv);
 			BenchBoth(board, Checkers::Minimax::BLACK, false);
 			EndCUDA();
+			break;
+		case 6:
+			StartCUDA(argc, argv);
+			Fight();
+			EndCUDA();
+			break;
 		default:
 			ASSERT(0, "run_which value is wrong (%d)!", run_which);
 			break;

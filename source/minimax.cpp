@@ -150,6 +150,11 @@ namespace Checkers
 		return Minimax(src, turn);
 	}
 
+	Minimax CreateMinimaxBoard(BitBoard const &src, Minimax::Turn turn, int t_left)
+	{
+		return Minimax(src, turn, t_left);
+	}
+
 	Minimax::Result Minimax::Next()
 	{
 		if (turn_count == 0)
@@ -224,6 +229,11 @@ namespace Checkers
 	}
 
 	Minimax::Minimax(BitBoard const &src, Turn t) : board(src), turn(t), turn_count(max_turns())
+	{
+
+	}
+
+	Minimax::Minimax(BitBoard const &src, Turn t, int t_left) : board(src), turn(t), turn_count(t_left)
 	{
 
 	}
@@ -322,5 +332,10 @@ namespace Checkers
 	Minimax::Turn Minimax::GetTurn() const
 	{
 		return turn;
+	}
+
+	int Minimax::GetTurnsLeft() const
+	{
+		return turn_count;
 	}
 }

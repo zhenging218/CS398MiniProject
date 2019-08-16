@@ -38,12 +38,12 @@ namespace Checkers
 
 				for (int j = 0; j < frontier_size; ++j)
 				{
-					v = MAX(explore_white_frontier(frontier[j], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
+					v = GET_MAX(explore_white_frontier(frontier[j], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
 					if (v > beta)
 					{
 						break;
 					}
-					alpha = MAX(alpha, v);
+					alpha = GET_MAX(alpha, v);
 				}
 			}
 			else
@@ -56,12 +56,12 @@ namespace Checkers
 
 				for (int j = 0; j < frontier_size; ++j)
 				{
-					v = MIN(explore_white_frontier(frontier[j], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
+					v = GET_MIN(explore_white_frontier(frontier[j], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
 					if (v < alpha)
 					{
 						break;
 					}
-					beta = MIN(beta, v);
+					beta = GET_MIN(beta, v);
 				}
 			}
 			return v;
@@ -129,12 +129,12 @@ namespace Checkers
 						t_x = -Infinity;
 						for (int i = 0; i < frontier_size; ++i)
 						{
-							t_x = MAX(t_v[i], t_x);
+							t_x = GET_MAX(t_v[i], t_x);
 							if (t_x > beta)
 							{
 								break;
 							}
-							alpha = MAX(alpha, t_x);
+							alpha = GET_MAX(alpha, t_x);
 						}
 					}
 					else
@@ -142,12 +142,12 @@ namespace Checkers
 						t_x = Infinity;
 						for (int i = 0; i < frontier_size; ++i)
 						{
-							t_x = MIN(t_v[i], t_x);
+							t_x = GET_MIN(t_v[i], t_x);
 							if (t_x < alpha)
 							{
 								break;
 							}
-							beta = MIN(beta, t_x);
+							beta = GET_MIN(beta, t_x);
 						}
 					}
 
@@ -165,12 +165,12 @@ namespace Checkers
 					X = -Infinity;
 					for (int i = 0; i < num_boards; ++i)
 					{
-						X = MAX(v[i], X);
+						X = GET_MAX(v[i], X);
 						if (X > beta)
 						{
 							break;
 						}
-						alpha = MAX(alpha, X);
+						alpha = GET_MAX(alpha, X);
 					}
 				}
 				else
@@ -178,12 +178,12 @@ namespace Checkers
 					X = Infinity;
 					for (int i = 0; i < num_boards; ++i)
 					{
-						X = MIN(v[i], X);
+						X = GET_MIN(v[i], X);
 						if (X < alpha)
 						{
 							break;
 						}
-						beta = MIN(beta, X);
+						beta = GET_MIN(beta, X);
 					}
 				}
 
