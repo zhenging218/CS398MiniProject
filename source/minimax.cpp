@@ -65,18 +65,7 @@ namespace Checkers
 		}
 		else if (turns_left == 0)
 		{
-			if (black_pieces < white_pieces)
-			{
-				return MinUtility;
-			}
-			else if (white_pieces < black_pieces)
-			{
-				return MaxUtility;
-			}
-			else
-			{
-				utility = 0;
-			}
+			utility = 0;
 		}
 		else if (depth == 0)
 		{
@@ -86,7 +75,6 @@ namespace Checkers
 		{
 			return false;
 		}
-
 		return true;
 	}
 
@@ -118,18 +106,7 @@ namespace Checkers
 		}
 		else if (turns_left == 0)
 		{
-			if (black_pieces < white_pieces)
-			{
-				return MaxUtility;
-			}
-			else if (white_pieces < black_pieces)
-			{
-				return MinUtility;
-			}
-			else
-			{
-				utility = 0;
-			}
+			utility = 0;
 		}
 		else if(depth == 0)
 		{
@@ -139,6 +116,7 @@ namespace Checkers
 		{
 			return false;
 		}
+
 		return true;
 	}
 
@@ -172,6 +150,11 @@ namespace Checkers
 		return Minimax(src, turn);
 	}
 
+	Minimax CreateMinimaxBoard(BitBoard const &src, Minimax::Turn turn, int t_left)
+	{
+		return Minimax(src, turn, t_left);
+	}
+
 	Minimax::Result Minimax::Next()
 	{
 		if (turn_count == 0)
@@ -179,14 +162,17 @@ namespace Checkers
 			return Result::DRAW;
 		}
 
+		int placement = -1;
+
 		if (turn == Turn::WHITE)
 		{
 			auto frontier = GenerateWhiteFrontier(board);
+			
 			if (frontier.empty())
 			{
 				return Result::LOSE;
 			}
-			int placement = -1;
+			
 			int size = (int)frontier.size();
 			utility_type X = -Infinity;
 			utility_type terminal_value = 0;
@@ -213,7 +199,6 @@ namespace Checkers
 			{
 				return Result::LOSE;
 			}
-			int placement = -1;
 			int size = (int)frontier.size();
 			utility_type X = -Infinity;
 			utility_type terminal_value = 0;
@@ -225,6 +210,7 @@ namespace Checkers
 				{
 					X = v;
 					placement = i;
+					
 				}
 			}
 
@@ -247,6 +233,11 @@ namespace Checkers
 
 	}
 
+	Minimax::Minimax(BitBoard const &src, Turn t, int t_left) : board(src), turn(t), turn_count(t_left)
+	{
+
+	}
+
 	Minimax::utility_type Minimax::WhiteMoveMax(BitBoard const &b, int depth, int turns_left, utility_type alpha, utility_type beta)
 	{
 		utility_type v = -Infinity;
@@ -262,12 +253,11 @@ namespace Checkers
 			v = std::max(WhiteMoveMin(move, depth - 1, turns_left - 1, alpha, beta), v);
 			if (v > beta)
 			{
-				// prune
+				// prune				
 				break;
 			}
 			alpha = std::max(alpha, v);
 		}
-
 		return v;
 	}
 
@@ -291,7 +281,6 @@ namespace Checkers
 			}
 			beta = std::min(beta, v);
 		}
-
 		return v;
 	}
 																								  
@@ -315,7 +304,6 @@ namespace Checkers
 			}
 			alpha = std::max(alpha, v);
 		}
-
 		return v;
 	}
 																								  
@@ -338,12 +326,16 @@ namespace Checkers
 			}
 			beta = std::min(beta, v);
 		}
-
 		return v;
 	}
 
 	Minimax::Turn Minimax::GetTurn() const
 	{
 		return turn;
+	}
+
+	int Minimax::GetTurnsLeft() const
+	{
+		return turn_count;
 	}
 }

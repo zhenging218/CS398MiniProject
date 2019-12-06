@@ -22,10 +22,10 @@ namespace Checkers
 		static constexpr GPUBitBoard::board_type BlackKingMask = BitBoard::BlackKingMask;
 		static constexpr GPUBitBoard::board_type WhiteKingMask = BitBoard::WhiteKingMask;
 
-		using gen_move_func = void(*)(GPUBitBoard::board_type, GPUBitBoard *&, GPUBitBoard const &);
+		using gen_move_func = void(*)(GPUBitBoard::board_type, GPUBitBoard const &, GPUBitBoard *, int &);
+		using gen_move_atomic_func = void(*)(GPUBitBoard::board_type, GPUBitBoard const &, GPUBitBoard *, int *);
 
 		board_type white, black, kings;
-		bool valid;
 
 		__host__ __device__ GPUBitBoard();
 		__host__ __device__ GPUBitBoard(board_type w, board_type b, board_type k);
@@ -48,12 +48,22 @@ namespace Checkers
 		__host__ __device__ static count_type GetBlackKingsCount(GPUBitBoard const &b);
 		__host__ __device__ static count_type GetWhiteKingsCount(GPUBitBoard const &b);
 
-		__host__ __device__ static void GenMoreWhiteJumps(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
-		__host__ __device__ static void GenMoreBlackJumps(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
+		__host__ __device__ static void GenMoreWhiteJumps(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int & frontier_size);
+		__device__ void static GenMoreWhiteJumpsAtomic(GPUBitBoard::board_type cell, GPUBitBoard const & board, GPUBitBoard * frontier, int * frontier_size);
 
-		__host__ __device__ static void GenWhiteMove(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
-		__host__ __device__ static void GenWhiteJump(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
-		__host__ __device__ static void GenBlackMove(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
-		__host__ __device__ static void GenBlackJump(board_type cell, GPUBitBoard *&out, GPUBitBoard const &board);
+		__host__ __device__ static void GenMoreBlackJumps(GPUBitBoard::board_type cell, GPUBitBoard const & board, GPUBitBoard *frontier, int & frontier_size);
+		__device__ void static GenMoreBlackJumpsAtomic(GPUBitBoard::board_type cell, GPUBitBoard const & board, GPUBitBoard * frontier, int * frontier_size);
+
+		__host__ __device__ static void GPUBitBoard::GenWhiteMove(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int & frontier_size);
+		__device__ void static GenWhiteMoveAtomic(GPUBitBoard::board_type cell, GPUBitBoard const & board, GPUBitBoard * frontier, int * frontier_size);
+		
+		__host__ __device__ static void GenWhiteJump(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int & frontier_size);
+		__device__ void static GenWhiteJumpAtomic(GPUBitBoard::board_type cell, GPUBitBoard const & board, GPUBitBoard * frontier, int * frontier_size);
+
+		__host__ __device__ static void GenBlackMove(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int & frontier_size);
+		__device__ void static GenBlackMoveAtomic(GPUBitBoard::board_type cell, GPUBitBoard const & board, GPUBitBoard * frontier, int * frontier_size);
+
+		__host__ __device__ static void GenBlackJump(GPUBitBoard::board_type cell, GPUBitBoard const &board, GPUBitBoard *frontier, int & frontier_size);
+		__device__ void static GenBlackJumpAtomic(GPUBitBoard::board_type cell, GPUBitBoard const & board, GPUBitBoard * frontier, int * frontier_size);
 	};
 }

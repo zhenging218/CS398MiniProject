@@ -17,6 +17,9 @@ namespace Checkers
 			if (GetBlackUtility(b, terminal_value, depth, turns_left))
 				return terminal_value;
 
+			if (depth <= 0)
+				throw("terminal test returned false when depth <= 0!");
+
 			BitBoard frontier[32];
 			BitBoard *end = frontier;
 			BitBoard::GetPossibleBlackMoves(b, end);
@@ -44,23 +47,23 @@ namespace Checkers
 						CHECK_ERRORS();
 						free(copy);
 
-						cudaMalloc((void**)&GPUv, sizeof(utility_type));
-						CHECK_ERRORS();
-						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
+						cudaMalloc((void**)&GPUv, sizeof(utility_type) * (size - 1));
 						CHECK_ERRORS();
 
 						// launch kernel
-						master_black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
+						black_kernel << <dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, NodeType::MAX, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 						CHECK_ERRORS();
-
-						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
+						// copy GPUv[0] to v
+						utility_type t_v;
+						cudaMemcpy(&t_v, GPUv, sizeof(utility_type), cudaMemcpyDeviceToHost);
 						CHECK_ERRORS();
 						cudaFree(GPUFrontier);
 						CHECK_ERRORS();
 						cudaFree(GPUv);
 						CHECK_ERRORS();
 
+						v = std::max(t_v, v);
 					}
 				}
 			}
@@ -103,23 +106,23 @@ namespace Checkers
 						CHECK_ERRORS();
 						free(copy);
 
-						cudaMalloc((void**)&GPUv, sizeof(utility_type));
-						CHECK_ERRORS();
-						cudaMemcpy(GPUv, &v, sizeof(utility_type), cudaMemcpyHostToDevice);
+						cudaMalloc((void**)&GPUv, sizeof(utility_type) * (size - 1));
 						CHECK_ERRORS();
 
 						// launch kernel
-						master_black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, depth - 1, turns_left - 1);
+						black_kernel << <dim3(size - 1, 1, 1), dim3(32, 1, 1) >> > (GPUv, GPUFrontier, size - 1, alpha, beta, NodeType::MIN, depth - 1, turns_left - 1);
 						cudaDeviceSynchronize();
 						CHECK_ERRORS();
-
-						cudaMemcpy(&v, GPUv, sizeof(int), cudaMemcpyDeviceToHost);
+						// copy GPUv[0] to v
+						utility_type t_v;
+						cudaMemcpy(&t_v, GPUv, sizeof(utility_type), cudaMemcpyDeviceToHost);
 						CHECK_ERRORS();
 						cudaFree(GPUFrontier);
 						CHECK_ERRORS();
 						cudaFree(GPUv);
 						CHECK_ERRORS();
 
+						v = std::min(t_v, v);
 					}
 				}
 			}

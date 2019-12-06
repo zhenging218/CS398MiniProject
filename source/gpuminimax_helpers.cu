@@ -45,18 +45,7 @@ namespace Checkers
 			}
 			else if (turns_left == 0)
 			{
-				if (black_pieces < white_pieces)
-				{
-					return MinUtility;
-				}
-				else if (white_pieces < black_pieces)
-				{
-					return MaxUtility;
-				}
-				else
-				{
-					utility = 0;
-				}
+				utility = 0;
 			}
 			else if (depth == 0)
 			{
@@ -66,7 +55,6 @@ namespace Checkers
 			{
 				return false;
 			}
-
 			return true;
 		}
 
@@ -88,18 +76,7 @@ namespace Checkers
 			}
 			else if (turns_left == 0)
 			{
-				if (black_pieces < white_pieces)
-				{
-					return MaxUtility;
-				}
-				else if (white_pieces < black_pieces)
-				{
-					return MinUtility;
-				}
-				else
-				{
-					utility = 0;
-				}
+				utility = 0;
 			}
 			else if (depth == 0)
 			{

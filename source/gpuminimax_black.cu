@@ -6,213 +6,197 @@ namespace Checkers
 {
 	namespace GPUMinimax
 	{
-		__global__ void black_min_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns)
+		__device__ utility_type explore_black_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns)
 		{
-			int tx = threadIdx.x;
-			int t_beta = beta;
-			int t_v = Minimax::Infinity;
-			__shared__ bool terminated;
-			__shared__ Minimax::utility_type utilities[32];
-			__shared__ bool valid[32];
-			GPUBitBoard new_boards[32];
+			GPUBitBoard frontier[32];
+			int frontier_size = 0;
+			int v = (node_type == NodeType::MAX) ? -Infinity : Infinity;
 
-			if (tx == 0)
+			int gen_board_type;
+
+			utility_type terminal_value = 0;
+			if (GetBlackUtility(board, terminal_value, depth, turns))
 			{
-				Minimax::utility_type terminal_value = 0;
-				if (src.valid)
-				{
-					terminated = GetBlackUtility(src, terminal_value, depth, turns);
-					if (terminated)
-						*v = terminal_value;
-				}
-				else
-					terminated = true;
-
+				return terminal_value;
 			}
 
-			__syncthreads();
-
-			if (terminated)
+			if (node_type == NodeType::MAX)
 			{
-				return;
+				gen_board_type = (GPUBitBoard::GetBlackJumps(board) != 0) ? 1 : 0;
 			}
 			else
 			{
-				if (tx < 32)
-				{
-					utilities[tx] = Minimax::Infinity;
-				}
-				__syncthreads();
-
-				// in the max kernel, use gen_black_move_type instead
-				int gen_white_move_type = (int)(GPUBitBoard::GetWhiteJumps(src) != 0);
-				GPUBitBoard *end = new_boards;
-				gen_white_move[gen_white_move_type](1u << tx, end, src);
-				int frontier_size = end - new_boards;
-				valid[tx] = (frontier_size != 0);
-
-				if (frontier_size > 0)
-				{
-					Minimax::utility_type * utility = (utility_type *)malloc(sizeof(utility_type) * frontier_size);
-
-					for (int i = 0; i < frontier_size; ++i)
-					{
-						utility[i] = utilities[tx];
-						black_max_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[i], alpha, t_beta, depth - 1, turns - 1);
-					}
-
-					__syncthreads();
-					cudaDeviceSynchronize();
-					__syncthreads();
-
-					for (int i = 0; i < frontier_size; ++i)
-					{
-						utilities[tx] = min(utility[i], utilities[tx]);
-						if (utilities[tx] < alpha)
-						{
-							break;
-						}
-						else
-						{
-							t_beta = min(utilities[tx], t_beta);
-						}
-					}
-
-					free(utility);
-				}
-
-				__syncthreads();
-
-				if (tx == 0)
-				{
-
-					// final ab-pruning for this node
-					for (int i = 0; i < 32; ++i)
-					{
-						if (valid[i])
-						{
-							t_v = min(utilities[i], t_v);
-							if (t_v < alpha)
-							{
-								break;
-							}
-							else
-							{
-								beta = min(utilities[i], beta);
-							}
-						}
-					}
-
-					*v = t_v;
-				}
-
-				__syncthreads();
+				gen_board_type = (GPUBitBoard::GetWhiteJumps(board) != 0) ? 1 : 0;
 			}
+
+			if (node_type == NodeType::MAX)
+			{
+				// if dynamic parallelism is possible, can call another kernel here
+				for (int i = 0; i < 32; ++i)
+				{
+					gen_black_move[gen_board_type](1u << i, board, frontier, frontier_size);
+				}
+
+				for (int j = 0; j < frontier_size; ++j)
+				{
+					v = GET_MAX(explore_black_frontier(frontier[j], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
+					if (v > beta)
+					{
+						break;
+					}
+					alpha = GET_MAX(alpha, v);
+					
+				}
+			}
+			else
+			{
+				// if dynamic parallelism is possible, can call another kernel here
+				for (int i = 0; i < 32; ++i)
+				{
+					gen_white_move[gen_board_type](1u << i, board, frontier, frontier_size);
+				}
+
+				for (int j = 0; j < frontier_size; ++j)
+				{
+					v = GET_MIN(explore_black_frontier(frontier[j], alpha, beta, node_type + 1, depth - 1, turns - 1), v);
+					
+					if (v < alpha)
+					{
+						break;
+					}
+					beta = GET_MIN(beta, v);
+				}
+			}
+
+			return v;
 		}
 
-		__global__ void black_max_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns)
+		__global__ void black_kernel(utility_type *v, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns)
 		{
 			int tx = threadIdx.x;
-			int t_alpha = alpha;
-			int t_v = -Minimax::Infinity;
+			int bx = blockIdx.x;
+
+			__shared__ int frontier_size;
+			__shared__ int gen_board_type;
+			__shared__ GPUBitBoard frontier[32];
+			__shared__ utility_type t_v[32];
 			__shared__ bool terminated;
-			__shared__ Minimax::utility_type utilities[32];
-			__shared__ bool valid[32];
-			GPUBitBoard new_boards[32];
 
 			if (tx == 0)
 			{
-				Minimax::utility_type terminal_value = 0;
-				if (src.valid)
+				frontier_size = 0;
+				utility_type terminal_value = 0;
+				if (terminated = GetBlackUtility(boards[bx], terminal_value, depth, turns))
 				{
-					terminated = GetBlackUtility(src, terminal_value, depth, turns);
-					if (terminated)
-						*v = terminal_value;
+					v[bx] = terminal_value;
 				}
 				else
-					terminated = true;
-
+				{
+					if ((node_type + 1) == NodeType::MAX)
+					{
+						gen_board_type = (GPUBitBoard::GetBlackJumps(boards[bx]) != 0) ? 1 : 0;
+					}
+					else
+					{
+						gen_board_type = (GPUBitBoard::GetWhiteJumps(boards[bx]) != 0) ? 1 : 0;
+					}
+				}
 			}
-
 			__syncthreads();
 
-			if (terminated)
+			if (!terminated)
 			{
-				return;
-			}
-			else
-			{
-				if (tx < 32)
+				if ((node_type + 1) == NodeType::MAX)
 				{
-					utilities[tx] = -Minimax::Infinity;
+					gen_black_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
 				}
+				else
+				{
+					gen_white_move_atomic[gen_board_type](1u << tx, boards[bx], frontier, &frontier_size);
+				}
+
 				__syncthreads();
 
-				// in the max kernel, use gen_black_move_type instead
-				int gen_black_move_type = (int)(GPUBitBoard::GetBlackJumps(src) != 0);
-				GPUBitBoard *end = new_boards;
-				gen_black_move[gen_black_move_type](1u << tx, end, src);
-
-				int frontier_size = end - new_boards;
-				valid[tx] = (frontier_size != 0);
-
-				if (frontier_size > 0)
+				if (tx < frontier_size)
 				{
-					Minimax::utility_type * utility = (utility_type *)malloc(sizeof(utility_type) * frontier_size);
+					t_v[tx] = explore_black_frontier(frontier[tx], alpha, beta, node_type + 2, depth - 1, turns - 1);
+				
+				}
 
-					for (int i = 0; i < frontier_size; ++i)
+				__syncthreads();
+				
+				if ((node_type + 1) == NodeType::MAX)
+				{
+					for (int i = 1; i < 32; i *= 2)
 					{
-						utility[i] = utilities[tx];
-						black_min_kernel << <dim3(1, 1, 1), dim3(32, 1, 1) >> > (utility + i, new_boards[i], t_alpha, beta, depth - 1, turns - 1);
-						
-					}
-
-					__syncthreads();
-					cudaDeviceSynchronize();
-					__syncthreads();
-
-					for (int i = 0; i < frontier_size; ++i)
-					{
-						utilities[tx] = max(utility[i], utilities[tx]);
-						if (utilities[tx] > beta)
+						if (tx + i < 32)
 						{
-							break;
-						}
-						else
-						{
-							t_alpha = max(utilities[tx], t_alpha);
+							t_v[tx] = GET_MAX(t_v[tx], t_v[tx + i]);
 						}
 					}
-
-					free(utility);
+				}
+				else
+				{
+					for (int i = 1; i < 32; i *= 2)
+					{
+						if (tx + i < 32)
+						{
+							t_v[tx] = GET_MIN(t_v[tx], t_v[tx + i]);
+						}
+					}
 				}
 
 				__syncthreads();
 
 				if (tx == 0)
 				{
-					// final ab-pruning for this node
-					for (int i = 0; i < 32; ++i)
-					{
-						if (valid[i])
-						{
-							t_v = max(utilities[i], t_v);
-							if (t_v > beta)
-							{
-								break;
-							}
-							else
-							{
-								alpha = max(utilities[i], alpha);
-							}
-						}
-					}
+					v[bx] = t_v[tx];
+				}
+			}
 
-					*v = t_v;
+			__syncthreads();
+
+			if (bx == 0)
+			{
+				if (tx < num_boards)
+				{
+					t_v[tx] = v[tx];
+				}
+				else
+				{
+					t_v[tx] = node_type == NodeType::MAX ? -Infinity : Infinity;
 				}
 
 				__syncthreads();
+				if (node_type == NodeType::MAX)
+				{
+					for (int i = 1; i < 32; i *= 2)
+					{
+						if (tx + i < 32)
+						{
+							t_v[tx] = GET_MAX(t_v[tx], t_v[tx + i]);
+						}
+					}
+				}
+				else
+				{
+					for (int i = 1; i < 32; i *= 2)
+					{
+						if (tx + i < 32)
+						{
+							t_v[tx] = GET_MIN(t_v[tx], t_v[tx + i]);
+						}
+					}
+				}
+				__syncthreads();
+
+				if (tx < num_boards)
+				{
+					v[tx] = t_v[tx];
+				}
 			}
+
+			__syncthreads();
 		}
 	}
 }

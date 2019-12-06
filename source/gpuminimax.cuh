@@ -6,35 +6,45 @@ namespace Checkers
 {
 	namespace GPUMinimax
 	{
+		enum class NodeType
+		{
+			MAX = 1,
+			MIN = 2
+		};
+
+		__host__ __device__ NodeType &operator++(NodeType &src);
+		__host__ __device__ NodeType operator+(NodeType const &src, int i);
+		__host__ __device__ char const *NodeTypeToString(NodeType const &src);
+
+		NodeType &operator--(NodeType &src) = delete;
+		NodeType operator-(NodeType const &src, int i) = delete;
+
 		__device__ extern GPUBitBoard::gen_move_func gen_white_move[2];
 		__device__ extern GPUBitBoard::gen_move_func gen_black_move[2];
 
+		__device__ extern GPUBitBoard::gen_move_atomic_func gen_white_move_atomic[2];
+		__device__ extern GPUBitBoard::gen_move_atomic_func gen_black_move_atomic[2];
+
 		using utility_type = Minimax::utility_type;
 
-		static constexpr Minimax::utility_type PieceUtility = 1;
-		static constexpr Minimax::utility_type KingsUtility = 3;
+		constexpr Minimax::utility_type PieceUtility = 1;
+		constexpr Minimax::utility_type KingsUtility = 3;
 
-		static constexpr Minimax::utility_type MaxUtility = KingsUtility * 12;
-		static constexpr Minimax::utility_type MinUtility = -MaxUtility;
+		constexpr Minimax::utility_type MaxUtility = KingsUtility * 12;
+		constexpr Minimax::utility_type MinUtility = -MaxUtility;
 
-		static constexpr Minimax::utility_type Infinity = 10000;
+		constexpr Minimax::utility_type Infinity = 10000;
 
-		static constexpr BitBoard::board_type EvaluationMask = 0x81188118u;
+		constexpr BitBoard::board_type EvaluationMask = 0x81188118u;
 
-		__global__ void master_white_next_kernel(int *placement, utility_type X, GPUBitBoard const *boards, int num_boards, int depth, int turns);
-		__global__ void master_black_next_kernel(int *placement, utility_type X, GPUBitBoard const *boards, int num_boards, int depth, int turns);
+		__global__ void white_next_kernel(int *placement, utility_type *v, utility_type X, GPUBitBoard const *boards, int num_boards, int depth, int turns);
+		__global__ void black_next_kernel(int *placement, utility_type *v, utility_type X, GPUBitBoard const *boards, int num_boards, int depth, int turns);
 
-		__global__ void master_white_max_kernel(Minimax::utility_type *v, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns);
-		__global__ void master_white_min_kernel(Minimax::utility_type *v, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns);
+		__device__ utility_type explore_black_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
+		__device__ utility_type explore_white_frontier(GPUBitBoard board, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
 
-		__global__ void white_min_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns);
-		__global__ void white_max_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns);
-
-		__global__ void master_black_max_kernel(Minimax::utility_type *v, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns);
-		__global__ void master_black_min_kernel(Minimax::utility_type *v, GPUBitBoard const *src, int num_boards, int alpha, int beta, int depth, int turns);
-
-		__global__ void black_min_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns);
-		__global__ void black_max_kernel(Minimax::utility_type *v, GPUBitBoard src, int alpha, int beta, int depth, int turns);
+		__global__ void black_kernel(utility_type *v, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
+		__global__ void white_kernel(utility_type *v, GPUBitBoard const *boards, int num_boards, utility_type alpha, utility_type beta, NodeType node_type, int depth, int turns);
 
 		__host__ __device__ bool GetWhiteUtility(GPUBitBoard const &src, Minimax::utility_type &terminal_value, int depth, int turns);
 		__host__ __device__ bool GetBlackUtility(GPUBitBoard const &src, Minimax::utility_type &terminal_value, int depth, int turns);

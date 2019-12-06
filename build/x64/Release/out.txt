@@ -1,0 +1,120 @@
+search depth: 3, maximum game turns: 9
+GPU Device 0: "GeForce GTX 1060 6GB" with compute capability 6.1
+
+CUDA device GeForce GTX 1060 6GB has 10 multi-processors, Compute capability 6.1
+CUDA default stack limit is 1024 bytes, changing it to 8192 bytes
+Processing turn 0 for BLACK...CPU took 0.173896 milliseconds, GPU took 3.98437 milliseconds
+CPU:
+|  | W|  | W|  | W|  | W|
+| W|  | W|  | W|  | W|  |
+|  |  |  | W|  | W|  | W|
+| W|  |  |  |  |  |  |  |
+|  | B|  |  |  |  |  |  |
+|  |  | B|  | B|  | B|  |
+|  | B|  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+GPU:
+|  | W|  | W|  | W|  | W|
+| W|  | W|  | W|  | W|  |
+|  |  |  | W|  | W|  | W|
+| W|  |  |  |  |  |  |  |
+|  | B|  |  |  |  |  |  |
+|  |  | B|  | B|  | B|  |
+|  | B|  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+Processing turn 1 for WHITE...CPU took 0.134307 milliseconds, GPU took 3.52925 milliseconds
+CPU:
+|  | W|  | W|  | W|  | W|
+| W|  | W|  | W|  | W|  |
+|  |  |  |  |  | W|  | W|
+| W|  | W|  |  |  |  |  |
+|  | B|  |  |  |  |  |  |
+|  |  | B|  | B|  | B|  |
+|  | B|  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+GPU:
+|  | W|  | W|  | W|  | W|
+| W|  | W|  | W|  | W|  |
+|  |  |  |  |  | W|  | W|
+| W|  | W|  |  |  |  |  |
+|  | B|  |  |  |  |  |  |
+|  |  | B|  | B|  | B|  |
+|  | B|  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+Processing turn 2 for BLACK...CPU took 0.014076 milliseconds, GPU took 2.65331 milliseconds
+CPU:
+|  | W|  | W|  | W|  | W|
+| W|  | W|  | W|  | W|  |
+|  |  |  | B|  | W|  | W|
+| W|  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |
+|  |  | B|  | B|  | B|  |
+|  | B|  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+GPU:
+|  | W|  | W|  | W|  | W|
+| W|  | W|  | W|  | W|  |
+|  |  |  | B|  | W|  | W|
+| W|  |  |  |  |  |  |  |
+|  |  |  |  |  |  |  |  |
+|  |  | B|  | B|  | B|  |
+|  | B|  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+Processing turn 3 for WHITE...CPU took 0.05777 milliseconds, GPU took 4.72805 milliseconds
+CPU:
+|  | W|  | W|  | W|  | W|
+| W|  |  |  | W|  | W|  |
+|  |  |  |  |  | W|  | W|
+| W|  |  |  | W|  |  |  |
+|  |  |  |  |  |  |  |  |
+|  |  | B|  | B|  | B|  |
+|  | B|  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+GPU:
+|  | W|  | W|  | W|  | W|
+| W|  |  |  | W|  | W|  |
+|  |  |  |  |  | W|  | W|
+| W|  |  |  | W|  |  |  |
+|  |  |  |  |  |  |  |  |
+|  |  | B|  | B|  | B|  |
+|  | B|  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+Processing turn 4 for BLACK...CPU took 0.111728 milliseconds, GPU took 4.85473 milliseconds
+CPU:
+|  | W|  | W|  | W|  | W|
+| W|  |  |  | W|  | W|  |
+|  |  |  |  |  | W|  | W|
+| W|  |  |  | W|  |  |  |
+|  |  |  |  |  |  |  |  |
+| B|  | B|  | B|  | B|  |
+|  |  |  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+GPU:
+|  | W|  | W|  | W|  | W|
+| W|  |  |  | W|  | W|  |
+|  |  |  |  |  | W|  | W|
+| W|  |  |  | W|  |  |  |
+|  |  |  |  |  |  |  |  |
+| B|  | B|  | B|  | B|  |
+|  |  |  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+Processing turn 5 for WHITE...CPU took 0.213778 milliseconds, GPU took 3.79845 milliseconds
+CPU:
+|  | W|  | W|  | W|  | W|
+| W|  |  |  | W|  | W|  |
+|  |  |  |  |  | W|  | W|
+| W|  |  |  |  |  |  |  |
+|  |  |  |  |  | W|  |  |
+| B|  | B|  | B|  | B|  |
+|  |  |  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+GPU:
+|  | W|  | W|  | W|  | W|
+| W|  |  |  | W|  | W|  |
+|  |  |  |  |  | W|  | W|
+|  |  |  |  | W|  |  |  |
+|  | W|  |  |  |  |  |  |
+| B|  | B|  | B|  | B|  |
+|  |  |  | B|  | B|  | B|
+| B|  | B|  | B|  | B|  |
+CPU and GPU ran different moves this turn!

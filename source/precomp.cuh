@@ -1,18 +1,17 @@
-#pragma once
+#ifndef GPU_PRECOMP_H
+#define GPU_PRECOMP_H
 
-#include <helper_cuda.h>
+#include <exception>
+#include <string>
+//#include <helper_cuda.h>
 
+#include "checkerrors.h"
 #include "gpubitwise_helpers.cuh"
 #include "gpubitboard.cuh"
 #include "gpuminimax.cuh"
+#include <stdio.h>
 
-#define CHECK_ERRORS()\
-do\
-{\
-	cudaError err = cudaThreadSynchronize();\
-	if (cudaSuccess != err)\
-	{\
-		std::cout << cudaGetErrorString(err) << "at " << __FILE__ << " (Line " << __LINE__ << ")" << std::endl;\
-		throw;\
-	}\
-} while(0)
+#define GET_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define GET_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
+#endif

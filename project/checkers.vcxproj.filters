@@ -68,15 +68,15 @@
     <ClInclude Include="..\source\gpuminimax.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\checkerrors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\source\gpubitboard.cu">
       <Filter>Kernel Files\Source Files</Filter>
     </CudaCompile>
     <CudaCompile Include="..\source\gpubitwise_helpers.cu">
-      <Filter>Kernel Files\Source Files</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\source\gpuminimax_next.cu">
       <Filter>Kernel Files\Source Files</Filter>
     </CudaCompile>
     <CudaCompile Include="..\source\gpuminimax_helpers.cu">
@@ -97,10 +97,7 @@
     <CudaCompile Include="..\source\gpuminimax_host_black.cu">
       <Filter>Kernel Files\Source Files</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\source\gpuminimax_master_white.cu">
-      <Filter>Kernel Files\Source Files</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\source\gpuminimax_master_black.cu">
+    <CudaCompile Include="..\source\gpuminimax_next.cu">
       <Filter>Kernel Files\Source Files</Filter>
     </CudaCompile>
   </ItemGroup>
